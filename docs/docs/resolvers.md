@@ -145,6 +145,10 @@ is equivalent to:
 value = object1 - object2
 ```
 
+### `bf.to_path`
+
+This resolver transforms the input string to a ``pathlib.Path``.
+
 ### `bf.truediv`
 
 This resolver computes the "true" division between two inputs.

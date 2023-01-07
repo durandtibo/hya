@@ -1,7 +1,9 @@
 import hashlib
 import logging
 import math
+from pathlib import Path
 from typing import Any, Union
+from urllib.parse import unquote, urlparse
 
 from bearface.registry import registry
 
@@ -133,6 +135,20 @@ def sub_resolver(object1: Any, object2: Any) -> Any:
         ``object1 - object2``
     """
     return object1 - object2
+
+
+@registry.register("bf.to_path")
+def to_path_resolver(path: str) -> Path:
+    r"""Implements a resolver to convert the input path to a ``pathlib.Path``.
+
+    Args:
+        path (str): Specifies the path to convert.
+            This value should be compatible with ``pathlib.Path``.
+
+    Returns:
+        ``pathlib.Path``: The converted path.
+    """
+    return Path(unquote(urlparse(path).path)).expanduser().resolve()
 
 
 @registry.register("bf.truediv")

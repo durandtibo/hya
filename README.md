@@ -27,7 +27,7 @@
 
 ## Overview
 
-`bearface` is a library of custom [OmegaConf](https://github.com/omry/omegaconf) resolvers.
+`bearface` :bear: is a library of custom [OmegaConf](https://github.com/omry/omegaconf) resolvers.
 The resolvers can be easily registered in your python project by adding the following lines:
 
 ```python

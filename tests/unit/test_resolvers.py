@@ -1,3 +1,5 @@
+from pathlib import Path
+
 from omegaconf import OmegaConf
 from pytest import fixture
 
@@ -85,6 +87,10 @@ def test_sha256_resolver():
 
 def test_sub_resolver():
     assert OmegaConf.create({"key": "${bf.sub:1,4}"}).key == -3
+
+
+def test_to_path_resolver():
+    assert OmegaConf.create({"key": "${bf.to_path:/my/path/to}"}).key == Path("/my/path/to")
 
 
 def test_truediv_resolver():

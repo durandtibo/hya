@@ -29,6 +29,7 @@ packages = [
 
 [tool.poetry.dependencies]
 python = "^3.9"
+omegaconf = "^2.1"
 torch = { version = "^1.10", optional = true , python = "<3.11"}
 
 [tool.poetry.extras]

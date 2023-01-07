@@ -39,5 +39,5 @@ unit-test-cov :
 
 .PHONY : publish-pypi
 publish-pypi :
-	poetry config pypi-token.pypi ${COOLA_PYPI_TOKEN}
+	poetry config pypi-token.pypi ${BEARFACE_PYPI_TOKEN}
 	poetry publish --build

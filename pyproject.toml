@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "bearface"
-version = "0.0.2a0"
+version = "0.0.2a1"
 description = "A library of custom OmegaConf resolvers"
 readme = "README.md"
 authors = ["Thibaut Durand <durand.tibo+gh@gmail.com>"]

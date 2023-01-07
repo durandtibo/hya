@@ -2,7 +2,7 @@ from unittest.mock import Mock, NonCallableMock
 
 from pytest import raises
 
-from bearface import ResolverRegistry
+from bearface.registry import ResolverRegistry
 
 ######################################
 #     Tests for ResolverRegistry     #

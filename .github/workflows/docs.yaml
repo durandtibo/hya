@@ -1,0 +1,29 @@
+name: Documentation
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+      - name: Install Poetry
+        uses: snok/install-poetry@v1
+      - name: Install packages
+        run: |
+          poetry run make config-poetry
+          poetry install --with docs
+      - name: Build and deploy documentation
+        run: |
+          cd docs/
+          poetry run mkdocs gh-deploy --force --clean

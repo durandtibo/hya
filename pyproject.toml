@@ -1,0 +1,97 @@
+[tool.poetry]
+name = "bearface"
+version = "0.0.1a0"
+description = "A library of custom OmegaConf resolvers"
+readme = "README.md"
+authors = ["Thibaut Durand <durand.tibo+gh@gmail.com>"]
+homepage = "https://github.com/durandtibo/bearface"
+repository = "https://github.com/durandtibo/bearface"
+keywords = ["omegaconf", "resolver"]
+license = "BSD-3-Clause"
+
+classifiers = [
+    "Development Status :: 2 - Pre-Alpha",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Information Technology",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: BSD License",
+    "Operating System :: POSIX :: Linux",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Topic :: Scientific/Engineering",
+    "Topic :: Software Development :: Libraries",
+]
+
+packages = [
+    { include = "bearface", from = "src" },
+]
+
+[tool.poetry.dependencies]
+python = "^3.9"
+torch = { version = "^1.10", optional = true , python = "<3.11"}
+
+[tool.poetry.extras]
+all = ["torch"]
+
+[tool.poetry.group.docs.dependencies]
+mkdocs-material = "^8.5"
+mkdocstrings = "^0.19"
+
+[tool.poetry.group.dev.dependencies]
+black = "^22.10"
+codecov = "^2.1"
+coverage = { extras = ["toml"], version = "^6.5" }
+docformatter = "^1.5"
+flake8 = "^6.0"
+flake8-black = "^0.3"
+flake8-bugbear = "^22.12"
+isort = "^5.10"
+pre-commit = "^2.20"
+pylint = "^2.15"
+pytest = "^7.2"
+pytest-cov = "^4.0"
+pytest-timeout = "^2.1"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.coverage.paths]
+source = ["src", "*/site-packages"]
+
+[tool.coverage.run]
+branch = true
+source = ["bearface"]
+
+[tool.coverage.report]
+show_missing = true
+exclude_lines = [
+    "pragma: no cover",
+    "if is_torch_available()",
+]
+
+[tool.pytest.ini_options]
+testpaths = "tests/"
+log_format = "%(asctime)s - %(levelname)s - %(name)s - %(message)s"
+log_level = "DEBUG"
+addopts = "--color yes --durations 10 -rf"
+# Configuration of the short test summary info
+# https://docs.pytest.org/en/stable/usage.html#detailed-summary-report
+
+[tool.black]
+line-length = 100
+target-version = ["py39", "py310", "py311"]
+include = '\.pyi?$'
+
+[tool.pylint.FORMAT]
+max-line-length = 100
+
+[tool.isort]
+profile = "black"
+
+[tool.docformatter]
+recursive = true
+wrap-summaries = 72
+wrap-descriptions = 72
+syntax = "google"

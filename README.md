@@ -1,4 +1,4 @@
-# bearface :bear:
+# :bear: bearface :bear:
 
 <p align="center">
    <a href="https://github.com/durandtibo/bearface/actions">
@@ -27,7 +27,7 @@
 
 ## Overview
 
-`bearface` :bear: is a library of custom [OmegaConf](https://github.com/omry/omegaconf) resolvers.
+`bearface` is a library of custom [OmegaConf](https://github.com/omry/omegaconf) resolvers.
 The resolvers can be easily registered in your python project by adding the following lines:
 
 ```python

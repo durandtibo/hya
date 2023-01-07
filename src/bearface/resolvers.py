@@ -1,5 +1,4 @@
 import hashlib
-import itertools
 import logging
 import math
 from typing import Any, Union
@@ -10,17 +9,19 @@ logger = logging.getLogger(__name__)
 
 
 @registry.register("bf.add")
-def add_resolver(object1: Any, object2: Any) -> Any:
-    r"""Implements a resolver to add two objects.
+def add_resolver(*args: Any) -> Any:
+    r"""Implements a resolver to add objects.
 
     Args:
-        object1: The first object.
-        object2: The second object.
+        *args: Specifies the values to add.
 
     Returns:
-        ``object1 + object2``
+        ``arg1 + arg2 + arg3 + ... + argN``
     """
-    return object1 + object2
+    output = args[0]
+    for arg in args[1:]:
+        output += arg
+    return output
 
 
 @registry.register("bf.floordiv")
@@ -50,36 +51,25 @@ def neg_resolver(number: Union[int, float]) -> Union[int, float]:
     return -number
 
 
-@registry.register("bf.mergelist")
-def mergelist_resolver(*args: list) -> list:
-    r"""Implements a resolver to merge multiple lists into a single list.
-
-    Args:
-        *args: Specifies the list to merge
-
-    Returns:
-        list: The merged list.
-    """
-    return list(itertools.chain(*args))
-
-
 @registry.register("bf.mul")
-def mul_resolver(object1: Any, object2: Any) -> Any:
-    r"""Implements a resolver to multiply two objects.
+def mul_resolver(*args: Any) -> Any:
+    r"""Implements a resolver to multiply objects.
 
     Args:
-        object1: The first object.
-        object2: The second object.
+        *args: Specifies the values to multiply.
 
     Returns:
-        object1 * object2
+        ``arg1 * arg2 * arg3 * ... * argN``
     """
-    return object1 * object2
+    output = args[0]
+    for arg in args[1:]:
+        output *= arg
+    return output
 
 
 @registry.register("bf.pow")
 def pow_resolver(value: Union[float, int], exponent: Union[float, int]) -> Union[float, int]:
-    r"""Implements a resolver to value to a given power.
+    r"""Implements a resolver to compute a value to a given power.
 
     Args:
         value (int or float): The value or base.
@@ -89,22 +79,6 @@ def pow_resolver(value: Union[float, int], exponent: Union[float, int]) -> Union
         ``x ** y``
     """
     return value**exponent
-
-
-@registry.register("bf.repeatlist")
-def repeatlist_resolver(values: Any, num_repetitions: int) -> list:
-    r"""Implements a resolver to repeat a list of values.
-
-    Args:
-        values (list): The list of values to repeat.
-        num_repetitions (int): The number of repetitions.
-
-    Returns:
-        list: The repeated list
-    """
-    if not isinstance(values, list):
-        values = [values]
-    return values * num_repetitions
 
 
 @registry.register("bf.sqrt")

@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "bearface"
-version = "0.0.1a0"
+version = "0.0.1a1"
 description = "A library of custom OmegaConf resolvers"
 readme = "README.md"
 authors = ["Thibaut Durand <durand.tibo+gh@gmail.com>"]
@@ -30,7 +30,7 @@ packages = [
 [tool.poetry.dependencies]
 python = "^3.9"
 omegaconf = "^2.1"
-torch = { version = "^1.10", optional = true , python = "<3.11"}
+torch = { version = "^1.10", optional = true,  python = "<3.11"}
 
 [tool.poetry.extras]
 all = ["torch"]

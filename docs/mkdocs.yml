@@ -1,0 +1,45 @@
+site_name: bearface
+theme:
+  name: material
+  features:
+    - navigation.tabs
+    - navigation.expand
+  icon:
+    repo: fontawesome/brands/github
+  palette:
+    - scheme: default
+      toggle:
+        icon: material/toggle-switch-off-outline
+        name: Switch to dark mode
+    - scheme: slate
+      toggle:
+        icon: material/toggle-switch
+        name: Switch to light mode
+
+nav:
+  - Home: index.md
+  - get_started.md
+  - GitHub: https://github.com/durandtibo/bearface
+
+repo_url: https://github.com/durandtibo/bearface
+repo_name: durandtibo/bearface
+
+markdown_extensions:
+  - pymdownx.highlight
+  - pymdownx.superfences
+  - pymdownx.snippets
+  - pymdownx.emoji:
+      emoji_index: !!python/name:materialx.emoji.twemoji
+      emoji_generator: !!python/name:materialx.emoji.to_svg
+  - toc:
+      permalink: true
+
+plugins:
+  - search
+  - mkdocstrings
+
+extra:
+  version:
+    method: mike
+
+copyright: Copyright &copy; 2023 - present Thibaut Durand

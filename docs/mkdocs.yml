@@ -19,6 +19,7 @@ theme:
 nav:
   - Home: index.md
   - get_started.md
+  - resolvers.md
   - GitHub: https://github.com/durandtibo/bearface
 
 repo_url: https://github.com/durandtibo/bearface

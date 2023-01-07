@@ -2,6 +2,8 @@ __all__ = ["ResolverRegistry", "registry"]
 
 from collections.abc import Callable
 
+from omegaconf import OmegaConf
+
 
 class ResolverRegistry:
     r"""Implementation of a resolver registry."""
@@ -52,3 +54,18 @@ class ResolverRegistry:
 
 
 registry = ResolverRegistry()
+
+
+def register_resolvers():
+    r"""Registers the resolvers.
+
+    Example usage:
+
+    .. code-block:: python
+
+        >>> from bearface import register_resolvers
+        >>> register_resolvers()
+    """
+    for key, resolver in registry.state.items():
+        if not OmegaConf.has_resolver(key):
+            OmegaConf.register_new_resolver(key, resolver)

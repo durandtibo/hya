@@ -1,8 +1,9 @@
 from unittest.mock import Mock, NonCallableMock
 
-from pytest import raises
+from omegaconf import OmegaConf
+from pytest import mark, raises
 
-from bearface.registry import ResolverRegistry
+from bearface.registry import ResolverRegistry, register_resolvers, registry
 
 ######################################
 #     Tests for ResolverRegistry     #
@@ -36,3 +37,14 @@ def test_resolver_registry_register_duplicate_exist_ok_true():
     register = ResolverRegistry()
     register.register("key")(Mock())
     register.register("key", exist_ok=True)(Mock())
+
+
+########################################
+#     Tests for register_resolvers     #
+########################################
+
+
+@mark.parametrize("name", registry.state.keys())
+def test_register_resolvers(name: str):
+    register_resolvers()
+    assert OmegaConf.has_resolver(name)

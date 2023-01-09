@@ -35,9 +35,9 @@ unit-test :
 
 .PHONY : unit-test-cov
 unit-test-cov :
-	python -m pytest --timeout 10 --cov-report html --cov-report xml --cov-report term --cov=bearface tests/unit
+	python -m pytest --timeout 10 --cov-report html --cov-report xml --cov-report term --cov=hya tests/unit
 
 .PHONY : publish-pypi
 publish-pypi :
-	poetry config pypi-token.pypi ${BEARFACE_PYPI_TOKEN}
+	poetry config pypi-token.pypi ${HYA_PYPI_TOKEN}
 	poetry publish --build

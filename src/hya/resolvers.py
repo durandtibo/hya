@@ -5,12 +5,12 @@ from pathlib import Path
 from typing import Any, Union
 from urllib.parse import unquote, urlparse
 
-from bearface.registry import registry
+from hya.registry import registry
 
 logger = logging.getLogger(__name__)
 
 
-@registry.register("bf.add")
+@registry.register("hya.add")
 def add_resolver(*args: Any) -> Any:
     r"""Implements a resolver to add objects.
 
@@ -26,7 +26,7 @@ def add_resolver(*args: Any) -> Any:
     return output
 
 
-@registry.register("bf.floordiv")
+@registry.register("hya.floordiv")
 def floordiv_resolver(dividend: Union[int, float], divisor: Union[int, float]) -> int:
     r"""Implements a resolver to compute the floor division of two numbers.
 
@@ -40,7 +40,7 @@ def floordiv_resolver(dividend: Union[int, float], divisor: Union[int, float]) -
     return dividend // divisor
 
 
-@registry.register("bf.neg")
+@registry.register("hya.neg")
 def neg_resolver(number: Union[int, float]) -> Union[int, float]:
     r"""Implements a resolver to compute the negation (``-number``).
 
@@ -53,7 +53,7 @@ def neg_resolver(number: Union[int, float]) -> Union[int, float]:
     return -number
 
 
-@registry.register("bf.mul")
+@registry.register("hya.mul")
 def mul_resolver(*args: Any) -> Any:
     r"""Implements a resolver to multiply objects.
 
@@ -69,7 +69,7 @@ def mul_resolver(*args: Any) -> Any:
     return output
 
 
-@registry.register("bf.pow")
+@registry.register("hya.pow")
 def pow_resolver(value: Union[float, int], exponent: Union[float, int]) -> Union[float, int]:
     r"""Implements a resolver to compute a value to a given power.
 
@@ -83,7 +83,7 @@ def pow_resolver(value: Union[float, int], exponent: Union[float, int]) -> Union
     return value**exponent
 
 
-@registry.register("bf.sqrt")
+@registry.register("hya.sqrt")
 def sqrt_resolver(number: Union[int, float]) -> float:
     r"""Implements a resolver to compute the square root of a number.
 
@@ -97,7 +97,7 @@ def sqrt_resolver(number: Union[int, float]) -> float:
     return math.sqrt(number)
 
 
-@registry.register("bf.sha1")
+@registry.register("hya.sha1")
 def sha1_resolver(obj: Any) -> str:
     r"""Implements a resolver to compute the SHA-1 hash of an object.
 
@@ -110,7 +110,7 @@ def sha1_resolver(obj: Any) -> str:
     return hashlib.sha1(bytes(str(obj), "utf-8")).hexdigest()
 
 
-@registry.register("bf.sha256")
+@registry.register("hya.sha256")
 def sha256_resolver(obj: Any) -> str:
     r"""Implements a resolver to compute the SHA-256 hash of an object.
 
@@ -123,7 +123,7 @@ def sha256_resolver(obj: Any) -> str:
     return hashlib.sha256(bytes(str(obj), "utf-8")).hexdigest()
 
 
-@registry.register("bf.sub")
+@registry.register("hya.sub")
 def sub_resolver(object1: Any, object2: Any) -> Any:
     r"""Implements a resolver to subtract two objects.
 
@@ -137,7 +137,7 @@ def sub_resolver(object1: Any, object2: Any) -> Any:
     return object1 - object2
 
 
-@registry.register("bf.to_path")
+@registry.register("hya.to_path")
 def to_path_resolver(path: str) -> Path:
     r"""Implements a resolver to convert the input path to a ``pathlib.Path``.
 
@@ -151,7 +151,7 @@ def to_path_resolver(path: str) -> Path:
     return Path(unquote(urlparse(path).path)).expanduser().resolve()
 
 
-@registry.register("bf.truediv")
+@registry.register("hya.truediv")
 def truediv_resolver(dividend: Union[int, float], divisor: Union[int, float]) -> Union[int, float]:
     r"""Implements a resolver to compute the true division of two numbers.
 

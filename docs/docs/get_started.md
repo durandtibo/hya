@@ -9,26 +9,26 @@ to keep your system in order.
 The following command installs the latest version of the library:
 
 ```shell
-pip install bearface
+pip install hya
 ```
 
-To make the package as slim as possible, only the packages required to use `bearface` are installed.
+To make the package as slim as possible, only the packages required to use `hya` are installed.
 It is possible to install all the optional dependencies by running the following command:
 
 ```shell
-pip install 'bearface[all]'
+pip install 'hya[all]'
 ```
 
 This command also installed PyTorch.
 It is also possible to install the optional packages manually or to select the packages to install.
 
 ```shell
-pip install bearface torch
+pip install hya torch
 ```
 
 ## Installing from source
 
-To install `bearface` from source, you can follow the steps below. First, you will need to
+To install `hya` from source, you can follow the steps below. First, you will need to
 install [`poetry`](https://python-poetry.org/docs/master/). `poetry` is used to manage and install
 the dependencies.
 If `poetry` is already installed on your machine, you can skip this step. There are several ways to
@@ -42,7 +42,7 @@ poetry --version
 Then, you can clone the git repository:
 
 ```shell
-git clone git@github.com:durandtibo/bearface.git
+git clone git@github.com:durandtibo/hya.git
 ```
 
 It is recommended to create a Python 3.8+ virtual environment. This step is optional so you
@@ -56,11 +56,11 @@ It automatically creates a conda virtual environment. When the virtual environme
 can activate it with the following command:
 
 ```shell
-conda activate bearface
+conda activate hya
 ```
 
 This example uses `conda` to create a virtual environment, but you can use other tools or
-configurations. Then, you should install the required package to use `bearface` with the following
+configurations. Then, you should install the required package to use `hya` with the following
 command:
 
 ```shell

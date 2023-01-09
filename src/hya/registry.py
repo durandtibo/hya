@@ -33,7 +33,7 @@ class ResolverRegistry:
 
         .. code-block:: python
 
-            >>> from bearface.registry import registry
+            >>> from hya.registry import registry
             >>> @registry.register('my_key')
             >>> def my_resolver(value):
             ...     pass
@@ -63,7 +63,7 @@ def register_resolvers():
 
     .. code-block:: python
 
-        >>> from bearface import register_resolvers
+        >>> from hya import register_resolvers
         >>> register_resolvers()
     """
     for key, resolver in registry.state.items():

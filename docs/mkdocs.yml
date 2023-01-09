@@ -1,4 +1,4 @@
-site_name: bearface
+site_name: hya
 theme:
   name: material
   features:
@@ -20,10 +20,10 @@ nav:
   - Home: index.md
   - get_started.md
   - resolvers.md
-  - GitHub: https://github.com/durandtibo/bearface
+  - GitHub: https://github.com/durandtibo/hya
 
-repo_url: https://github.com/durandtibo/bearface
-repo_name: durandtibo/bearface
+repo_url: https://github.com/durandtibo/hya
+repo_name: durandtibo/hya
 
 markdown_extensions:
   - pymdownx.highlight

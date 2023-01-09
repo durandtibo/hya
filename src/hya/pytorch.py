@@ -1,7 +1,7 @@
 from typing import Any
 
-from bearface import is_torch_available
-from bearface.registry import registry
+from hya import is_torch_available
+from hya.registry import registry
 
 if is_torch_available():
     from torch import Tensor, tensor
@@ -9,7 +9,7 @@ else:
     Tensor, tensor = None, None  # pragma: no cover
 
 
-@registry.register("bf.to_tensor")
+@registry.register("hya.to_tensor")
 def to_tensor_resolver(data: Any) -> Tensor:
     r"""Implements a resolver to transform the input to a ``torch.Tensor``.
 

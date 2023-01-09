@@ -1,4 +1,4 @@
-name: bearface
+name: hya
 channels:
   - conda-forge
 dependencies:

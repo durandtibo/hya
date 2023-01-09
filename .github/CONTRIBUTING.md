@@ -1,4 +1,4 @@
-# Contributing to `bearface`
+# Contributing to `hya`
 
 We want to make contributing to this project as easy and transparent as possible.
 
@@ -39,5 +39,5 @@ Please outline the motivation for the proposal.
 
 ## License
 
-By contributing to `bearface`, you agree that your contributions will be licensed under the LICENSE
+By contributing to `hya`, you agree that your contributions will be licensed under the LICENSE
 file in the root directory of this source tree.

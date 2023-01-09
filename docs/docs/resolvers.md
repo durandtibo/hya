@@ -4,13 +4,13 @@
 
 ## Default
 
-### `bf.add`
+### `hya.add`
 
 This resolver adds the two inputs.
 The following config
 
 ```yaml
-value: ${bf.add:object1,object2}
+value: ${hya.add:object1,object2}
 ```
 
 is equivalent to:
@@ -23,7 +23,7 @@ It is possible to add more than 2 inputs.
 The following config
 
 ```yaml
-value: ${bf.add:object1,object2,object3,object4}
+value: ${hya.add:object1,object2,object3,object4}
 ```
 
 is equivalent to:
@@ -32,13 +32,13 @@ is equivalent to:
 value = object1 + object2 + object3 + object4
 ```
 
-### `bf.floordiv`
+### `hya.floordiv`
 
 This resolver computes the "true" division between two inputs.
 The following config
 
 ```yaml
-value: ${bf.floordiv:dividend,divisor}
+value: ${hya.floordiv:dividend,divisor}
 ```
 
 is equivalent to:
@@ -47,13 +47,13 @@ is equivalent to:
 value = dividend // divisor
 ```
 
-### `bf.neg`
+### `hya.neg`
 
 This resolver computes the negation of the input.
 The following config
 
 ```yaml
-value: ${bf.neg:number}
+value: ${hya.neg:number}
 ```
 
 is equivalent to:
@@ -62,13 +62,13 @@ is equivalent to:
 value = -number
 ```
 
-### `bf.mul`
+### `hya.mul`
 
 This resolver multiplies the two inputs.
 The following config
 
 ```yaml
-value: ${bf.mul:object1,object2}
+value: ${hya.mul:object1,object2}
 ```
 
 is equivalent to:
@@ -81,7 +81,7 @@ It is possible to multiply more than 2 inputs.
 The following config
 
 ```yaml
-value: ${bf.mul:object1,object2,object3,object4}
+value: ${hya.mul:object1,object2,object3,object4}
 ```
 
 is equivalent to:
@@ -90,13 +90,13 @@ is equivalent to:
 value = object1 * object2 * object3 * object4
 ```
 
-### `bf.pow`
+### `hya.pow`
 
 This resolver computes a value to a given power.
 The following config
 
 ```yaml
-value: ${bf.pow:fraction,exponent}
+value: ${hya.pow:fraction,exponent}
 ```
 
 is equivalent to:
@@ -105,13 +105,13 @@ is equivalent to:
 value = fraction ** exponent
 ```
 
-### `bf.sqrt`
+### `hya.sqrt`
 
 This resolver computes a squared root value of a number.
 The following config
 
 ```yaml
-value: ${bf.sqrt:number}
+value: ${hya.sqrt:number}
 ```
 
 is equivalent to:
@@ -122,21 +122,21 @@ import math
 value = math.sqrt(number)
 ```
 
-### `bf.sha1`
+### `hya.sha1`
 
 This resolver computes the SHA-1 hash of an object.
 
-### `bf.sha256`
+### `hya.sha256`
 
 This resolver computes the SHA-256 hash of an object.
 
-### `bf.sub`
+### `hya.sub`
 
 This resolver subtracts the two inputs.
 The following config
 
 ```yaml
-value: ${bf.sub:object1,object2}
+value: ${hya.sub:object1,object2}
 ```
 
 is equivalent to:
@@ -145,17 +145,17 @@ is equivalent to:
 value = object1 - object2
 ```
 
-### `bf.to_path`
+### `hya.to_path`
 
 This resolver transforms the input string to a ``pathlib.Path``.
 
-### `bf.truediv`
+### `hya.truediv`
 
 This resolver computes the "true" division between two inputs.
 The following config
 
 ```yaml
-value: ${bf.truediv:dividend,divisor}
+value: ${hya.truediv:dividend,divisor}
 ```
 
 is equivalent to:
@@ -168,13 +168,13 @@ value = dividend / divisor
 
 You need to install PyTorch to use these resolvers.
 
-### `bf.to_tensor`
+### `hya.to_tensor`
 
 This resolver transforms the input to a ``torch.Tensor``.
 The following config
 
 ```yaml
-value: ${bf.to_tensor:[1,2,3]}
+value: ${hya.to_tensor:[1,2,3]}
 ```
 
 is equivalent to:

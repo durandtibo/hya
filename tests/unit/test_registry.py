@@ -3,7 +3,7 @@ from unittest.mock import Mock, NonCallableMock
 from omegaconf import OmegaConf
 from pytest import mark, raises
 
-from bearface.registry import ResolverRegistry, register_resolvers, registry
+from hya.registry import ResolverRegistry, register_resolvers, registry
 
 ######################################
 #     Tests for ResolverRegistry     #

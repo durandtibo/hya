@@ -1,11 +1,11 @@
 [tool.poetry]
-name = "bearface"
-version = "0.0.2a1"
+name = "hya"
+version = "0.0.2a2"
 description = "A library of custom OmegaConf resolvers"
 readme = "README.md"
 authors = ["Thibaut Durand <durand.tibo+gh@gmail.com>"]
-homepage = "https://github.com/durandtibo/bearface"
-repository = "https://github.com/durandtibo/bearface"
+homepage = "https://github.com/durandtibo/hya"
+repository = "https://github.com/durandtibo/hya"
 keywords = ["omegaconf", "resolver"]
 license = "BSD-3-Clause"
 
@@ -24,7 +24,7 @@ classifiers = [
 ]
 
 packages = [
-    { include = "bearface", from = "src" },
+    { include = "hya", from = "src" },
 ]
 
 [tool.poetry.dependencies]
@@ -63,7 +63,7 @@ source = ["src", "*/site-packages"]
 
 [tool.coverage.run]
 branch = true
-source = ["bearface"]
+source = ["hya"]
 
 [tool.coverage.report]
 show_missing = true

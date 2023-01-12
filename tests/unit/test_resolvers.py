@@ -35,6 +35,10 @@ def test_add_resolver_str3():
     assert OmegaConf.create({"key": "${hya.add:abc,d,ef}"}).key == "abcdef"
 
 
+def test_ceildiv_resolver():
+    assert OmegaConf.create({"key": "${hya.ceildiv:11,4}"}).key == 3
+
+
 def test_floordiv_resolver():
     assert OmegaConf.create({"key": "${hya.floordiv:11,4}"}).key == 2
 

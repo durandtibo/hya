@@ -47,6 +47,30 @@ def test_neg_resolver():
     assert OmegaConf.create({"key": "${hya.neg:2}"}).key == -2
 
 
+def test_max_resolver_int2():
+    assert OmegaConf.create({"key": "${hya.max:3,4}"}).key == 4
+
+
+def test_max_resolver_int3():
+    assert OmegaConf.create({"key": "${hya.max:3,4,-1}"}).key == 4
+
+
+def test_max_resolver_float2():
+    assert OmegaConf.create({"key": "${hya.max:1.2,3.4}"}).key == 3.4
+
+
+def test_min_resolver_int2():
+    assert OmegaConf.create({"key": "${hya.min:3,4}"}).key == 3
+
+
+def test_min_resolver_int3():
+    assert OmegaConf.create({"key": "${hya.min:3,4,-1}"}).key == -1
+
+
+def test_min_resolver_float2():
+    assert OmegaConf.create({"key": "${hya.min:1.2,3.4}"}).key == 1.2
+
+
 def test_mul_resolver_int2():
     assert OmegaConf.create({"key": "${hya.mul:3,4}"}).key == 12
 

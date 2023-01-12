@@ -67,6 +67,32 @@ def neg_resolver(number: Union[int, float]) -> Union[int, float]:
     return -number
 
 
+@registry.register("hya.max")
+def max_resolver(*args: Any) -> Any:
+    r"""Implements a resolver to compute the maximum between multiple values.
+
+    Args:
+        *args: Specifies the values.
+
+    Returns:
+        ``max(arg1, arg2, arg3, ..., argN)``
+    """
+    return max(*args)
+
+
+@registry.register("hya.min")
+def min_resolver(*args: Any) -> Any:
+    r"""Implements a resolver to compute the minimum between multiple values.
+
+    Args:
+        *args: Specifies the values.
+
+    Returns:
+        ``min(arg1, arg2, arg3, ..., argN)``
+    """
+    return min(*args)
+
+
 @registry.register("hya.mul")
 def mul_resolver(*args: Any) -> Any:
     r"""Implements a resolver to multiply objects.

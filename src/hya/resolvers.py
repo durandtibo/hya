@@ -26,6 +26,20 @@ def add_resolver(*args: Any) -> Any:
     return output
 
 
+@registry.register("hya.ceildiv")
+def ceildiv_resolver(dividend: Union[int, float], divisor: Union[int, float]) -> int:
+    r"""Implements a resolver to compute the ceiling division of two numbers.
+
+    Args:
+        dividend (int or float): The dividend.
+        divisor (int or float): The divisor.
+
+    Returns:
+        int: The output of the ceiling division.
+    """
+    return -(dividend // -divisor)
+
+
 @registry.register("hya.floordiv")
 def floordiv_resolver(dividend: Union[int, float], divisor: Union[int, float]) -> int:
     r"""Implements a resolver to compute the floor division of two numbers.

@@ -185,7 +185,7 @@ def pow_resolver(value: Union[float, int], exponent: Union[float, int]) -> Union
     Returns:
         ``x ** y``
     """
-    return value ** exponent
+    return value**exponent
 
 
 @registry.register("hya.sqrt")

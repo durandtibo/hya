@@ -186,6 +186,19 @@ def sha256_resolver(obj: Any) -> str:
     return hashlib.sha256(bytes(str(obj), "utf-8")).hexdigest()
 
 
+@registry.register("hya.sinh")
+def sinh_resolver(number: Union[int, float]) -> float:
+    r"""Implements a resolver to compute the hyperbolic sine.
+
+    Args:
+        number (int or float): Specifies the number.
+
+    Returns:
+        float: The hyperbolic sine of the input number.
+    """
+    return math.sinh(number)
+
+
 @registry.register("hya.sub")
 def sub_resolver(object1: Any, object2: Any) -> Any:
     r"""Implements a resolver to subtract two objects.

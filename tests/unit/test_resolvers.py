@@ -126,6 +126,14 @@ def test_sha256_resolver():
     )
 
 
+def test_sinh_resolver_int():
+    assert OmegaConf.create({"key": "${hya.sinh:1}"}).key == 1.1752011936438014
+
+
+def test_sinh_resolver_float():
+    assert OmegaConf.create({"key": "${hya.sinh:1.0}"}).key == 1.1752011936438014
+
+
 def test_sub_resolver():
     assert OmegaConf.create({"key": "${hya.sub:1,4}"}).key == -3
 

@@ -48,6 +48,14 @@ def test_ceildiv_resolver():
     assert OmegaConf.create({"key": "${hya.ceildiv:11,4}"}).key == 3
 
 
+def test_exp_resolver_int():
+    assert math.isclose(OmegaConf.create({"key": "${hya.exp:1}"}).key, 2.718281828459045)
+
+
+def test_exp_resolver_float():
+    assert math.isclose(OmegaConf.create({"key": "${hya.exp:1.0}"}).key, 2.718281828459045)
+
+
 def test_floordiv_resolver():
     assert OmegaConf.create({"key": "${hya.floordiv:11,4}"}).key == 2
 

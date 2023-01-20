@@ -53,6 +53,19 @@ def ceildiv_resolver(dividend: Union[int, float], divisor: Union[int, float]) ->
     return -(dividend // -divisor)
 
 
+@registry.register("hya.exp")
+def exp_resolver(number: Union[int, float]) -> float:
+    r"""Implements a resolver to compute the exponential value of the input.
+
+    Args:
+        number (int or float): Specifies the number.
+
+    Returns:
+        float: The exponential value of the input.
+    """
+    return math.exp(number)
+
+
 @registry.register("hya.floordiv")
 def floordiv_resolver(dividend: Union[int, float], divisor: Union[int, float]) -> int:
     r"""Implements a resolver to compute the floor division of two numbers.
@@ -172,7 +185,7 @@ def pow_resolver(value: Union[float, int], exponent: Union[float, int]) -> Union
     Returns:
         ``x ** y``
     """
-    return value**exponent
+    return value ** exponent
 
 
 @registry.register("hya.sqrt")

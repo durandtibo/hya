@@ -36,6 +36,14 @@ def test_add_resolver_str3():
     assert OmegaConf.create({"key": "${hya.add:abc,d,ef}"}).key == "abcdef"
 
 
+def test_asinh_resolver_int():
+    assert OmegaConf.create({"key": "${hya.asinh:1}"}).key == 0.881373587019543
+
+
+def test_asinh_resolver_float():
+    assert OmegaConf.create({"key": "${hya.asinh:1.0}"}).key == 0.881373587019543
+
+
 def test_ceildiv_resolver():
     assert OmegaConf.create({"key": "${hya.ceildiv:11,4}"}).key == 3
 

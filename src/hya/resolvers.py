@@ -26,6 +26,19 @@ def add_resolver(*args: Any) -> Any:
     return output
 
 
+@registry.register("hya.asinh")
+def asinh_resolver(number: Union[int, float]) -> float:
+    r"""Implements a resolver to compute the inverse hyperbolic sine.
+
+    Args:
+        number (int or float): Specifies the number.
+
+    Returns:
+        float: The inverse hyperbolic sine of the input number.
+    """
+    return math.asinh(number)
+
+
 @registry.register("hya.ceildiv")
 def ceildiv_resolver(dividend: Union[int, float], divisor: Union[int, float]) -> int:
     r"""Implements a resolver to compute the ceiling division of two numbers.

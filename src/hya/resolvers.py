@@ -67,6 +67,35 @@ def floordiv_resolver(dividend: Union[int, float], divisor: Union[int, float]) -
     return dividend // divisor
 
 
+@registry.register("hya.log")
+def log_resolver(number: Union[int, float], base: float = math.e) -> float:
+    r"""Implements a resolver to compute logarithm of the input value to the
+    given base.
+
+    Args:
+        number (int or float): Specifies the number.
+        base (float, optional): Specifies the base.
+            Default: ``math.e``
+
+    Returns:
+        float: The logarithm of the input value to the given base.
+    """
+    return math.log(number, base)
+
+
+@registry.register("hya.log10")
+def log10_resolver(number: Union[int, float]) -> float:
+    r"""Implements a resolver to compute base 10 logarithm of the input value.
+
+    Args:
+        number (int or float): Specifies the number.
+
+    Returns:
+        float: The base 10 logarithm of the input value.
+    """
+    return math.log10(number)
+
+
 @registry.register("hya.max")
 def max_resolver(*args: Any) -> Any:
     r"""Implements a resolver to compute the maximum between multiple values.

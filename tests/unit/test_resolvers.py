@@ -52,6 +52,26 @@ def test_floordiv_resolver():
     assert OmegaConf.create({"key": "${hya.floordiv:11,4}"}).key == 2
 
 
+def test_log_resolver_int():
+    assert math.isclose(OmegaConf.create({"key": "${hya.log:2}"}).key, 0.6931471805599453)
+
+
+def test_log_resolver_float():
+    assert math.isclose(OmegaConf.create({"key": "${hya.log:2.0}"}).key, 0.6931471805599453)
+
+
+def test_log_resolver_base_10():
+    assert math.isclose(OmegaConf.create({"key": "${hya.log:2.0,10}"}).key, 0.3010299956639812)
+
+
+def test_log10_resolver_int():
+    assert math.isclose(OmegaConf.create({"key": "${hya.log10:2}"}).key, 0.3010299956639812)
+
+
+def test_log10_resolver_float():
+    assert math.isclose(OmegaConf.create({"key": "${hya.log10:2.0}"}).key, 0.3010299956639812)
+
+
 def test_max_resolver_int2():
     assert OmegaConf.create({"key": "${hya.max:3,4}"}).key == 4
 

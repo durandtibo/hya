@@ -1,3 +1,4 @@
+import math
 from pathlib import Path
 
 from omegaconf import OmegaConf
@@ -43,10 +44,6 @@ def test_floordiv_resolver():
     assert OmegaConf.create({"key": "${hya.floordiv:11,4}"}).key == 2
 
 
-def test_neg_resolver():
-    assert OmegaConf.create({"key": "${hya.neg:2}"}).key == -2
-
-
 def test_max_resolver_int2():
     assert OmegaConf.create({"key": "${hya.max:3,4}"}).key == 4
 
@@ -89,6 +86,14 @@ def test_mul_resolver_float3():
 
 def test_mul_resolver_list():
     assert OmegaConf.create({"key": "${hya.mul:[1,2,3],3}"}).key == [1, 2, 3, 1, 2, 3, 1, 2, 3]
+
+
+def test_neg_resolver():
+    assert OmegaConf.create({"key": "${hya.neg:2}"}).key == -2
+
+
+def test_pi_resolver():
+    assert OmegaConf.create({"key": "${hya.pi:}"}).key == math.pi
 
 
 def test_pow_resolver_int():

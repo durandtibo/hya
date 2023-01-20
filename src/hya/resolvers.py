@@ -54,19 +54,6 @@ def floordiv_resolver(dividend: Union[int, float], divisor: Union[int, float]) -
     return dividend // divisor
 
 
-@registry.register("hya.neg")
-def neg_resolver(number: Union[int, float]) -> Union[int, float]:
-    r"""Implements a resolver to compute the negation (``-number``).
-
-    Args:
-        number (int or float): Specifies the number.
-
-    Returns:
-        int or float: The negated input number.
-    """
-    return -number
-
-
 @registry.register("hya.max")
 def max_resolver(*args: Any) -> Any:
     r"""Implements a resolver to compute the maximum between multiple values.
@@ -107,6 +94,29 @@ def mul_resolver(*args: Any) -> Any:
     for arg in args[1:]:
         output *= arg
     return output
+
+
+@registry.register("hya.neg")
+def neg_resolver(number: Union[int, float]) -> Union[int, float]:
+    r"""Implements a resolver to compute the negation (``-number``).
+
+    Args:
+        number (int or float): Specifies the number.
+
+    Returns:
+        int or float: The negated input number.
+    """
+    return -number
+
+
+@registry.register("hya.pi")
+def pi_resolver() -> float:
+    r"""Implements a resolver that returns the value PI.
+
+    Returns:
+        float: The value of PI.
+    """
+    return math.pi
 
 
 @registry.register("hya.pow")

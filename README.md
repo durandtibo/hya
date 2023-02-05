@@ -22,8 +22,12 @@
     <a href="https://google.github.io/styleguide/pyguide.html#s3.8-comments-and-docstrings">
         <img  alt="Doc style: google" src="https://img.shields.io/badge/%20style-google-3666d6.svg">
     </a>
+    <br/>
     <a href="https://pepy.tech/project/hya">
         <img  alt="Downloads" src="https://static.pepy.tech/badge/hya">
+    </a>
+    <a href="https://pepy.tech/project/hya">
+        <img  alt="Monthly downloads" src="https://static.pepy.tech/badge/hya/month">
     </a>
    <br/>
 </p>

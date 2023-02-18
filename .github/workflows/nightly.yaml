@@ -47,3 +47,29 @@ jobs:
       - name: Run unit tests
         run: |
           poetry run make unit-test-cov
+
+  package:
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ ubuntu-latest ]
+        python-version: [ '3.9', '3.10', '3.11' ]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install package
+        run: |
+          pip install hya
+
+      - name: Run short experiment
+        run: |
+          python -c "import hya; print(hya.registry.registry.state)"

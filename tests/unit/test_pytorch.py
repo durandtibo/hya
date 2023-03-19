@@ -2,6 +2,7 @@ from omegaconf import OmegaConf
 from pytest import fixture, mark
 
 from hya import is_torch_available, register_resolvers
+from hya.pytorch import DTYPE_MAPPING
 
 if is_torch_available():
     import torch
@@ -24,3 +25,9 @@ def test_to_tensor_resolver_list():
     assert OmegaConf.create({"key": "${hya.to_tensor:[1, 2, 3]}"}).key.equal(
         torch.tensor([1, 2, 3])
     )
+
+
+@torch_available
+@mark.parametrize("target,dtype", DTYPE_MAPPING.items())
+def test_torch_dtype_resolver_list(target: str, dtype: torch.dtype):
+    assert OmegaConf.create({"key": "${hya.torch_dtype:" + f"{target}" + "}"}).key == dtype

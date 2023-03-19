@@ -119,8 +119,8 @@ jobs:
         python-version: [ '3.9', '3.10', '3.11' ]
         pytorch-version: [ 2.0.0, 1.13.1, 1.12.1, 1.11.0, 1.10.0 ]
         exclude:
-#          - pytorch-version: 1.10.0
-#            python-version: 3.10
+          - pytorch-version: 1.10.0
+            python-version: 3.10
           - pytorch-version: 1.10.0
             python-version: 3.11
           - pytorch-version: 1.11.0

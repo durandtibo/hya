@@ -118,6 +118,11 @@ jobs:
         os: [ ubuntu-latest ]
         python-version: [ '3.9', '3.10', '3.11' ]
         pytorch-version: [ 2.0.0, 1.13.1, 1.12.1, 1.11.0 ]
+        exclude:
+          - pytorch-version: 1.11.0
+            python-version: 3.11
+          - pytorch-version: 1.12.1
+            python-version: 3.11
 
     steps:
       - name: Checkout
@@ -134,7 +139,7 @@ jobs:
       - name: Install packages
         run: |
           poetry run make config-poetry
-          poetry run make install-all
+          poetry run make install
 
       - name: Install PyTorch
         run: |

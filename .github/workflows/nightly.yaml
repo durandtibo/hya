@@ -155,6 +155,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     timeout-minutes: 10
     strategy:
+      max-parallel: 10
       fail-fast: false
       matrix:
         os: [ ubuntu-latest, macos-latest ]

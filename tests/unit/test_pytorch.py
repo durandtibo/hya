@@ -6,6 +6,8 @@ from hya.pytorch import DTYPE_MAPPING
 
 if is_torch_available():
     import torch
+else:
+    torch = None
 
 torch_available = mark.skipif(not is_torch_available(), reason="Requires PyTorch")
 

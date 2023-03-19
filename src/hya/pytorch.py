@@ -3,41 +3,42 @@ from typing import Any
 from hya import is_torch_available
 from hya.registry import registry
 
+DTYPES = (
+    "float32",
+    "float",
+    "float64",
+    "double",
+    "float16",
+    "bfloat16",
+    "half",
+    "uint8",
+    "int8",
+    "int16",
+    "short",
+    "int32",
+    "int",
+    "int64",
+    "long",
+    "complex32",
+    "complex64",
+    "cfloat",
+    "complex128",
+    "cdouble",
+    "quint8",
+    "qint8",
+    "qint32",
+    "bool",
+    "quint4x2",
+    "quint2x4",
+)
 DTYPE_MAPPING = {}
 if is_torch_available():
     import torch
     from torch import Tensor, dtype, tensor
 
-    DTYPE_MAPPING.update(
-        {
-            "float32": torch.float32,
-            "float": torch.float,
-            "float64": torch.float64,
-            "double": torch.double,
-            "float16": torch.float16,
-            "bfloat16": torch.bfloat16,
-            "half": torch.half,
-            "uint8": torch.uint8,
-            "int8": torch.int8,
-            "int16": torch.int16,
-            "short": torch.short,
-            "int32": torch.int32,
-            "int": torch.int,
-            "int64": torch.int64,
-            "long": torch.long,
-            "complex32": torch.complex32,
-            "complex64": torch.complex64,
-            "cfloat": torch.cfloat,
-            "complex128": torch.complex128,
-            "cdouble": torch.cdouble,
-            "quint8": torch.quint8,
-            "qint8": torch.qint8,
-            "qint32": torch.qint32,
-            "bool": torch.bool,
-            "quint4x2": torch.quint4x2,
-            "quint2x4": torch.quint2x4,
-        }
-    )
+    for dt in DTYPES:
+        if hasattr(torch, dt):
+            DTYPE_MAPPING[dt] = getattr(torch, dt)
 else:
     Tensor, tensor, dtype = None, None, None  # pragma: no cover
 

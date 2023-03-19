@@ -31,6 +31,16 @@ def test_to_tensor_resolver_list():
 
 
 @torch_available
+def test_dtype_mapping():
+    assert len(DTYPE_MAPPING) > 1
+
+
+@torch_available
+def test_torch_dtype_resolver_float():
+    assert OmegaConf.create({"key": "${hya.torch_dtype:float}"}).key == torch.float
+
+
+@torch_available
 @mark.parametrize("target,dtype", DTYPE_MAPPING.items())
 def test_torch_dtype_resolver_list(target: str, dtype: dtype):
     assert OmegaConf.create({"key": "${hya.torch_dtype:" + f"{target}" + "}"}).key == dtype

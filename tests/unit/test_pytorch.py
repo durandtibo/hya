@@ -6,8 +6,9 @@ from hya.pytorch import DTYPE_MAPPING
 
 if is_torch_available():
     import torch
+    from torch import dtype
 else:
-    torch = None
+    dtype = None
 
 torch_available = mark.skipif(not is_torch_available(), reason="Requires PyTorch")
 
@@ -31,5 +32,5 @@ def test_to_tensor_resolver_list():
 
 @torch_available
 @mark.parametrize("target,dtype", DTYPE_MAPPING.items())
-def test_torch_dtype_resolver_list(target: str, dtype: torch.dtype):
+def test_torch_dtype_resolver_list(target: str, dtype: dtype):
     assert OmegaConf.create({"key": "${hya.torch_dtype:" + f"{target}" + "}"}).key == dtype

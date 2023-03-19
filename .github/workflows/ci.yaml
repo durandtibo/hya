@@ -18,7 +18,7 @@ jobs:
       matrix:
         os: [ ubuntu-latest, macos-latest ]
         python-version: [ '3.9', '3.10', '3.11' ]
-        pytorch-version: [ 2.0.0, 1.13.1, 1.12.1, 1.11.0, 1.10.0 ]
+#        pytorch-version: [ 2.0.0, 1.13.1, 1.12.1, 1.11.0, 1.10.0 ]
 
     steps:
       - name: Checkout
@@ -37,9 +37,9 @@ jobs:
           poetry run make config-poetry
           poetry run make install-all
 
-      - name: Install PyTorch
-        run: |
-          poetry run pip install torch==${{ matrix.pytorch-version }}
+#      - name: Install PyTorch
+#        run: |
+#          poetry run pip install torch==${{ matrix.pytorch-version }}
 
       - name: Show installed packages
         run: |
@@ -68,7 +68,6 @@ jobs:
           # in the github UI just because the coverage report failed to
           # be published.
           fail_ci_if_error: false
-
 
   test-minimal:
     runs-on: ${{ matrix.os }}

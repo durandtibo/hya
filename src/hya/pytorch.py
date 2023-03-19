@@ -6,7 +6,7 @@ from hya.registry import registry
 DTYPE_MAPPING = {}
 if is_torch_available():
     import torch
-    from torch import Tensor, tensor
+    from torch import Tensor, dtype, tensor
 
     DTYPE_MAPPING.update(
         {
@@ -39,7 +39,7 @@ if is_torch_available():
         }
     )
 else:
-    Tensor, tensor = None, None  # pragma: no cover
+    Tensor, tensor, dtype = None, None, None  # pragma: no cover
 
 
 @registry.register("hya.to_tensor")
@@ -57,7 +57,7 @@ def to_tensor_resolver(data: Any) -> Tensor:
 
 
 @registry.register("hya.torch_dtype")
-def torch_dtype_resolver(dtype: str) -> torch.dtype:
+def torch_dtype_resolver(dtype: str) -> dtype:
     r"""Implements a resolver to create a ``torch.dtype`` from its string
     representation.
 

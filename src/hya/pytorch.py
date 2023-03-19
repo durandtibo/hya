@@ -1,17 +1,13 @@
 from typing import Any
 
+from omegaconf.errors import InterpolationResolutionError
+
 from hya import is_torch_available
 from hya.registry import registry
 
-DTYPE_MAPPING = {}
 if is_torch_available():
     import torch
     from torch import Tensor, dtype, tensor
-
-    for attr in dir(torch):
-        dt = getattr(torch, attr)
-        if isinstance(dt, dtype):
-            DTYPE_MAPPING[attr] = dt
 else:
     Tensor, tensor, dtype = None, None, None  # pragma: no cover
 
@@ -31,14 +27,32 @@ def to_tensor_resolver(data: Any) -> Tensor:
 
 
 @registry.register("hya.torch_dtype")
-def torch_dtype_resolver(dtype: str) -> dtype:
+def torch_dtype_resolver(target: str) -> dtype:
     r"""Implements a resolver to create a ``torch.dtype`` from its string
     representation.
 
     Args:
-        data: Specifies the target data type.
+        target: Specifies the target data type.
 
     Returns:
         ``torch.dtype``: The data type.
     """
-    return DTYPE_MAPPING[dtype]
+    if not hasattr(torch, target) or not isinstance(getattr(torch, target), dtype):
+        raise InterpolationResolutionError(
+            f"Incorrect dtype {target}. The available dtypes are {get_dtypes()}"
+        )
+    return getattr(torch, target)
+
+
+def get_dtypes() -> set[dtype]:
+    r"""Gets all the data types.
+
+    Returns:
+        set: The data types.
+    """
+    dtypes = set()
+    for attr in dir(torch):
+        dt = getattr(torch, attr)
+        if isinstance(dt, dtype):
+            dtypes.add(dt)
+    return dtypes

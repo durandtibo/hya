@@ -164,6 +164,19 @@ def neg_resolver(number: Union[int, float]) -> Union[int, float]:
     return -number
 
 
+@registry.register("hya.path")
+def path_resolver(path: str) -> Path:
+    r"""Implements a resolver to return a path object.
+
+    Args:
+        path (str): Specifies the target path.
+
+    Returns:
+        ``pathlib.Path``: The path object.
+    """
+    return Path(path).expanduser().resolve()
+
+
 @registry.register("hya.pi")
 def pi_resolver() -> float:
     r"""Implements a resolver that returns the value PI.

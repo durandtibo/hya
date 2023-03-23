@@ -128,6 +128,10 @@ def test_neg_resolver():
     assert OmegaConf.create({"key": "${hya.neg:2}"}).key == -2
 
 
+def test_path_resolver():
+    assert OmegaConf.create({"key": "${hya.path:/my/path}"}).key == Path("/my/path")
+
+
 def test_pi_resolver():
     assert OmegaConf.create({"key": "${hya.pi:}"}).key == math.pi
 

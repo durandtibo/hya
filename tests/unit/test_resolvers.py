@@ -60,6 +60,14 @@ def test_floordiv_resolver():
     assert OmegaConf.create({"key": "${hya.floordiv:11,4}"}).key == 2
 
 
+def test_len_resolver_list():
+    assert OmegaConf.create({"key": "${hya.len:[1,2,3]}"}).key == 3
+
+
+def test_len_resolver_str():
+    assert OmegaConf.create({"key": "${hya.len:abcdef}"}).key == 6
+
+
 def test_log_resolver_int():
     assert math.isclose(OmegaConf.create({"key": "${hya.log:2}"}).key, 0.6931471805599453)
 

@@ -80,6 +80,19 @@ def floordiv_resolver(dividend: Union[int, float], divisor: Union[int, float]) -
     return dividend // divisor
 
 
+@registry.register("hya.len")
+def len_resolver(obj: Any) -> int:
+    r"""Implements a resolver to compute the length of an object.
+
+    Args:
+        obj: Specifies the object.
+
+    Returns:
+        int: The length of the object.
+    """
+    return len(obj)
+
+
 @registry.register("hya.log")
 def log_resolver(number: Union[int, float], base: float = math.e) -> float:
     r"""Implements a resolver to compute logarithm of the input value to the

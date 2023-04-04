@@ -8,7 +8,7 @@ from omegaconf import OmegaConf
 class ResolverRegistry:
     r"""Implementation of a resolver registry."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         self._state: dict[str, Callable] = dict()
 
     @property
@@ -56,7 +56,7 @@ class ResolverRegistry:
 registry = ResolverRegistry()
 
 
-def register_resolvers():
+def register_resolvers() -> None:
     r"""Registers the resolvers.
 
     Example usage:

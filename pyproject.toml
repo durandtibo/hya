@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "hya"
-version = "0.0.9a0"
+version = "0.0.9a1"
 description = "A library of custom OmegaConf resolvers"
 readme = "README.md"
 authors = ["Thibaut Durand <durand.tibo+gh@gmail.com>"]
@@ -40,19 +40,17 @@ mkdocs-material = "^8.5"
 mkdocstrings = "^0.19"
 
 [tool.poetry.group.dev.dependencies]
-black = "^22.10"
+black = "^23.3"
 codecov = "^2.1"
 coverage = { extras = ["toml"], version = "^6.5" }
 docformatter = "^1.5"
-flake8 = "^6.0"
-flake8-black = "^0.3"
-flake8-bugbear = "^22.12"
 isort = "^5.10"
 pre-commit = "^2.20"
 pylint = "^2.15"
 pytest = "^7.2"
 pytest-cov = "^4.0"
 pytest-timeout = "^2.1"
+ruff = "^0.0.260"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
@@ -96,3 +94,73 @@ recursive = true
 wrap-summaries = 72
 wrap-descriptions = 72
 syntax = "google"
+
+[tool.ruff]
+select = [
+    "A",   # builtins
+    "ANN", # annotations
+    "B",   # bugbear
+    "BLE", # blind-except
+    "E",   # pycodestyle (Error)
+    "F",   # pyflakes
+    "N",   # naming
+    "PTH", # pathlib
+    "UP",  # pyupgrade
+    "W",   # pycodestyle (Warning)
+#    "NPY", # NumPy-specific rules
+]
+ignore = [
+    "A003",    # Class attribute `{name}` is shadowing a python builtin
+    "ANN002",  # Missing type annotation for `*args`
+    "ANN003",  # Missing type annotation for `**kwargs`
+    "ANN101",  # Missing type annotation for `self` in method
+    "ANN102",  # Missing type annotation for `cls` in classmethod
+    "ANN401",  # Dynamically typed expressions (typing.Any) are disallowed.
+    "B905",    # `zip()` without an explicit strict= parameter set. The `strict=` argument was added in Python 3.10
+    "E501",    # Line lengths are recommended to be no greater than 79 characters.
+    "W505",    # Doc line too long
+]
+
+# Allow autofix for all enabled rules (when `--fix`) is provided.
+fixable = ["A", "ANN", "B", "E", "F", "PTH", "W"]
+unfixable = []
+
+exclude = [
+    ".bzr",
+    ".direnv",
+    ".eggs",
+    ".git",
+    ".hg",
+    ".mypy_cache",
+    ".nox",
+    ".pants.d",
+    ".pytype",
+    ".ruff_cache",
+    ".tox",
+    ".venv",
+    "__pypackages__",
+    "_build",
+    "buck-out",
+    "build",
+    "dist",
+    "node_modules",
+    "venv",
+]
+
+line-length = 100
+target-version = "py39"
+src = ["src"]
+
+[tool.ruff.mccabe]
+max-complexity = 10
+
+[tool.ruff.pydocstyle]
+convention = "google"
+
+[tool.ruff.pycodestyle]
+max-doc-length = 72
+
+[tool.ruff.isort]
+force-sort-within-sections = true
+combine-as-imports = true
+known-first-party = ["src"]

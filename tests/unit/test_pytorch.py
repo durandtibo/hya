@@ -48,13 +48,13 @@ def test_torch_dtype_resolver_bool() -> None:
 
 @torch_available
 def test_torch_dtype_resolver_incorrect_attribute() -> None:
-    with raises(InterpolationResolutionError):
+    with raises(InterpolationResolutionError, match="Incorrect dtype bool32."):
         OmegaConf.create({"key": "${hya.torch_dtype:bool32}"}).key  # noqa: B018
 
 
 @torch_available
 def test_torch_dtype_resolver_incorrect_dtype() -> None:
-    with raises(InterpolationResolutionError):
+    with raises(InterpolationResolutionError, match="Incorrect dtype ones."):
         OmegaConf.create({"key": "${hya.torch_dtype:ones}"}).key  # noqa: B018
 
 

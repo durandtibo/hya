@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "hya"
-version = "0.0.10a0"
+version = "0.0.10a1"
 description = "A library of custom OmegaConf resolvers"
 readme = "README.md"
 authors = ["Thibaut Durand <durand.tibo+gh@gmail.com>"]
@@ -43,13 +43,12 @@ mkdocstrings = "^0.19"
 black = "^23.3"
 coverage = { extras = ["toml"], version = "^6.5" }
 docformatter = "^1.6"
-isort = "^5.10"
 pre-commit = "^2.20"
 pylint = "^2.17"
 pytest = "^7.3"
 pytest-cov = "^4.0"
 pytest-timeout = "^2.1"
-ruff = "^0.0.260"
+ruff = "^0.0.261"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]

@@ -176,7 +176,40 @@ jobs:
 
       - name: Run short experiment
         run: |
-          python -c "import hya; print(hya.registry.registry.state)"
+          python -c "import hya; from omegaconf import OmegaConf; " \
+            "print(hya.registry.registry.state); " \
+            "assert not hya.import_utils.is_torch_available(); " \
+            "assert OmegaConf.create({'key': '\${hya.add:1,4}'}).key == 5"
+
+  package-all:
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 10
+    strategy:
+      max-parallel: 8
+      fail-fast: false
+      matrix:
+        os: [ ubuntu-latest, macos-latest ]
+        python-version: [ '3.9', '3.10', '3.11' ]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install package
+        run: |
+          pip install "hya[all]"
+
+      - name: Run short experiment
+        run: |
+          python -c "import hya; from omegaconf import OmegaConf; import torch; " \
+            "print(hya.registry.registry.state); " \
+            "assert hya.import_utils.is_torch_available(); " \
+            "assert OmegaConf.create({'key': '\${hya.to_tensor:1.42}'}).key.equal(torch.tensor(1.42))"
 
   package-pytorch:
     runs-on: ${{ matrix.os }}
@@ -213,4 +246,7 @@ jobs:
 
       - name: Run short experiment
         run: |
-          python -c "import hya; print(hya.registry.registry.state)"
+          python -c "import hya; from omegaconf import OmegaConf; import torch; " \
+            "print(hya.registry.registry.state); " \
+            "assert hya.import_utils.is_torch_available(); " \
+            "assert OmegaConf.create({'key': '\${hya.to_tensor:1.42}'}).key.equal(torch.tensor(1.42))"

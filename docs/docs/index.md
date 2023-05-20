@@ -4,6 +4,19 @@
     <a href="https://github.com/durandtibo/hya/actions">
         <img alt="CI" src="https://github.com/durandtibo/hya/workflows/CI/badge.svg?event=push&branch=main">
     </a>
+    <a href="https://durandtibo.github.io/hya/">
+        <img alt="CI" src="https://github.com/durandtibo/hya/workflows/Documentation/badge.svg?event=push&branch=main">
+    </a>
+    <a href="https://codecov.io/gh/durandtibo/hya">
+        <img alt="Codecov" src="https://codecov.io/gh/durandtibo/hya/branch/main/graph/badge.svg">
+    </a>
+    <a href="https://codeclimate.com/github/durandtibo/hya/maintainability">
+        <img src="https://api.codeclimate.com/v1/badges/372b4c4212452ab0b0ad/maintainability" />
+    </a>
+    <a href="https://codeclimate.com/github/durandtibo/hya/test_coverage">
+        <img src="https://api.codeclimate.com/v1/badges/372b4c4212452ab0b0ad/test_coverage" />
+    </a>
+    <br/>
     <a href="https://pypi.org/project/hya/">
         <img alt="PYPI version" src="https://img.shields.io/pypi/v/hya">
     </a>
@@ -12,9 +25,6 @@
     </a>
     <a href="https://opensource.org/licenses/BSD-3-Clause">
         <img alt="BSD-3-Clause" src="https://img.shields.io/pypi/l/hya">
-    </a>
-    <a href="https://codecov.io/gh/durandtibo/hya">
-        <img alt="Codecov" src="https://codecov.io/gh/durandtibo/hya/branch/main/graph/badge.svg">
     </a>
     <a href="https://github.com/psf/black">
         <img  alt="Code style: black" src="https://img.shields.io/badge/code%20style-black-000000.svg">
@@ -29,7 +39,7 @@
     <a href="https://pepy.tech/project/hya">
         <img  alt="Monthly downloads" src="https://static.pepy.tech/badge/hya/month">
     </a>
-   <br/>
+    <br/>
 </p>
 
 ## Overview

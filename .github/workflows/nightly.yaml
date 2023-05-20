@@ -178,7 +178,7 @@ jobs:
         run: |
           python -c "import hya; from omegaconf import OmegaConf; " \
             "print(hya.registry.registry.state); " \
-            "assert not hya.import_utils.is_torch_available(); " \
+            "assert not hya.imports.is_torch_available(); " \
             "assert OmegaConf.create({'key': '\${hya.add:1,4}'}).key == 5"
 
   package-all:
@@ -208,7 +208,7 @@ jobs:
         run: |
           python -c "import hya; from omegaconf import OmegaConf; import torch; " \
             "print(hya.registry.registry.state); " \
-            "assert hya.import_utils.is_torch_available(); " \
+            "assert hya.imports.is_torch_available(); " \
             "assert OmegaConf.create({'key': '\${hya.to_tensor:1.42}'}).key.equal(torch.tensor(1.42))"
 
   package-pytorch:
@@ -248,5 +248,5 @@ jobs:
         run: |
           python -c "import hya; from omegaconf import OmegaConf; import torch; " \
             "print(hya.registry.registry.state); " \
-            "assert hya.import_utils.is_torch_available(); " \
+            "assert hya.imports.is_torch_available(); " \
             "assert OmegaConf.create({'key': '\${hya.to_tensor:1.42}'}).key.equal(torch.tensor(1.42))"

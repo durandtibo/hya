@@ -13,7 +13,7 @@ class ResolverRegistry:
 
     @property
     def state(self) -> dict[str, Callable]:
-        r"""Dict: The state of the registry."""
+        r"""``dict``: The state of the registry."""
         return self._state
 
     def register(self, key: str, exist_ok: bool = False) -> Callable:

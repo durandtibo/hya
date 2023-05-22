@@ -1,11 +1,11 @@
-name: Nightly Tests
+name: Nightly Package Tests
 on:
   schedule:
-    - cron: '0 5 * * *' # run at 5 AM UTC
+    - cron: '0 6 * * *' # run at 6 AM UTC
   workflow_dispatch:  # to trigger manually
 
 jobs:
-  test:
+  package:
     runs-on: ${{ matrix.os }}
     timeout-minutes: 10
     strategy:
@@ -24,32 +24,18 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
 
-      - name: Install Poetry
-        uses: snok/install-poetry@v1
-
-      - name: Install packages
+      - name: Install package
         run: |
-          poetry run make config-poetry
-          poetry run make install-all
+          pip install hya
 
-      - name: Show installed packages
+      - name: Run short experiment
         run: |
-          poetry run poetry show
-          poetry run poetry show --tree
+          python -c "import hya; from omegaconf import OmegaConf; " \
+            "print(hya.registry.registry.state); " \
+            "assert not hya.imports.is_torch_available(); " \
+            "assert OmegaConf.create({'key': '\${hya.add:1,4}'}).key == 5"
 
-      - name: Format
-        run: |
-          poetry run make format
-
-      - name: Lint
-        run: |
-          poetry run make lint
-
-      - name: Run unit tests
-        run: |
-          poetry run make unit-test-cov
-
-  test-minimal:
+  package-all:
     runs-on: ${{ matrix.os }}
     timeout-minutes: 10
     strategy:
@@ -68,32 +54,18 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
 
-      - name: Install Poetry
-        uses: snok/install-poetry@v1
-
-      - name: Install packages
+      - name: Install package
         run: |
-          poetry run make config-poetry
-          poetry run make install
+          pip install "hya[all]"
 
-      - name: Show installed packages
+      - name: Run short experiment
         run: |
-          poetry run poetry show
-          poetry run poetry show --tree
+          python -c "import hya; from omegaconf import OmegaConf; import torch; " \
+            "print(hya.registry.registry.state); " \
+            "assert hya.imports.is_torch_available(); " \
+            "assert OmegaConf.create({'key': '\${hya.to_tensor:1.42}'}).key.equal(torch.tensor(1.42))"
 
-      - name: Format
-        run: |
-          poetry run make format
-
-      - name: Lint
-        run: |
-          poetry run make lint
-
-      - name: Run unit tests
-        run: |
-          poetry run make unit-test-cov
-
-  test-pytorch:
+  package-pytorch:
     runs-on: ${{ matrix.os }}
     timeout-minutes: 10
     strategy:
@@ -122,31 +94,13 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
 
-      - name: Install Poetry
-        uses: snok/install-poetry@v1
-
-      - name: Install packages
+      - name: Install package
         run: |
-          poetry run make config-poetry
-          poetry run make install
+          pip install hya torch==${{ matrix.pytorch-version }}
 
-      - name: Install PyTorch
+      - name: Run short experiment
         run: |
-          poetry run pip install torch==${{ matrix.pytorch-version }}
-
-      - name: Show installed packages
-        run: |
-          poetry run poetry show
-          poetry run poetry show --tree
-
-      - name: Format
-        run: |
-          poetry run make format
-
-      - name: Lint
-        run: |
-          poetry run make lint
-
-      - name: Run unit tests
-        run: |
-          poetry run make unit-test-cov
+          python -c "import hya; from omegaconf import OmegaConf; import torch; " \
+            "print(hya.registry.registry.state); " \
+            "assert hya.imports.is_torch_available(); " \
+            "assert OmegaConf.create({'key': '\${hya.to_tensor:1.42}'}).key.equal(torch.tensor(1.42))"

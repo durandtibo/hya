@@ -1,3 +1,10 @@
+SHELL=/bin/bash
+NAME=hya
+SOURCE=src/$(NAME)
+TESTS=tests
+UNIT_TESTS=tests/unit
+INTEGRATION_TESTS=tests/integration
+
 .PHONY : conda
 conda :
 	conda env create -f environment.yaml --force
@@ -31,17 +38,21 @@ lint :
 format :
 	black --check .
 
+.PHONY : docformat
+docformat :
+	docformatter --config ./pyproject.toml --in-place $(SOURCE)
+
 .PHONY : test
 test :
 	python -m pytest
 
 .PHONY : unit-test
 unit-test :
-	python -m pytest --timeout 10 tests/unit
+	python -m pytest --timeout 10 $(UNIT_TESTS)
 
 .PHONY : unit-test-cov
 unit-test-cov :
-	python -m pytest --timeout 10 --cov-report html --cov-report xml --cov-report term --cov=hya tests/unit
+	python -m pytest --timeout 10 --cov-report html --cov-report xml --cov-report term --cov=$(NAME) $(UNIT_TESTS)
 
 .PHONY : publish-pypi
 publish-pypi :

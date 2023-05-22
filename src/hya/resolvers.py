@@ -41,7 +41,8 @@ def asinh_resolver(number: Union[int, float]) -> float:
 
 @registry.register("hya.ceildiv")
 def ceildiv_resolver(dividend: Union[int, float], divisor: Union[int, float]) -> int:
-    r"""Implements a resolver to compute the ceiling division of two numbers.
+    r"""Implements a resolver to compute the ceiling division of two
+    numbers.
 
     Args:
         dividend (int or float): The dividend.
@@ -55,7 +56,8 @@ def ceildiv_resolver(dividend: Union[int, float], divisor: Union[int, float]) ->
 
 @registry.register("hya.exp")
 def exp_resolver(number: Union[int, float]) -> float:
-    r"""Implements a resolver to compute the exponential value of the input.
+    r"""Implements a resolver to compute the exponential value of the
+    input.
 
     Args:
         number (int or float): Specifies the number.
@@ -68,7 +70,8 @@ def exp_resolver(number: Union[int, float]) -> float:
 
 @registry.register("hya.floordiv")
 def floordiv_resolver(dividend: Union[int, float], divisor: Union[int, float]) -> int:
-    r"""Implements a resolver to compute the floor division of two numbers.
+    r"""Implements a resolver to compute the floor division of two
+    numbers.
 
     Args:
         dividend (int or float): The dividend.
@@ -95,8 +98,8 @@ def len_resolver(obj: Any) -> int:
 
 @registry.register("hya.log")
 def log_resolver(number: Union[int, float], base: float = math.e) -> float:
-    r"""Implements a resolver to compute logarithm of the input value to the
-    given base.
+    r"""Implements a resolver to compute logarithm of the input value to
+    the given base.
 
     Args:
         number (int or float): Specifies the number.
@@ -111,7 +114,8 @@ def log_resolver(number: Union[int, float], base: float = math.e) -> float:
 
 @registry.register("hya.log10")
 def log10_resolver(number: Union[int, float]) -> float:
-    r"""Implements a resolver to compute base 10 logarithm of the input value.
+    r"""Implements a resolver to compute base 10 logarithm of the input
+    value.
 
     Args:
         number (int or float): Specifies the number.
@@ -124,7 +128,8 @@ def log10_resolver(number: Union[int, float]) -> float:
 
 @registry.register("hya.max")
 def max_resolver(*args: Any) -> Any:
-    r"""Implements a resolver to compute the maximum between multiple values.
+    r"""Implements a resolver to compute the maximum between multiple
+    values.
 
     Args:
         *args: Specifies the values.
@@ -137,7 +142,8 @@ def max_resolver(*args: Any) -> Any:
 
 @registry.register("hya.min")
 def min_resolver(*args: Any) -> Any:
-    r"""Implements a resolver to compute the minimum between multiple values.
+    r"""Implements a resolver to compute the minimum between multiple
+    values.
 
     Args:
         *args: Specifies the values.
@@ -297,7 +303,8 @@ def to_path_resolver(path: str) -> Path:
 
 @registry.register("hya.truediv")
 def truediv_resolver(dividend: Union[int, float], divisor: Union[int, float]) -> Union[int, float]:
-    r"""Implements a resolver to compute the true division of two numbers.
+    r"""Implements a resolver to compute the true division of two
+    numbers.
 
     Args:
         dividend (int or float): The dividend.

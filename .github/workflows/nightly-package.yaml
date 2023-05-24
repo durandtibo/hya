@@ -66,6 +66,7 @@ jobs:
             "assert OmegaConf.create({'key': '\${hya.to_tensor:1.42}'}).key.equal(torch.tensor(1.42))"
 
   package-pytorch:
+    needs: [package, package-minimal]
     runs-on: ${{ matrix.os }}
     timeout-minutes: 10
     strategy:
@@ -106,6 +107,7 @@ jobs:
             "assert OmegaConf.create({'key': '\${hya.to_tensor:1.42}'}).key.equal(torch.tensor(1.42))"
 
   package-omegaconf:
+    needs: [package, package-minimal]
     runs-on: ${{ matrix.os }}
     timeout-minutes: 10
     strategy:

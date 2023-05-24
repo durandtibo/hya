@@ -94,6 +94,7 @@ jobs:
           poetry run make unit-test-cov
 
   test-pytorch:
+    needs: [test, test-minimal]
     runs-on: ${{ matrix.os }}
     timeout-minutes: 10
     strategy:
@@ -153,6 +154,7 @@ jobs:
 
 
   test-omegaconf:
+    needs: [test, test-minimal]
     runs-on: ${{ matrix.os }}
     timeout-minutes: 10
     strategy:

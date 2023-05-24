@@ -131,7 +131,7 @@ jobs:
 
       - name: Install OmegaConf
         run: |
-          poetry run pip install omegaconf==${{ matrix.omegaconf-version }}
+          pip install omegaconf==${{ matrix.omegaconf-version }}
 
       - name: Run short experiment
         run: |

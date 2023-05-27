@@ -31,12 +31,13 @@ class ResolverRegistry:
 
         Example usage:
 
-        .. code-block:: python
+        .. code-block:: pycon
 
             >>> from hya.registry import registry
-            >>> @registry.register('my_key')
-            >>> def my_resolver(value):
+            >>> @registry.register("my_key")
+            ... def my_resolver(value):
             ...     pass
+            ...
         """
 
         def wrap(resolver: Callable) -> Callable:
@@ -61,7 +62,7 @@ def register_resolvers() -> None:
 
     Example usage:
 
-    .. code-block:: python
+    .. code-block:: pycon
 
         >>> from hya import register_resolvers
         >>> register_resolvers()

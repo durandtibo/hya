@@ -102,7 +102,7 @@ value: ${hya.pow:fraction,exponent}
 is equivalent to:
 
 ```python
-value = fraction ** exponent
+value = fraction**exponent
 ```
 
 ### `hya.sqrt`

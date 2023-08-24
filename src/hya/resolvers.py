@@ -289,7 +289,8 @@ def sub_resolver(object1: Any, object2: Any) -> Any:
 
 @registry.register("hya.to_path")
 def to_path_resolver(path: str) -> Path:
-    r"""Implements a resolver to convert the input path to a ``pathlib.Path``.
+    r"""Implements a resolver to convert the input path to a
+    ``pathlib.Path``.
 
     Args:
         path (str): Specifies the path to convert.

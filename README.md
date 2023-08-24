@@ -80,7 +80,7 @@ pip install hya[all]
 
 Please check the [get started page](https://durandtibo.github.io/hya/get_started) to see how to
 install only some specific packages or other alternatives to install the library.
-The following is the corresponding `coola` versions and supported dependencies.
+The following is the corresponding `hya` versions and supported dependencies.
 
 | `hya`    | `torch`<sup>*</sup> | `python`      |
 |----------|---------------------|---------------|

@@ -204,4 +204,3 @@ jobs:
       - name: Run unit tests
         run: |
           poetry run make unit-test-cov
-

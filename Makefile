@@ -42,17 +42,21 @@ format :
 docformat :
 	docformatter --config ./pyproject.toml --in-place $(SOURCE)
 
+.PHONY : doctest-src
+doctest-src :
+	python -m pytest --xdoctest $(SOURCE)
+
 .PHONY : test
 test :
 	python -m pytest
 
 .PHONY : unit-test
 unit-test :
-	python -m pytest --timeout 10 $(UNIT_TESTS)
+	python -m pytest --xdoctest --timeout 10 $(UNIT_TESTS)
 
 .PHONY : unit-test-cov
 unit-test-cov :
-	python -m pytest --timeout 10 --cov-report html --cov-report xml --cov-report term --cov=$(NAME) $(UNIT_TESTS)
+	python -m pytest --xdoctest --timeout 10 --cov-report html --cov-report xml --cov-report term --cov=$(NAME) $(UNIT_TESTS)
 
 .PHONY : publish-pypi
 publish-pypi :

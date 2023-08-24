@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from typing import Any
 
 from omegaconf.errors import InterpolationResolutionError
@@ -18,10 +20,12 @@ def to_tensor_resolver(data: Any) -> Tensor:
     ``torch.Tensor``.
 
     Args:
+    ----
         data: Specifies the data to transform in ``torch.Tensor``.
             This value should be compatible with ``torch.tensor``
 
     Returns:
+    -------
         ``torch.Tensor``: The input in a ``torch.Tensor`` object.
     """
     return tensor(data)
@@ -33,9 +37,11 @@ def torch_dtype_resolver(target: str) -> dtype:
     representation.
 
     Args:
+    ----
         target: Specifies the target data type.
 
     Returns:
+    -------
         ``torch.dtype``: The data type.
     """
     if not hasattr(torch, target) or not isinstance(getattr(torch, target), dtype):
@@ -49,6 +55,7 @@ def get_dtypes() -> set[dtype]:
     r"""Gets all the data types.
 
     Returns:
+    -------
         set: The data types.
     """
     dtypes = set()

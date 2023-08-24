@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 __all__ = ["ResolverRegistry", "registry"]
 
 from collections.abc import Callable
@@ -17,15 +19,17 @@ class ResolverRegistry:
         return self._state
 
     def register(self, key: str, exist_ok: bool = False) -> Callable:
-        r"""Register a resolver to registry with ``key``
+        r"""Registers a resolver to registry with ``key``
 
         Args:
+        ----
             key (str): Specifies the key used to register the resolver.
             exist_ok (bool, optional): If ``False``, a ``RuntimeError``
                 is raised if you try to register a new resolver with
                 an existing key. Default: ``False``
 
         Raises:
+        ------
             TypeError if the resolver is not callable
             TypeError if the key already exists and ``exist_ok=False``
 

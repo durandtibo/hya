@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 __all__ = ["register_resolvers"]
 
 from hya import resolvers  # noqa: F401

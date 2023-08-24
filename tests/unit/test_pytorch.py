@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from omegaconf import OmegaConf
 from omegaconf.errors import InterpolationResolutionError
 from pytest import fixture, mark, raises

@@ -35,6 +35,7 @@ jobs:
             "assert not hya.imports.is_torch_available(); " \
             "assert OmegaConf.create({'key': '\${hya.add:1,4}'}).key == 5"
 
+
   package-all:
     runs-on: ${{ matrix.os }}
     timeout-minutes: 10
@@ -64,6 +65,43 @@ jobs:
             "print(hya.registry.registry.state); " \
             "assert hya.imports.is_torch_available(); " \
             "assert OmegaConf.create({'key': '\${hya.to_tensor:1.42}'}).key.equal(torch.tensor(1.42))"
+
+
+  package-omegaconf:
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 10
+    strategy:
+      max-parallel: 8
+      fail-fast: false
+      matrix:
+        os: [ ubuntu-latest ]
+        python-version: [ '3.9', '3.10', '3.11' ]
+        omegaconf-version: [ 2.3.0, 2.2.3, 2.1.2 ]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install package
+        run: |
+          pip install hya
+
+      - name: Install OmegaConf
+        run: |
+          pip install omegaconf==${{ matrix.omegaconf-version }}
+
+      - name: Run short experiment
+        run: |
+          python -c "import hya; from omegaconf import OmegaConf; " \
+            "print(hya.registry.registry.state); " \
+            "assert not hya.imports.is_torch_available(); " \
+            "assert OmegaConf.create({'key': '\${hya.add:1,4}'}).key == 5"
+
 
   package-pytorch:
     runs-on: ${{ matrix.os }}
@@ -104,38 +142,3 @@ jobs:
             "print(hya.registry.registry.state); " \
             "assert hya.imports.is_torch_available(); " \
             "assert OmegaConf.create({'key': '\${hya.to_tensor:1.42}'}).key.equal(torch.tensor(1.42))"
-
-  package-omegaconf:
-    runs-on: ${{ matrix.os }}
-    timeout-minutes: 10
-    strategy:
-      max-parallel: 8
-      fail-fast: false
-      matrix:
-        os: [ ubuntu-latest ]
-        python-version: [ '3.9', '3.10', '3.11' ]
-        omegaconf-version: [ '2.3.0', '2.2.3', '2.1.2' ]
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-
-      - name: Set up Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: ${{ matrix.python-version }}
-
-      - name: Install package
-        run: |
-          pip install hya
-
-      - name: Install OmegaConf
-        run: |
-          pip install omegaconf==${{ matrix.omegaconf-version }}
-
-      - name: Run short experiment
-        run: |
-          python -c "import hya; from omegaconf import OmegaConf; " \
-            "print(hya.registry.registry.state); " \
-            "assert not hya.imports.is_torch_available(); " \
-            "assert OmegaConf.create({'key': '\${hya.add:1,4}'}).key == 5"

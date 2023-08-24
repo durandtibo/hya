@@ -1,21 +1,20 @@
 from __future__ import annotations
 
 from typing import Any
+from unittest.mock import Mock
 
 from omegaconf.errors import InterpolationResolutionError
 
-from hya import is_torch_available
+from hya.imports import check_torch, is_torch_available
 from hya.registry import registry
 
 if is_torch_available():
     import torch
-    from torch import Tensor, dtype, tensor
-else:
-    Tensor, tensor, dtype = None, None, None  # pragma: no cover
+else:  # pragma: no cover
+    torch = Mock()
 
 
-@registry.register("hya.to_tensor")
-def to_tensor_resolver(data: Any) -> Tensor:
+def to_tensor_resolver(data: Any) -> torch.Tensor:
     r"""Implements a resolver to transform the input to a
     ``torch.Tensor``.
 
@@ -28,11 +27,11 @@ def to_tensor_resolver(data: Any) -> Tensor:
     -------
         ``torch.Tensor``: The input in a ``torch.Tensor`` object.
     """
-    return tensor(data)
+    check_torch()
+    return torch.tensor(data)
 
 
-@registry.register("hya.torch_dtype")
-def torch_dtype_resolver(target: str) -> dtype:
+def torch_dtype_resolver(target: str) -> torch.dtype:
     r"""Implements a resolver to create a ``torch.dtype`` from its string
     representation.
 
@@ -44,23 +43,34 @@ def torch_dtype_resolver(target: str) -> dtype:
     -------
         ``torch.dtype``: The data type.
     """
-    if not hasattr(torch, target) or not isinstance(getattr(torch, target), dtype):
+    check_torch()
+    if not hasattr(torch, target) or not isinstance(getattr(torch, target), torch.dtype):
         raise InterpolationResolutionError(
             f"Incorrect dtype {target}. The available dtypes are {get_dtypes()}"
         )
     return getattr(torch, target)
 
 
-def get_dtypes() -> set[dtype]:
+def get_dtypes() -> set[torch.dtype]:
     r"""Gets all the data types.
 
     Returns:
     -------
         set: The data types.
     """
+    check_torch()
     dtypes = set()
     for attr in dir(torch):
         dt = getattr(torch, attr)
-        if isinstance(dt, dtype):
+        if isinstance(dt, torch.dtype):
             dtypes.add(dt)
     return dtypes
+
+
+if is_torch_available():
+    resolvers = {
+        "hya.to_tensor": to_tensor_resolver,
+        "hya.torch_dtype": torch_dtype_resolver,
+    }
+    for name, resolver in resolvers.items():
+        registry.register(name)(resolver)

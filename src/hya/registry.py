@@ -8,7 +8,19 @@ from omegaconf import OmegaConf
 
 
 class ResolverRegistry:
-    r"""Implementation of a resolver registry."""
+    r"""Implementation of a resolver registry.
+
+    Example usage:
+
+    .. code-block:: pycon
+
+        >>> from hya.registry import ResolverRegistry
+        >>> registry = ResolverRegistry()
+        >>> @registry.register("my_key")
+        ... def my_resolver(value):
+        ...     pass
+        ...
+    """
 
     def __init__(self) -> None:
         self._state: dict[str, Callable] = dict()

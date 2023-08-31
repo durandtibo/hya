@@ -1,4 +1,4 @@
-# `hya`
+# hya
 
 <p align="center">
     <a href="https://github.com/durandtibo/hya/actions">

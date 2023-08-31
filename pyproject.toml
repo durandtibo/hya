@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "hya"
-version = "0.0.12"
+version = "0.0.13a0"
 description = "A library of custom OmegaConf resolvers"
 readme = "README.md"
 authors = ["Thibaut Durand <durand.tibo+gh@gmail.com>"]
@@ -52,7 +52,7 @@ pylint = "^2.17"
 pytest = "^7.4"
 pytest-cov = "^4.1"
 pytest-timeout = "^2.1"
-ruff = ">=0.0.285,<1.0"
+ruff = ">=0.0.286,<1.0"
 xdoctest = "^1.1"
 
 [build-system]

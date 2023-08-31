@@ -60,5 +60,5 @@ unit-test-cov :
 
 .PHONY : publish-pypi
 publish-pypi :
-	poetry config pypi-token.pypi ${HYA_PYPI_TOKEN}
+	poetry config pypi-token.pypi ${PYPI_TOKEN}
 	poetry publish --build

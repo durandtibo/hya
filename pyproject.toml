@@ -40,7 +40,7 @@ all = ["torch"]
 
 [tool.poetry.group.docs.dependencies]
 mkdocs-material = "^9.1"
-mkdocstrings = "^0.22"
+mkdocstrings = ">=0.22,<0.24"
 
 [tool.poetry.group.dev.dependencies]
 black = "^23.7"

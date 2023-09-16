@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "hya"
-version = "0.0.13"
+version = "0.0.14a0"
 description = "A library of custom OmegaConf resolvers"
 readme = "README.md"
 authors = ["Thibaut Durand <durand.tibo+gh@gmail.com>"]

@@ -14,4 +14,4 @@ from hya.registry import register_resolvers
 if is_braceexpand_available():
     from hya import braceexpand_  # noqa: F401
 if is_torch_available():
-    from hya import pytorch  # noqa: F401
+    from hya import torch_  # noqa: F401

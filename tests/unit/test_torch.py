@@ -5,7 +5,7 @@ from omegaconf.errors import InterpolationResolutionError
 from pytest import fixture, mark, raises
 
 from hya import is_torch_available, register_resolvers
-from hya.pytorch import get_dtypes
+from hya.torch_ import get_dtypes
 
 if is_torch_available():
     import torch

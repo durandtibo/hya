@@ -8,6 +8,44 @@ __all__ = [
 from importlib.util import find_spec
 
 
+def check_braceexpand() -> None:
+    r"""Checks if the ``braceexpand`` package is installed.
+
+    Raises:
+        RuntimeError if the ``braceexpand`` package is not installed.
+
+    Example usage:
+
+    .. code-block:: pycon
+
+        >>> from hya.imports import check_braceexpand
+        >>> check_braceexpand()
+    """
+    if not is_braceexpand_available():
+        raise RuntimeError(
+            "`braceexpand` package is required but not installed. "
+            "You can install `braceexpand` package with the command:\n\n"
+            "pip install braceexpand\n"
+        )
+
+
+def is_braceexpand_available() -> bool:
+    r"""Indicates if the braceexpand package is installed or not.
+
+    Returns:
+    -------
+        bool: ``True`` if ``braceexpand`` is installed, otherwise ``False``.
+
+    Example usage:
+
+    .. code-block:: pycon
+
+        >>> from hya.imports import is_braceexpand_available
+        >>> is_braceexpand_available()
+    """
+    return find_spec("braceexpand") is not None
+
+
 def check_torch() -> None:
     r"""Checks if the ``torch`` package is installed.
 

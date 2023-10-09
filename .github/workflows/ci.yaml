@@ -16,6 +16,8 @@ jobs:
     uses: ./.github/workflows/doctest.yaml
   format:
     uses: ./.github/workflows/format.yaml
+  pre-commit:
+    uses: ./.github/workflows/pre-commit.yaml
   test:
     uses: ./.github/workflows/test.yaml
   test-deps:

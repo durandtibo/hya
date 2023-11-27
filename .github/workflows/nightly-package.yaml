@@ -103,7 +103,7 @@ jobs:
             "assert OmegaConf.create({'key': '\${hya.add:1,4}'}).key == 5"
 
 
-  package-pytorch:
+  package-torch:
     runs-on: ${{ matrix.os }}
     timeout-minutes: 10
     strategy:
@@ -112,15 +112,15 @@ jobs:
       matrix:
         os: [ ubuntu-latest ]
         python-version: [ '3.9', '3.10', '3.11' ]
-        pytorch-version: [ 2.1.0, 2.0.0, 1.13.1, 1.12.1, 1.11.0, 1.10.0 ]
+        torch-version: [ 2.1.1, 2.0.0, 1.13.1, 1.12.1, 1.11.0, 1.10.0 ]
         exclude:
-          - pytorch-version: 1.10.0
+          - torch-version: 1.10.0
             python-version: 3.10
-          - pytorch-version: 1.10.0
+          - torch-version: 1.10.0
             python-version: 3.11
-          - pytorch-version: 1.11.0
+          - torch-version: 1.11.0
             python-version: 3.11
-          - pytorch-version: 1.12.1
+          - torch-version: 1.12.1
             python-version: 3.11
 
     steps:
@@ -134,7 +134,7 @@ jobs:
 
       - name: Install package
         run: |
-          pip install hya torch==${{ matrix.pytorch-version }}
+          pip install hya torch==${{ matrix.torch-version }}
 
       - name: Run short experiment
         run: |

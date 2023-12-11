@@ -13,7 +13,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [ ubuntu-latest, macos-latest ]
-        python-version: [ '3.9', '3.10', '3.11' ]
+        python-version: [ '3.12', '3.11' , '3.10', '3.9' ]
 
     steps:
       - name: Checkout
@@ -44,7 +44,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [ ubuntu-latest, macos-latest ]
-        python-version: [ '3.9', '3.10', '3.11' ]
+        python-version: [ '3.12', '3.11' , '3.10', '3.9' ]
 
     steps:
       - name: Checkout
@@ -75,7 +75,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [ ubuntu-latest ]
-        python-version: [ '3.9', '3.10', '3.11' ]
+        python-version: [ '3.12', '3.11' , '3.10', '3.9' ]
         omegaconf-version: [ 2.3.0, 2.2.3, 2.1.2 ]
 
     steps:
@@ -111,7 +111,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [ ubuntu-latest ]
-        python-version: [ '3.9', '3.10', '3.11' ]
+        python-version: [ '3.12', '3.11' , '3.10', '3.9' ]
         torch-version: [ 2.1.1, 2.0.0, 1.13.1, 1.12.1, 1.11.0, 1.10.0 ]
         exclude:
           - torch-version: 1.10.0

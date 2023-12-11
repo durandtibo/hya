@@ -80,11 +80,12 @@ pip install hya[all]
 
 Please check the [get started page](https://durandtibo.github.io/hya/get_started) to see how to
 install only some specific packages or other alternatives to install the library.
-The following is the corresponding `hya` versions and supported dependencies.
+The following is the corresponding `hya` versions and tested dependencies.
 
 | `hya`    | `torch`<sup>*</sup> | `python`      |
 |----------|---------------------|---------------|
 | `main`   | `>=1.10,<2.2`       | `>=3.9,<3.12` |
+| `0.1.0`  | `>=1.10,<2.2`       | `>=3.9,<3.12` |
 | `0.0.14` | `>=1.10,<2.2`       | `>=3.9,<3.12` |
 | `0.0.13` | `>=1.10,<2.1`       | `>=3.9,<3.12` |
 | `0.0.12` | `>=1.10,<2.1`       | `>=3.9,<3.12` |

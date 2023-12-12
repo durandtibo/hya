@@ -21,6 +21,9 @@ files = [
     {file = "Babel-2.13.1.tar.gz", hash = "sha256:33e0952d7dd6374af8dbf6768cc4ddf3ccfefc244f9986d4074704f2fbd18900"},
 ]
 
+[package.dependencies]
+setuptools = {version = "*", markers = "python_version >= \"3.12\""}
+
 [package.extras]
 dev = ["freezegun (>=1.0,<2.0)", "pytest (>=6.0)", "pytest-cov"]
 
@@ -1549,5 +1552,5 @@ all = ["braceexpand", "torch"]
 
 [metadata]
 lock-version = "2.0"
-python-versions = ">=3.9,<3.12"
-content-hash = "42259c36a85fc7403fb54e03e5eb9461322fd01d53825d5841dd89cd208cdf2a"
+python-versions = ">=3.9,<3.13"
+content-hash = "27f351ff38e53ba52c59f2419a4f6bc1d3e69a7a583160f1db28b25766cb3856"

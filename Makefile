@@ -19,9 +19,18 @@ install :
 	poetry install --no-interaction
 
 .PHONY : install-all
-install-all :
+install-all : install-all-deps install-torch
+
+.PHONY : install-all-deps
+install-all-deps :
 	poetry install --no-interaction --all-extras
-	pip install --upgrade "torch>=2.1.0"  # TODO: https://github.com/pytorch/pytorch/issues/100974
+
+.PHONY : install-torch
+install-torch :
+	@if python -c "import torch" &> /dev/null; then\
+        echo "Installing pytorch with pip because of the pytorch/poetry issue (https://github.com/pytorch/pytorch/issues/100974)";\
+        pip install --upgrade "torch>=2.1.1";\
+    fi
 
 .PHONY : update
 update :

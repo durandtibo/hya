@@ -5,7 +5,7 @@ on:
   workflow_dispatch:  # to trigger manually
 
 jobs:
-  package:
+  stable-min:
     runs-on: ${{ matrix.os }}
     timeout-minutes: 10
     strategy:
@@ -36,7 +36,7 @@ jobs:
             "assert OmegaConf.create({'key': '\${hya.add:1,4}'}).key == 5"
 
 
-  package-all:
+  stable-all:
     runs-on: ${{ matrix.os }}
     timeout-minutes: 10
     strategy:
@@ -67,7 +67,7 @@ jobs:
             "assert OmegaConf.create({'key': '\${hya.to_tensor:1.42}'}).key.equal(torch.tensor(1.42))"
 
 
-  package-omegaconf:
+  omegaconf:
     runs-on: ${{ matrix.os }}
     timeout-minutes: 10
     strategy:
@@ -103,7 +103,7 @@ jobs:
             "assert OmegaConf.create({'key': '\${hya.add:1,4}'}).key == 5"
 
 
-  package-torch:
+  braceexpand:
     runs-on: ${{ matrix.os }}
     timeout-minutes: 10
     strategy:
@@ -112,6 +112,42 @@ jobs:
       matrix:
         os: [ ubuntu-latest ]
         python-version: [ '3.12', '3.11' , '3.10', '3.9' ]
+        braceexpand-version: [ 0.1.7 ]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install package
+        run: |
+          pip install hya
+
+      - name: Install OmegaConf
+        run: |
+          pip install braceexpand==${{ matrix.braceexpand-version }}
+
+      - name: Run short experiment
+        run: |
+          python -c "import hya; from omegaconf import OmegaConf; " \
+            "print(hya.registry.registry.state); " \
+            "assert not hya.imports.is_braceexpand_available(); " \
+            "assert OmegaConf.create({'key': '\${hya.braceexpand:\{1..4\}}).key == ['1', '2', '3', '4']"
+
+
+  torch:
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 10
+    strategy:
+      max-parallel: 8
+      fail-fast: false
+      matrix:
+        os: [ ubuntu-latest ]
+        python-version: [ '3.11' , '3.10', '3.9' ]
         torch-version: [ 2.1.1, 2.0.0, 1.13.1, 1.12.1, 1.11.0, 1.10.0 ]
         exclude:
           - torch-version: 1.10.0

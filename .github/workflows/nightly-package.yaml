@@ -129,7 +129,6 @@ jobs:
             "assert OmegaConf.create({'key': '\${hya.to_tensor:1.42}'}).key.equal(torch.tensor(1.42))"
 
 
-
   omegaconf:
     runs-on: ${{ matrix.os }}
     timeout-minutes: 10

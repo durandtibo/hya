@@ -22,7 +22,7 @@ jobs:
       - name: Install packages
         run: |
           poetry run make config-poetry
-          poetry install --with docs
+          poetry run make install-all
       - name: Build and deploy documentation
         run: |
           cd docs/

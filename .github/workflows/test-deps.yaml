@@ -111,8 +111,8 @@ jobs:
       fail-fast: false
       matrix:
         os: [ ubuntu-latest ]
-        python-version: [ '3.11' , '3.10', '3.9' ]
-        torch-version: [ 2.1.1, 2.0.1, 1.13.1, 1.12.1, 1.11.0, 1.10.0 ]
+        python-version: [ '3.11', '3.10', '3.9' ]
+        torch-version: [ 2.1.2, 2.0.1, 1.13.1, 1.12.1, 1.11.0, 1.10.0 ]
         exclude:
           - torch-version: 1.10.0
             python-version: 3.10
@@ -138,7 +138,7 @@ jobs:
       - name: Install packages
         run: |
           poetry run make config-poetry
-          poetry run make install
+          poetry run make install-all
 
       - name: Install PyTorch
         run: |

@@ -23,7 +23,7 @@ install-all : install-all-deps install-torch
 
 .PHONY : install-all-deps
 install-all-deps :
-	poetry install --no-interaction --all-extras
+	poetry install --no-interaction --all-extras --with docs
 
 .PHONY : install-torch
 install-torch :

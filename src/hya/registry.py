@@ -12,14 +12,15 @@ class ResolverRegistry:
 
     Example usage:
 
-    .. code-block:: pycon
+    ```pycon
+    >>> from hya.registry import ResolverRegistry
+    >>> registry = ResolverRegistry()
+    >>> @registry.register("my_key")
+    ... def my_resolver(value):
+    ...     pass
+    ...
 
-        >>> from hya.registry import ResolverRegistry
-        >>> registry = ResolverRegistry()
-        >>> @registry.register("my_key")
-        ... def my_resolver(value):
-        ...     pass
-        ...
+    ```
     """
 
     def __init__(self) -> None:
@@ -27,33 +28,32 @@ class ResolverRegistry:
 
     @property
     def state(self) -> dict[str, Callable]:
-        r"""``dict``: The state of the registry."""
+        r"""The state of the registry."""
         return self._state
 
     def register(self, key: str, exist_ok: bool = False) -> Callable:
         r"""Registers a resolver to registry with ``key``
 
         Args:
-        ----
-            key (str): Specifies the key used to register the resolver.
-            exist_ok (bool, optional): If ``False``, a ``RuntimeError``
-                is raised if you try to register a new resolver with
-                an existing key. Default: ``False``
+            key: Specifies the key used to register the resolver.
+            exist_ok: If ``False``, a ``RuntimeError`` is raised if
+                you try to register a new resolver with an existing
+                key.
 
         Raises:
-        ------
-            TypeError if the resolver is not callable
-            TypeError if the key already exists and ``exist_ok=False``
+            TypeError: if the resolver is not callable
+            TypeError: if the key already exists and ``exist_ok=False``
 
         Example usage:
 
-        .. code-block:: pycon
+        ```pycon
+        >>> from hya.registry import registry
+        >>> @registry.register("my_key")
+        ... def my_resolver(value):
+        ...     pass
+        ...
 
-            >>> from hya.registry import registry
-            >>> @registry.register("my_key")
-            ... def my_resolver(value):
-            ...     pass
-            ...
+        ```
         """
 
         def wrap(resolver: Callable) -> Callable:
@@ -78,10 +78,11 @@ def register_resolvers() -> None:
 
     Example usage:
 
-    .. code-block:: pycon
+    ```pycon
+    >>> from hya import register_resolvers
+    >>> register_resolvers()
 
-        >>> from hya import register_resolvers
-        >>> register_resolvers()
+    ```
     """
     for key, resolver in registry.state.items():
         if not OmegaConf.has_resolver(key):

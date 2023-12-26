@@ -18,12 +18,10 @@ def braceexpand_resolver(pattern: str) -> Iterator[str]:
     information about the syntax.
 
     Args:
-    ----
-        pattern (str): Specifies the pattern of the brace expansion.
+        pattern: Specifies the pattern of the brace expansion.
 
     Returns:
-    -------
-        list: The list resulting from brace expansion of pattern.
+        The generator resulting from brace expansion of pattern.
     """
     check_braceexpand()
     return braceexpand.braceexpand(pattern)

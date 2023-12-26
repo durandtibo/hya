@@ -19,13 +19,11 @@ def to_tensor_resolver(data: Any) -> torch.Tensor:
     ``torch.Tensor``.
 
     Args:
-    ----
         data: Specifies the data to transform in ``torch.Tensor``.
             This value should be compatible with ``torch.tensor``
 
     Returns:
-    -------
-        ``torch.Tensor``: The input in a ``torch.Tensor`` object.
+        The input in a ``torch.Tensor`` object.
     """
     check_torch()
     return torch.tensor(data)
@@ -36,12 +34,10 @@ def torch_dtype_resolver(target: str) -> torch.dtype:
     representation.
 
     Args:
-    ----
         target: Specifies the target data type.
 
     Returns:
-    -------
-        ``torch.dtype``: The data type.
+        The data type.
     """
     check_torch()
     if not hasattr(torch, target) or not isinstance(getattr(torch, target), torch.dtype):
@@ -55,8 +51,7 @@ def get_dtypes() -> set[torch.dtype]:
     r"""Gets all the data types.
 
     Returns:
-    -------
-        set: The data types.
+        The data types.
     """
     check_torch()
     dtypes = set()

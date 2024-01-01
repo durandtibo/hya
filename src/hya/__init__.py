@@ -1,3 +1,5 @@
+r"""Contain the main features of the ``hya`` package."""
+
 from __future__ import annotations
 
 __all__ = [

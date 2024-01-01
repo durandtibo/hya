@@ -1,3 +1,5 @@
+r"""Implement some resolvers using features from standard libraries."""
+
 from __future__ import annotations
 
 import hashlib
@@ -253,7 +255,7 @@ def min_resolver(*args: Any) -> Any:
 
 @registry.register("hya.mul")
 def mul_resolver(*args: Any) -> Any:
-    r"""Implement a resolver to multiply objects.
+    r"""Return the multiplication of several objects.
 
     Args:
         *args: Specifies the values to multiply.
@@ -282,7 +284,7 @@ def mul_resolver(*args: Any) -> Any:
 
 @registry.register("hya.neg")
 def neg_resolver(number: float) -> float:
-    r"""Implement a resolver to compute the negation (``-number``).
+    r"""Return the negation (``-number``).
 
     Args:
         number: Specifies the number.
@@ -305,7 +307,7 @@ def neg_resolver(number: float) -> float:
 
 @registry.register("hya.path")
 def path_resolver(path: str) -> Path:
-    r"""Implement a resolver to return a path object.
+    r"""Return a path object.
 
     Args:
         path: Specifies the target path.
@@ -328,7 +330,7 @@ def path_resolver(path: str) -> Path:
 
 @registry.register("hya.pi")
 def pi_resolver() -> float:
-    r"""Implement a resolver that returns the value PI.
+    r"""Return the value PI.
 
     Returns:
         The value of PI.
@@ -347,8 +349,8 @@ def pi_resolver() -> float:
 
 
 @registry.register("hya.pow")
-def pow_resolver(value: float | int, exponent: float | int) -> float | int:
-    r"""Implement a resolver to compute a value to a given power.
+def pow_resolver(value: float, exponent: float) -> float:
+    r"""Return a value to a given power.
 
     Args:
         value: The value or base.
@@ -372,7 +374,7 @@ def pow_resolver(value: float | int, exponent: float | int) -> float | int:
 
 @registry.register("hya.sqrt")
 def sqrt_resolver(number: float) -> float:
-    r"""Implement a resolver to compute the square root of a number.
+    r"""Return the square root of a number.
 
     Args:
         number: Specifies the number to compute the
@@ -396,7 +398,7 @@ def sqrt_resolver(number: float) -> float:
 
 @registry.register("hya.sha1")
 def sha1_resolver(obj: Any) -> str:
-    r"""Implement a resolver to compute the SHA-1 hash of an object.
+    r"""Return the SHA-1 hash of the input object.
 
     Args:
         obj: Specifies the object to compute the SHA-1 hash.
@@ -419,7 +421,7 @@ def sha1_resolver(obj: Any) -> str:
 
 @registry.register("hya.sha256")
 def sha256_resolver(obj: Any) -> str:
-    r"""Implement a resolver to compute the SHA-256 hash of an object.
+    r"""Return the SHA-256 hash of the input object.
 
     Args:
         obj: Specifies the object to compute the SHA-256 hash.
@@ -442,7 +444,7 @@ def sha256_resolver(obj: Any) -> str:
 
 @registry.register("hya.sinh")
 def sinh_resolver(number: float) -> float:
-    r"""Implement a resolver to compute the hyperbolic sine.
+    r"""Return the hyperbolic sine.
 
     Args:
         number: Specifies the number.
@@ -465,7 +467,7 @@ def sinh_resolver(number: float) -> float:
 
 @registry.register("hya.sub")
 def sub_resolver(object1: Any, object2: Any) -> Any:
-    r"""Implement a resolver to subtract two objects.
+    r"""Return the subtraction of two objects.
 
     Args:
         object1: The first object.
@@ -489,8 +491,7 @@ def sub_resolver(object1: Any, object2: Any) -> Any:
 
 @registry.register("hya.to_path")
 def to_path_resolver(path: str) -> Path:
-    r"""Implement a resolver to convert the input path to a
-    ``pathlib.Path``.
+    r"""Return the input path into a ``pathlib.Path``.
 
     Args:
         path: Specifies the path to convert. This value should be
@@ -514,7 +515,7 @@ def to_path_resolver(path: str) -> Path:
 
 @registry.register("hya.truediv")
 def truediv_resolver(dividend: float, divisor: float) -> float:
-    r"""Implement a resolver to compute the true division of two numbers.
+    r"""Return the true division of two numbers.
 
     Args:
         dividend: The dividend.

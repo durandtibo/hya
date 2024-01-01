@@ -1,3 +1,8 @@
+r"""Implement PyTorch resolvers.
+
+The resolvers are registered only if ``torch`` is available.
+"""
+
 from __future__ import annotations
 
 from typing import Any
@@ -61,9 +66,8 @@ def torch_dtype_resolver(target: str) -> torch.dtype:
     """
     check_torch()
     if not hasattr(torch, target) or not isinstance(getattr(torch, target), torch.dtype):
-        raise InterpolationResolutionError(
-            f"Incorrect dtype {target}. The available dtypes are {get_dtypes()}"
-        )
+        msg = f"Incorrect dtype {target}. The available dtypes are {get_dtypes()}"
+        raise InterpolationResolutionError(msg)
     return getattr(torch, target)
 
 

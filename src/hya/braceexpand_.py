@@ -1,4 +1,11 @@
-from collections.abc import Iterator
+r"""Implement a braceexpand resolver.
+
+The resolver is registered only if ``braceexpand`` is available.
+"""
+
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
 from unittest.mock import Mock
 
 from hya.imports import check_braceexpand, is_braceexpand_available
@@ -8,6 +15,9 @@ if is_braceexpand_available():
     import braceexpand
 else:  # pragma: no cover
     braceexpand = Mock()
+
+if TYPE_CHECKING:
+    from collections.abc import Iterator
 
 
 def braceexpand_resolver(pattern: str) -> Iterator[str]:

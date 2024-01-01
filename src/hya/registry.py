@@ -1,14 +1,19 @@
+r"""Implement the resolver registry to easily register resolvers."""
+
 from __future__ import annotations
 
 __all__ = ["ResolverRegistry", "registry"]
 
-from collections.abc import Callable
+from typing import TYPE_CHECKING
 
 from omegaconf import OmegaConf
 
+if TYPE_CHECKING:
+    from collections.abc import Callable
+
 
 class ResolverRegistry:
-    r"""Implementation of a resolver registry.
+    r"""Implement a resolver registry.
 
     Example usage:
 
@@ -24,7 +29,7 @@ class ResolverRegistry:
     """
 
     def __init__(self) -> None:
-        self._state: dict[str, Callable] = dict()
+        self._state: dict[str, Callable] = {}
 
     @property
     def state(self) -> dict[str, Callable]:
@@ -32,7 +37,7 @@ class ResolverRegistry:
         return self._state
 
     def register(self, key: str, exist_ok: bool = False) -> Callable:
-        r"""Registers a resolver to registry with ``key``
+        r"""Register a resolver to registry with ``key``.
 
         Args:
             key: Specifies the key used to register the resolver.
@@ -58,12 +63,14 @@ class ResolverRegistry:
 
         def wrap(resolver: Callable) -> Callable:
             if not callable(resolver):
-                raise TypeError(f"Each resolver has to be callable but received {type(resolver)}")
+                msg = f"Each resolver has to be callable but received {type(resolver)}"
+                raise TypeError(msg)
             if key in self._state and not exist_ok:
-                raise RuntimeError(
+                msg = (
                     f"A resolver is already registered for `{key}`. You can use another key "
                     "or set `exist_ok=True` to override the existing resolver"
                 )
+                raise RuntimeError(msg)
             self._state[key] = resolver
             return resolver
 
@@ -74,7 +81,7 @@ registry = ResolverRegistry()
 
 
 def register_resolvers() -> None:
-    r"""Registers the resolvers.
+    r"""Register the resolvers.
 
     Example usage:
 

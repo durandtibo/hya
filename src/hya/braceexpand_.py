@@ -1,4 +1,11 @@
-from collections.abc import Iterator
+r"""Implement a braceexpand resolver.
+
+The resolver is registered only if ``braceexpand`` is available.
+"""
+
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
 from unittest.mock import Mock
 
 from hya.imports import check_braceexpand, is_braceexpand_available
@@ -9,10 +16,12 @@ if is_braceexpand_available():
 else:  # pragma: no cover
     braceexpand = Mock()
 
+if TYPE_CHECKING:
+    from collections.abc import Iterator
+
 
 def braceexpand_resolver(pattern: str) -> Iterator[str]:
-    r"""Implements a resolver to compute a list from a brace expansion of
-    pattern.
+    r"""Return an iterator from a brace expansion of pattern.
 
     Please check https://github.com/trendels/braceexpand for more
     information about the syntax.
@@ -21,7 +30,7 @@ def braceexpand_resolver(pattern: str) -> Iterator[str]:
         pattern: Specifies the pattern of the brace expansion.
 
     Returns:
-        The generator resulting from brace expansion of pattern.
+        The iterator resulting from brace expansion of pattern.
     """
     check_braceexpand()
     return braceexpand.braceexpand(pattern)

@@ -1,3 +1,5 @@
+r"""Implement some utility functions to manage optional dependencies."""
+
 from __future__ import annotations
 
 __all__ = [
@@ -9,7 +11,7 @@ from importlib.util import find_spec
 
 
 def check_braceexpand() -> None:
-    r"""Checks if the ``braceexpand`` package is installed.
+    r"""Check if the ``braceexpand`` package is installed.
 
     Raises:
         RuntimeError: if the ``braceexpand`` package is not installed.
@@ -23,15 +25,16 @@ def check_braceexpand() -> None:
     ```
     """
     if not is_braceexpand_available():
-        raise RuntimeError(
+        msg = (
             "`braceexpand` package is required but not installed. "
             "You can install `braceexpand` package with the command:\n\n"
             "pip install braceexpand\n"
         )
+        raise RuntimeError(msg)
 
 
 def is_braceexpand_available() -> bool:
-    r"""Indicates if the braceexpand package is installed or not.
+    r"""Indicate if the braceexpand package is installed or not.
 
     Returns:
         ``True`` if ``braceexpand`` is installed, otherwise ``False``.
@@ -48,7 +51,7 @@ def is_braceexpand_available() -> bool:
 
 
 def check_torch() -> None:
-    r"""Checks if the ``torch`` package is installed.
+    r"""Check if the ``torch`` package is installed.
 
     Raises:
         RuntimeError: if the ``torch`` package is not installed.
@@ -62,15 +65,16 @@ def check_torch() -> None:
     ```
     """
     if not is_torch_available():
-        raise RuntimeError(
+        msg = (
             "`torch` package is required but not installed. "
             "You can install `torch` package with the command:\n\n"
             "pip install torch\n"
         )
+        raise RuntimeError(msg)
 
 
 def is_torch_available() -> bool:
-    r"""Indicates if the torch package is installed or not.
+    r"""Indicate if the torch package is installed or not.
 
     Returns:
         ``True`` if ``torch`` is installed, otherwise ``False``.

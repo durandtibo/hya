@@ -1,3 +1,8 @@
+r"""Implement PyTorch resolvers.
+
+The resolvers are registered only if ``torch`` is available.
+"""
+
 from __future__ import annotations
 
 from typing import Any
@@ -15,7 +20,7 @@ else:  # pragma: no cover
 
 
 def to_tensor_resolver(data: Any) -> torch.Tensor:
-    r"""Implements a resolver to transform the input to a
+    r"""Implement a resolver to transform the input to a
     ``torch.Tensor``.
 
     Args:
@@ -24,13 +29,23 @@ def to_tensor_resolver(data: Any) -> torch.Tensor:
 
     Returns:
         The input in a ``torch.Tensor`` object.
+
+    Example usage:
+
+    ```pycon
+    >>> from omegaconf import OmegaConf
+    >>> conf = OmegaConf.create({"key": "${hya.to_tensor:[1,2,3,4,5]}"})
+    >>> conf.key
+    tensor([1, 2, 3, 4, 5])
+
+    ```
     """
     check_torch()
     return torch.tensor(data)
 
 
 def torch_dtype_resolver(target: str) -> torch.dtype:
-    r"""Implements a resolver to create a ``torch.dtype`` from its string
+    r"""Implement a resolver to create a ``torch.dtype`` from its string
     representation.
 
     Args:
@@ -38,17 +53,26 @@ def torch_dtype_resolver(target: str) -> torch.dtype:
 
     Returns:
         The data type.
+
+    Example usage:
+
+    ```pycon
+    >>> from omegaconf import OmegaConf
+    >>> conf = OmegaConf.create({"key": "${hya.torch_dtype:float}"})
+    >>> conf.key
+    torch.float32
+
+    ```
     """
     check_torch()
     if not hasattr(torch, target) or not isinstance(getattr(torch, target), torch.dtype):
-        raise InterpolationResolutionError(
-            f"Incorrect dtype {target}. The available dtypes are {get_dtypes()}"
-        )
+        msg = f"Incorrect dtype {target}. The available dtypes are {get_dtypes()}"
+        raise InterpolationResolutionError(msg)
     return getattr(torch, target)
 
 
 def get_dtypes() -> set[torch.dtype]:
-    r"""Gets all the data types.
+    r"""Get all the data types.
 
     Returns:
         The data types.
@@ -62,7 +86,7 @@ def get_dtypes() -> set[torch.dtype]:
     return dtypes
 
 
-if is_torch_available():
+if is_torch_available():  # pragma: no cover
     resolvers = {
         "hya.to_tensor": to_tensor_resolver,
         "hya.torch_dtype": torch_dtype_resolver,

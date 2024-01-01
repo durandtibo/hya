@@ -2,8 +2,8 @@ from __future__ import annotations
 
 from unittest.mock import Mock, NonCallableMock
 
+import pytest
 from omegaconf import OmegaConf
-from pytest import mark, raises
 
 from hya.registry import ResolverRegistry, register_resolvers, registry
 
@@ -24,14 +24,14 @@ def test_resolver_registry_register() -> None:
 
 def test_resolver_registry_register_not_callable() -> None:
     register = ResolverRegistry()
-    with raises(TypeError, match="Each resolver has to be callable but received"):
+    with pytest.raises(TypeError, match="Each resolver has to be callable but received"):
         register.register("key")(NonCallableMock())
 
 
 def test_resolver_registry_register_duplicate_exist_ok_false() -> None:
     register = ResolverRegistry()
     register.register("key")(Mock())
-    with raises(RuntimeError, match="A resolver is already registered for `key`."):
+    with pytest.raises(RuntimeError, match="A resolver is already registered for `key`."):
         register.register("key")(Mock())
 
 
@@ -46,7 +46,7 @@ def test_resolver_registry_register_duplicate_exist_ok_true() -> None:
 ########################################
 
 
-@mark.parametrize("name", registry.state.keys())
+@pytest.mark.parametrize("name", registry.state.keys())
 def test_register_resolvers(name: str) -> None:
     register_resolvers()
     assert OmegaConf.has_resolver(name)

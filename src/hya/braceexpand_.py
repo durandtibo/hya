@@ -11,7 +11,7 @@ else:  # pragma: no cover
 
 
 def braceexpand_resolver(pattern: str) -> Iterator[str]:
-    r"""Implements a resolver to compute a list from a brace expansion of
+    r"""Implement a resolver to compute a list from a brace expansion of
     pattern.
 
     Please check https://github.com/trendels/braceexpand for more
@@ -22,6 +22,16 @@ def braceexpand_resolver(pattern: str) -> Iterator[str]:
 
     Returns:
         The generator resulting from brace expansion of pattern.
+
+    Example usage:
+
+    ```pycon
+    # >>> from omegaconf import OmegaConf
+    # >>> conf = OmegaConf.create({"key": "${hya.braceexpand:{1..4}}"})
+    # >>> list(conf.key)
+    # [1, 2, 3, 4]
+
+    ```
     """
     check_braceexpand()
     return braceexpand.braceexpand(pattern)

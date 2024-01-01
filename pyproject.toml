@@ -46,7 +46,7 @@ mkdocstrings = { extras = ["python"], version = "^0.24" }
 
 [tool.poetry.group.dev.dependencies]
 black = "^23.12"
-coverage = { extras = ["toml"], version = "^7.3" }
+coverage = { extras = ["toml"], version = "^7.4" }
 docformatter = { extras = ["tomli"], version = "^1.7" }
 pre-commit = "^3.6"
 pygments = "^2.17"
@@ -100,33 +100,98 @@ wrap-descriptions = 72
 syntax = "google"
 
 [tool.ruff]
+# List of rules: https://docs.astral.sh/ruff/rules/
 select = [
-    "A",   # builtins
+    "A", # builtins
     "ANN", # annotations
-    "B",   # bugbear
-    "BLE", # blind-except
-    "E",   # pycodestyle (Error)
-    "F",   # pyflakes
-    "N",   # naming
+    "B", # bugbear
+    "BLE", # flake8-blind-except
+    "C4", # flake8-comprehensions
+    "D", # pydocstyle
+    "E", # pycodestyle (Error)
+    "EM", # flake8-errmsg
+    "F", # pyflakes
+    "FA", # flake8-future-annotations
+    "FURB", # refurb
+    "ICN", # flake8-import-conventions
+    "INP", # flake8-no-pep420
+    "ISC", # flake8-implicit-str-concat
+    "LOG", # logging
+    "N", # naming
+    "PD", # pandas-vet
+    "PERF", # Perflint
+    "PGH", # pygrep-hooks
+    "PIE", # flake8-pie
+    "PL", # Pylint
+    "PT", # flake8-pytest-style
     "PTH", # pathlib
-    "UP",  # pyupgrade
-    "W",   # pycodestyle (Warning)
-#    "NPY", # NumPy-specific rules
+    "PYI", # flake8-pyi
+    "Q", # flake8-quotes
+    "RET", # flake8-return
+    "RSE", # flake8-raise
+    "SIM", # flake8-simplify
+    "T20", # flake8-print
+    "TCH", # flake8-type-checking
+    "TD", # flake8-todos
+    "TID", # flake8-tidy-imports
+    "TRY", # tryceratops
+    "UP", # pyupgrade
+    "W", # pycodestyle (Warning)
 ]
 ignore = [
-    "A003",    # Class attribute `{name}` is shadowing a python builtin
-    "ANN002",  # Missing type annotation for `*args`
-    "ANN003",  # Missing type annotation for `**kwargs`
-    "ANN101",  # Missing type annotation for `self` in method
-    "ANN102",  # Missing type annotation for `cls` in classmethod
-    "ANN401",  # Dynamically typed expressions (typing.Any) are disallowed.
-    "B905",    # `zip()` without an explicit strict= parameter set. The `strict=` argument was added in Python 3.10
-    "E501",    # Line lengths are recommended to be no greater than 79 characters.
-    "W505",    # Doc line too long
+    "A003", # Class attribute `{name}` is shadowing a python builtin
+    "ANN101", # Missing type annotation for `self` in method
+    "ANN102", # Missing type annotation for `cls` in classmethod
+    "ANN401", # Dynamically typed expressions (typing.Any) are disallowed.
+    "B905", # `zip()` without an explicit strict= parameter set. The `strict=` argument was added in Python 3.10
+    "E501", # Line lengths are recommended to be no greater than 79 characters.
+    "W505", # Doc line too long
+    "PLR0913", # Too many arguments in function definition (8 > 5)
+
+    # The following rules are ignored because they conflict with another library like docformatter.
+    "D102", # Missing docstring in public method
+    "D105", # Missing docstring in magic method
+    "D107", # Missing docstring in `__init__`
+    "D205", # 1 blank line required between summary line and description
+    "D209", # Multi-line docstring closing quotes should be on a separate line
 ]
 
 # Allow autofix for all enabled rules (when `--fix`) is provided.
-fixable = ["A", "ANN", "B", "E", "F", "PTH", "W"]
+fixable = [
+    "A",
+    "ANN",
+    "B",
+    "BLE",
+    "C4",
+    "D",
+    "E",
+    "EM",
+    "F",
+    "FA",
+    "FURB",
+    "ICN",
+    "INP",
+    "ISC",
+    "LOG",
+    "PD",
+    "PERF",
+    "PGH",
+    "PIE",
+    "PL",
+    "PT",
+    "PTH",
+    "PYI",
+    "Q",
+    "RET",
+    "RSE",
+    "SIM",
+    "T20",
+    "TCH",
+    "TD",
+    "TID",
+    "TRY",
+    "W",
+]
 unfixable = []
 
 exclude = [
@@ -155,10 +220,24 @@ line-length = 100
 target-version = "py39"
 src = ["src"]
 
+[tool.ruff.per-file-ignores]
+# Ignore all directories named `tests`.
+"tests/**" = [
+    "D", # pydocstyle
+    "PL", # Pylint
+]
+
 [tool.ruff.mccabe]
 max-complexity = 10
 
 [tool.ruff.pydocstyle]
+convention = "google"
+
+[tool.ruff.lint]
+# Enable on top of the Google convention.
+extend-select = ["D400", "D401", "D404"]
+
+[tool.ruff.lint.pydocstyle]
 convention = "google"
 
 [tool.ruff.pycodestyle]

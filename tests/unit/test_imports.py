@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from unittest.mock import patch
 
-from pytest import raises
+import pytest
 
 from hya.imports import (
     check_braceexpand,
@@ -22,9 +22,10 @@ def test_check_braceexpand_with_package() -> None:
 
 
 def test_check_braceexpand_without_package() -> None:
-    with patch("hya.imports.is_braceexpand_available", lambda *args: False):
-        with raises(RuntimeError, match="`braceexpand` package is required but not installed."):
-            check_braceexpand()
+    with patch("hya.imports.is_braceexpand_available", lambda *args: False), pytest.raises(
+        RuntimeError, match="`braceexpand` package is required but not installed."
+    ):
+        check_braceexpand()
 
 
 def test_is_braceexpand_available() -> None:
@@ -42,9 +43,10 @@ def test_check_torch_with_package() -> None:
 
 
 def test_check_torch_without_package() -> None:
-    with patch("hya.imports.is_torch_available", lambda *args: False):
-        with raises(RuntimeError, match="`torch` package is required but not installed."):
-            check_torch()
+    with patch("hya.imports.is_torch_available", lambda *args: False), pytest.raises(
+        RuntimeError, match="`torch` package is required but not installed."
+    ):
+        check_torch()
 
 
 def test_is_torch_available() -> None:

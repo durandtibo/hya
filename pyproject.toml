@@ -71,7 +71,7 @@ source = ["hya"]
 show_missing = true
 exclude_lines = [
     "pragma: no cover",
-    "if is_torch_available()",
+    "if TYPE_CHECKING:"
 ]
 
 [tool.pytest.ini_options]

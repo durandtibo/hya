@@ -86,7 +86,7 @@ def get_dtypes() -> set[torch.dtype]:
     return dtypes
 
 
-if is_torch_available():
+if is_torch_available():  # pragma: no cover
     resolvers = {
         "hya.to_tensor": to_tensor_resolver,
         "hya.torch_dtype": torch_dtype_resolver,

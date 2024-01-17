@@ -396,29 +396,6 @@ def sqrt_resolver(number: float) -> float:
     return math.sqrt(number)
 
 
-@registry.register("hya.sha1")
-def sha1_resolver(obj: Any) -> str:
-    r"""Return the SHA-1 hash of the input object.
-
-    Args:
-        obj: Specifies the object to compute the SHA-1 hash.
-
-    Returns:
-        The SHA-1 hash of the object.
-
-    Example usage:
-
-    ```pycon
-    >>> from omegaconf import OmegaConf
-    >>> conf = OmegaConf.create({"key": "${hya.sha1:mystring}"})
-    >>> conf.key
-    9ce3ea4d6fac2165933b3971e6d5a13753c7d878
-
-    ```
-    """
-    return hashlib.sha1(bytes(str(obj), "utf-8")).hexdigest()
-
-
 @registry.register("hya.sha256")
 def sha256_resolver(obj: Any) -> str:
     r"""Return the SHA-256 hash of the input object.

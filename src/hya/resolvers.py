@@ -410,9 +410,9 @@ def sha256_resolver(obj: Any) -> str:
 
     ```pycon
     >>> from omegaconf import OmegaConf
-    >>> conf = OmegaConf.create({"key": "${hya.sha1:mystring}"})
+    >>> conf = OmegaConf.create({"key": "${hya.sha256:mystring}"})
     >>> conf.key
-    9ce3ea4d6fac2165933b3971e6d5a13753c7d878
+    bd3ff47540b31e62d4ca6b07794e5a886b0f655fc322730f26ecd65cc7dd5c90
 
     ```
     """

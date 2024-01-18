@@ -3,7 +3,11 @@ r"""Implement some utility functions to manage optional dependencies."""
 from __future__ import annotations
 
 __all__ = [
+    "check_braceexpand",
+    "check_numpy",
     "check_torch",
+    "is_braceexpand_available",
+    "is_numpy_available",
     "is_torch_available",
 ]
 
@@ -48,6 +52,46 @@ def is_braceexpand_available() -> bool:
     ```
     """
     return find_spec("braceexpand") is not None
+
+
+def check_numpy() -> None:
+    r"""Check if the ``numpy`` package is installed.
+
+    Raises:
+        RuntimeError: if the ``numpy`` package is not installed.
+
+    Example usage:
+
+    ```pycon
+    >>> from hya.imports import check_numpy
+    >>> check_numpy()
+
+    ```
+    """
+    if not is_numpy_available():
+        msg = (
+            "`numpy` package is required but not installed. "
+            "You can install `numpy` package with the command:\n\n"
+            "pip install numpy\n"
+        )
+        raise RuntimeError(msg)
+
+
+def is_numpy_available() -> bool:
+    r"""Indicate if the numpy package is installed or not.
+
+    Returns:
+        ``True`` if ``numpy`` is installed, otherwise ``False``.
+
+    Example usage:
+
+    ```pycon
+    >>> from hya.imports import is_numpy_available
+    >>> is_numpy_available()
+
+    ```
+    """
+    return find_spec("numpy") is not None
 
 
 def check_torch() -> None:

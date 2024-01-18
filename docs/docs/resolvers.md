@@ -122,10 +122,6 @@ import math
 value = math.sqrt(number)
 ```
 
-### `hya.sha1`
-
-This resolver computes the SHA-1 hash of an object.
-
 ### `hya.sha256`
 
 This resolver computes the SHA-256 hash of an object.
@@ -168,13 +164,13 @@ value = dividend / divisor
 
 You need to install PyTorch to use these resolvers.
 
-### `hya.to_tensor`
+### `hya.torch.tensor`
 
 This resolver transforms the input to a ``torch.Tensor``.
 The following config
 
 ```yaml
-value: ${hya.to_tensor:[1,2,3]}
+value: ${hya.torch.tensor:[1,2,3]}
 ```
 
 is equivalent to:

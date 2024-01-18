@@ -58,9 +58,10 @@ def check_torch_resolvers() -> None:
     if not is_torch_available():
         return
     logger.info("Checking torch resolvers...")
-    assert OmegaConf.create({"key": "${hya.to_tensor:[1, 2, 3]}"}).key.equal(
+    assert OmegaConf.create({"key": "${hya.torch.tensor:[1, 2, 3]}"}).key.equal(
         torch.tensor([1, 2, 3])
     )
+    assert OmegaConf.create({"key": "${hya.torch.dtype:float}"}).key == torch.float
 
 
 def main() -> None:

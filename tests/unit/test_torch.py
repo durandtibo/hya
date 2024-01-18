@@ -23,41 +23,41 @@ def _register() -> None:
 
 @torch_available
 def test_to_tensor_resolver_number() -> None:
-    assert OmegaConf.create({"key": "${hya.to_tensor:1.42}"}).key.equal(torch.tensor(1.42))
+    assert OmegaConf.create({"key": "${hya.torch.tensor:1.42}"}).key.equal(torch.tensor(1.42))
 
 
 @torch_available
 def test_to_tensor_resolver_list() -> None:
-    assert OmegaConf.create({"key": "${hya.to_tensor:[1, 2, 3]}"}).key.equal(
+    assert OmegaConf.create({"key": "${hya.torch.tensor:[1, 2, 3]}"}).key.equal(
         torch.tensor([1, 2, 3])
     )
 
 
 @torch_available
 def test_torch_dtype_resolver_float() -> None:
-    assert OmegaConf.create({"key": "${hya.torch_dtype:float}"}).key == torch.float
+    assert OmegaConf.create({"key": "${hya.torch.dtype:float}"}).key == torch.float
 
 
 @torch_available
 def test_torch_dtype_resolver_long() -> None:
-    assert OmegaConf.create({"key": "${hya.torch_dtype:long}"}).key == torch.long
+    assert OmegaConf.create({"key": "${hya.torch.dtype:long}"}).key == torch.long
 
 
 @torch_available
 def test_torch_dtype_resolver_bool() -> None:
-    assert OmegaConf.create({"key": "${hya.torch_dtype:bool}"}).key == torch.bool
+    assert OmegaConf.create({"key": "${hya.torch.dtype:bool}"}).key == torch.bool
 
 
 @torch_available
 def test_torch_dtype_resolver_incorrect_attribute() -> None:
     with pytest.raises(InterpolationResolutionError, match="Incorrect dtype bool32."):
-        OmegaConf.create({"key": "${hya.torch_dtype:bool32}"}).key  # noqa: B018
+        OmegaConf.create({"key": "${hya.torch.dtype:bool32}"}).key  # noqa: B018
 
 
 @torch_available
 def test_torch_dtype_resolver_incorrect_dtype() -> None:
     with pytest.raises(InterpolationResolutionError, match="Incorrect dtype ones."):
-        OmegaConf.create({"key": "${hya.torch_dtype:ones}"}).key  # noqa: B018
+        OmegaConf.create({"key": "${hya.torch.dtype:ones}"}).key  # noqa: B018
 
 
 @torch_available

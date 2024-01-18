@@ -36,7 +36,7 @@ def to_tensor_resolver(data: Any) -> torch.Tensor:
     >>> import hya
     >>> from omegaconf import OmegaConf
     >>> hya.register_resolvers()
-    >>> conf = OmegaConf.create({"key": "${hya.to_tensor:[1,2,3,4,5]}"})
+    >>> conf = OmegaConf.create({"key": "${hya.torch.tensor:[1,2,3,4,5]}"})
     >>> conf.key
     tensor([1, 2, 3, 4, 5])
 
@@ -62,7 +62,7 @@ def torch_dtype_resolver(target: str) -> torch.dtype:
     >>> import hya
     >>> from omegaconf import OmegaConf
     >>> hya.register_resolvers()
-    >>> conf = OmegaConf.create({"key": "${hya.torch_dtype:float}"})
+    >>> conf = OmegaConf.create({"key": "${hya.torch.dtype:float}"})
     >>> conf.key
     torch.float32
 
@@ -92,8 +92,8 @@ def get_dtypes() -> set[torch.dtype]:
 
 if is_torch_available():  # pragma: no cover
     resolvers = {
-        "hya.to_tensor": to_tensor_resolver,
-        "hya.torch_dtype": torch_dtype_resolver,
+        "hya.torch.tensor": to_tensor_resolver,
+        "hya.torch.dtype": torch_dtype_resolver,
     }
     for name, resolver in resolvers.items():
         registry.register(name)(resolver)

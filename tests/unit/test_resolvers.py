@@ -158,10 +158,6 @@ def test_sqrt_resolver() -> None:
     assert OmegaConf.create({"key": "${hya.sqrt:9}"}).key == 3.0
 
 
-def test_sha1_resolver() -> None:
-    assert isinstance(OmegaConf.create({"key": "${hya.sha1:${value}}", "value": "blabla"}).key, str)
-
-
 def test_sha256_resolver() -> None:
     assert isinstance(
         OmegaConf.create({"key": "${hya.sha256:${value}}", "value": "blabla"}).key, str

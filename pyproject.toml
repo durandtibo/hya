@@ -35,10 +35,11 @@ omegaconf = ">=2.1,<3.0"
 
 # Optional dependencies
 braceexpand = { version = ">=0.1.7,<0.2.0", optional = true}
+numpy = { version = ">=1.21,<2.0", optional = true }
 torch = { version = ">=1.10,<3.0", optional = true, python = ">=3.9,<3.12"}
 
 [tool.poetry.extras]
-all = ["braceexpand", "torch"]
+all = ["braceexpand", "numpy", "torch"]
 
 [tool.poetry.group.docs.dependencies]
 mkdocs-material = "^9.5"
@@ -53,7 +54,7 @@ pygments = "^2.17"
 pytest = "^7.4"
 pytest-cov = "^4.1"
 pytest-timeout = "^2.2"
-ruff = ">=0.1.9,<1.0"
+ruff = ">=0.1.13,<1.0"
 xdoctest = "^1.1"
 
 [build-system]
@@ -84,7 +85,7 @@ addopts = "--color yes --durations 10 -rf"
 
 [tool.black]
 line-length = 100
-target-version = ["py39", "py310", "py311"]
+target-version = ["py39", "py310", "py311", "py312"]
 include = '\.pyi?$'
 
 [tool.pylint.FORMAT]
@@ -129,6 +130,7 @@ select = [
     "Q", # flake8-quotes
     "RET", # flake8-return
     "RSE", # flake8-raise
+    "S", # flake8-bandit
     "SIM", # flake8-simplify
     "T20", # flake8-print
     "TCH", # flake8-type-checking
@@ -147,6 +149,7 @@ ignore = [
     "E501", # Line lengths are recommended to be no greater than 79 characters.
     "W505", # Doc line too long
     "PLR0913", # Too many arguments in function definition (8 > 5)
+    "PLR2004", # Magic value used in comparison, consider replacing 0.0 with a constant variable
 
     # The following rules are ignored because they conflict with another library like docformatter.
     "D102", # Missing docstring in public method
@@ -184,6 +187,7 @@ fixable = [
     "Q",
     "RET",
     "RSE",
+    "S",
     "SIM",
     "T20",
     "TCH",
@@ -225,6 +229,7 @@ src = ["src"]
 "tests/**" = [
     "D", # pydocstyle
     "PL", # Pylint
+    "S101", # flake8-bandit
 ]
 
 [tool.ruff.mccabe]
@@ -247,3 +252,7 @@ max-doc-length = 72
 force-sort-within-sections = true
 combine-as-imports = true
 known-first-party = ["src"]
+
+[tool.ruff.flake8-import-conventions]
+[tool.ruff.flake8-import-conventions.aliases]
+numpy = "np"

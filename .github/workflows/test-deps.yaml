@@ -103,6 +103,61 @@ jobs:
           poetry run make unit-test-cov
 
 
+  numpy:
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 10
+    strategy:
+      max-parallel: 8
+      fail-fast: false
+      matrix:
+        os: [ ubuntu-latest ]
+        python-version: [ '3.12', '3.11', '3.10', '3.9' ]
+        numpy-version: [ 1.26.2, 1.25.2, 1.24.3, 1.23.5, 1.22.4, 1.21.6 ]
+        exclude:
+          - numpy-version: 1.21.6
+            python-version: '3.11'
+          - numpy-version: 1.21.6
+            python-version: '3.12'
+          - numpy-version: 1.22.4
+            python-version: '3.12'
+          - numpy-version: 1.23.5
+            python-version: '3.12'
+          - numpy-version: 1.24.3
+            python-version: '3.12'
+          - numpy-version: 1.25.2
+            python-version: '3.12'
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install Poetry
+        uses: snok/install-poetry@v1
+
+      - name: Install packages
+        run: |
+          poetry run make config-poetry
+          poetry run make install
+
+      - name: Install NumPy
+        run: |
+          poetry run pip install numpy==${{ matrix.numpy-version }}
+
+      - name: Show installed packages
+        run: |
+          poetry run poetry show
+          poetry run poetry show --tree
+
+      - name: Run unit tests
+        run: |
+          poetry run make unit-test-cov
+
+
   torch:
     runs-on: ${{ matrix.os }}
     timeout-minutes: 10

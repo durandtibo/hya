@@ -6,8 +6,10 @@ import pytest
 
 from hya.imports import (
     check_braceexpand,
+    check_numpy,
     check_torch,
     is_braceexpand_available,
+    is_numpy_available,
     is_torch_available,
 )
 
@@ -30,6 +32,27 @@ def test_check_braceexpand_without_package() -> None:
 
 def test_is_braceexpand_available() -> None:
     assert isinstance(is_braceexpand_available(), bool)
+
+
+#################
+#     numpy     #
+#################
+
+
+def test_check_numpy_with_package() -> None:
+    with patch("hya.imports.is_numpy_available", lambda *args: True):
+        check_numpy()
+
+
+def test_check_numpy_without_package() -> None:
+    with patch("hya.imports.is_numpy_available", lambda *args: False), pytest.raises(
+        RuntimeError, match="`numpy` package is required but not installed."
+    ):
+        check_numpy()
+
+
+def test_is_numpy_available() -> None:
+    assert isinstance(is_numpy_available(), bool)
 
 
 #################

@@ -17,10 +17,10 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
 
@@ -40,10 +40,6 @@ jobs:
         run: |
           poetry run poetry show
           poetry run poetry show --tree
-
-      - name: Format
-        run: |
-          poetry run make format
 
       - name: Lint
         run: |
@@ -66,10 +62,10 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
 
@@ -89,10 +85,6 @@ jobs:
         run: |
           poetry run poetry show
           poetry run poetry show --tree
-
-      - name: Format
-        run: |
-          poetry run make format
 
       - name: Lint
         run: |
@@ -129,10 +121,10 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
 
@@ -180,10 +172,10 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
 
@@ -203,10 +195,6 @@ jobs:
         run: |
           poetry run poetry show
           poetry run poetry show --tree
-
-      - name: Format
-        run: |
-          poetry run make format
 
       - name: Lint
         run: |

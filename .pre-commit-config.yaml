@@ -44,7 +44,7 @@ repos:
     rev: 24.1.1
     hooks:
       - id: black
-        language_version: python3.10
+        language_version: python3.12
   - repo: https://github.com/adamchainz/blacken-docs
     rev: "1.16.0"
     hooks:
@@ -52,7 +52,7 @@ repos:
         additional_dependencies:
           - black>=24.1.1
   - repo: https://github.com/charliermarsh/ruff-pre-commit
-    rev: v0.1.14
+    rev: v0.2.0
     hooks:
       - id: ruff
         args: [--fix]

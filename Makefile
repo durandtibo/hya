@@ -29,7 +29,7 @@ install-all-deps :
 install-torch :
 	@if python -c "import torch" &> /dev/null; then\
         echo "Installing pytorch with pip because of the pytorch/poetry issue (https://github.com/pytorch/pytorch/issues/100974)";\
-        pip install --upgrade "torch>=2.1.1";\
+        pip install --upgrade "torch>=2.2.0";\
     fi
 
 .PHONY : update

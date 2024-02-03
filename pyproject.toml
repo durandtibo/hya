@@ -51,7 +51,7 @@ coverage = { extras = ["toml"], version = "^7.4" }
 docformatter = { extras = ["tomli"], version = "^1.7" }
 pre-commit = "^3.6"
 pygments = "^2.17"
-pytest = "^7.4"
+pytest = "^8.0"
 pytest-cov = "^4.1"
 pytest-timeout = "^2.2"
 ruff = ">=0.2.0,<1.0"

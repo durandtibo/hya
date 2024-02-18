@@ -37,6 +37,7 @@ jobs:
         if: github.repository == 'durandtibo/hya' && (github.event_name == 'push' || github.event_name == 'pull_request')
         uses: codecov/codecov-action@v3
         with:
+          token: ${{ secrets.CODECOV_TOKEN }}
           files: ./coverage.xml
           # Ignore codecov failures as the codecov server is not
           # very reliable but we don't want to report a failure

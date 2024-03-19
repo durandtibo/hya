@@ -1662,4 +1662,4 @@ all = ["braceexpand", "numpy", "torch"]
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.9,<3.13"
-content-hash = "a4a185053f49b3223aa53ed243c557acc9269fae1622573bd7322939b65051b9"
+content-hash = "f810dfb035c6c51dd9b5ee73ae36366a0b92fb0864d28d521ddca6579fc42669"

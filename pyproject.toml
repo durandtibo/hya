@@ -46,12 +46,12 @@ mkdocs-material = "^9.5"
 mkdocstrings = { extras = ["python"], version = "^0.24" }
 
 [tool.poetry.group.dev.dependencies]
-black = "^24.2"
+black = "^24.3"
 coverage = { extras = ["toml"], version = "^7.4" }
 docformatter = { extras = ["tomli"], version = "^1.7" }
 pre-commit = "^3.6"
 pygments = "^2.17"
-pytest = "^8.0"
+pytest = "^8.1"
 pytest-cov = "^4.1"
 pytest-timeout = "^2.3"
 ruff = ">=0.3,<1.0"
@@ -102,9 +102,10 @@ syntax = "google"
 
 [tool.ruff]
 # List of rules: https://docs.astral.sh/ruff/rules/
-select = [
+lint.select = [
     "A", # builtins
     "ANN", # annotations
+    "ARG", # flake8-unused-arguments
     "B", # bugbear
     "BLE", # flake8-blind-except
     "C4", # flake8-comprehensions
@@ -140,7 +141,7 @@ select = [
     "UP", # pyupgrade
     "W", # pycodestyle (Warning)
 ]
-ignore = [
+lint.ignore = [
     "A003", # Class attribute `{name}` is shadowing a python builtin
     "ANN101", # Missing type annotation for `self` in method
     "ANN102", # Missing type annotation for `cls` in classmethod
@@ -160,9 +161,10 @@ ignore = [
 ]
 
 # Allow autofix for all enabled rules (when `--fix`) is provided.
-fixable = [
+lint.fixable = [
     "A",
     "ANN",
+    "ARG",
     "B",
     "BLE",
     "C4",
@@ -196,9 +198,9 @@ fixable = [
     "TRY",
     "W",
 ]
-unfixable = []
+lint.unfixable = []
 
-exclude = [
+lint.exclude = [
     ".bzr",
     ".direnv",
     ".eggs",
@@ -221,7 +223,7 @@ exclude = [
 ]
 
 # Enable on top of the Google convention.
-extend-select = ["D400", "D401", "D404"]
+lint.extend-select = ["D400", "D401", "D404"]
 
 line-length = 100
 target-version = "py39"

@@ -5,7 +5,7 @@ default_stages: [ commit ]
 
 repos:
   - repo: https://github.com/asottile/pyupgrade
-    rev: v3.15.1
+    rev: v3.15.2
     hooks:
       - id: pyupgrade
         args: [--py39-plus]
@@ -27,7 +27,7 @@ repos:
         name: isort (pyi)
         types: [ pyi ]
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.5.0
+    rev: v4.6.0
     hooks:
       - id: end-of-file-fixer
       - id: trailing-whitespace
@@ -52,7 +52,7 @@ repos:
         additional_dependencies:
           - black>=24.1.1
   - repo: https://github.com/charliermarsh/ruff-pre-commit
-    rev: v0.3.3
+    rev: v0.3.5
     hooks:
       - id: ruff
         args: [--fix]

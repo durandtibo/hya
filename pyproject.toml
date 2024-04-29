@@ -46,7 +46,7 @@ all = ["braceexpand", "numpy", "torch"]
 
 [tool.poetry.group.docs.dependencies]
 mkdocs-material = "^9.5"
-mkdocstrings = { extras = ["python"], version = "^0.24" }
+mkdocstrings = { extras = ["python"], version = ">=0.24,<0.26" }
 
 [tool.poetry.group.dev.dependencies]
 black = "^24.4"

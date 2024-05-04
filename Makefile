@@ -5,6 +5,9 @@ TESTS=tests
 UNIT_TESTS=tests/unit
 INTEGRATION_TESTS=tests/integration
 
+LAST_GIT_TAG := $(shell git tag --sort=taggerdate | grep -o 'v.*' | tail -1)
+DOC_TAG := $(shell echo $(LAST_GIT_TAG) | cut -c 2- | awk -F \. {'print $$1"."$$2'})
+
 .PHONY : conda
 conda :
 	conda env create -f environment.yaml --force
@@ -60,3 +63,14 @@ unit-test-cov :
 publish-pypi :
 	poetry config pypi-token.pypi ${PYPI_TOKEN}
 	poetry publish --build
+
+.PHONY : publish-doc-dev
+publish-doc-dev :
+	-mike delete --config-file docs/mkdocs.yml main  # delete previous version if it exists
+	mike deploy --config-file docs/mkdocs.yml --push --update-aliases main dev
+
+.PHONY : publish-doc-latest
+publish-doc-latest :
+	-mike delete --config-file docs/mkdocs.yml $(DOC_TAG) 	# delete previous version if it exists
+	mike deploy --config-file docs/mkdocs.yml --push --update-aliases $(DOC_TAG) latest;
+	mike set-default --config-file docs/mkdocs.yml --push --allow-empty latest

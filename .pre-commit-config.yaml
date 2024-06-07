@@ -52,7 +52,7 @@ repos:
         additional_dependencies:
           - black>=24.4.2
   - repo: https://github.com/charliermarsh/ruff-pre-commit
-    rev: v0.4.3
+    rev: v0.4.8
     hooks:
       - id: ruff
         types_or: [ python, pyi, jupyter ]

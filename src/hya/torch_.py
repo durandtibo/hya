@@ -33,6 +33,7 @@ def to_tensor_resolver(data: Any) -> torch.Tensor:
     Example usage:
 
     ```pycon
+
     >>> import hya
     >>> from omegaconf import OmegaConf
     >>> hya.register_resolvers()
@@ -59,6 +60,7 @@ def torch_dtype_resolver(target: str) -> torch.dtype:
     Example usage:
 
     ```pycon
+
     >>> import hya
     >>> from omegaconf import OmegaConf
     >>> hya.register_resolvers()

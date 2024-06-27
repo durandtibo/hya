@@ -19,7 +19,7 @@ def add_resolver(*args: Any) -> Any:
     r"""Return the addition of several objects.
 
     Args:
-        *args: Specifies the values to add.
+        *args: The values to add.
 
     Returns:
         ``arg1 + arg2 + arg3 + ... + argN``
@@ -27,6 +27,7 @@ def add_resolver(*args: Any) -> Any:
     Example usage:
 
     ```pycon
+
     >>> import hya
     >>> from omegaconf import OmegaConf
     >>> hya.register_resolvers()
@@ -50,7 +51,7 @@ def asinh_resolver(number: float) -> float:
     r"""Return the inverse hyperbolic sine.
 
     Args:
-        number: Specifies the number.
+        number: The number to transform.
 
     Returns:
         The inverse hyperbolic sine of the input number.
@@ -58,6 +59,7 @@ def asinh_resolver(number: float) -> float:
     Example usage:
 
     ```pycon
+
     >>> import hya
     >>> from omegaconf import OmegaConf
     >>> hya.register_resolvers()
@@ -84,6 +86,7 @@ def ceildiv_resolver(dividend: float, divisor: float) -> int:
     Example usage:
 
     ```pycon
+
     >>> import hya
     >>> from omegaconf import OmegaConf
     >>> hya.register_resolvers()
@@ -101,7 +104,7 @@ def exp_resolver(number: float) -> float:
     r"""Return the exponential value of the input.
 
     Args:
-        number: Specifies the number.
+        number: The number to transform.
 
     Returns:
         The exponential value of the input.
@@ -109,6 +112,7 @@ def exp_resolver(number: float) -> float:
     Example usage:
 
     ```pycon
+
     >>> import hya
     >>> from omegaconf import OmegaConf
     >>> hya.register_resolvers()
@@ -135,6 +139,7 @@ def floordiv_resolver(dividend: float, divisor: float) -> int:
     Example usage:
 
     ```pycon
+
     >>> import hya
     >>> from omegaconf import OmegaConf
     >>> hya.register_resolvers()
@@ -152,7 +157,7 @@ def len_resolver(obj: Any) -> int:
     r"""Return the length of an object.
 
     Args:
-        obj: Specifies the object.
+        obj: The object.
 
     Returns:
         The length of the object.
@@ -160,6 +165,7 @@ def len_resolver(obj: Any) -> int:
     Example usage:
 
     ```pycon
+
     >>> import hya
     >>> from omegaconf import OmegaConf
     >>> hya.register_resolvers()
@@ -177,8 +183,8 @@ def log_resolver(number: float, base: float = math.e) -> float:
     r"""Compute logarithm of the input value to the given base.
 
     Args:
-        number: Specifies the number.
-        base: Specifies the base.
+        number: The number to transform.
+        base: The base.
 
     Returns:
         The logarithm of the input value to the given base.
@@ -186,6 +192,7 @@ def log_resolver(number: float, base: float = math.e) -> float:
     Example usage:
 
     ```pycon
+
     >>> import hya
     >>> from omegaconf import OmegaConf
     >>> hya.register_resolvers()
@@ -203,7 +210,7 @@ def log10_resolver(number: float) -> float:
     r"""Compute base 10 logarithm of the input value.
 
     Args:
-        number: Specifies the number.
+        number: The number to transform.
 
     Returns:
         The base 10 logarithm of the input value.
@@ -211,6 +218,7 @@ def log10_resolver(number: float) -> float:
     Example usage:
 
     ```pycon
+
     >>> import hya
     >>> from omegaconf import OmegaConf
     >>> hya.register_resolvers()
@@ -228,7 +236,7 @@ def max_resolver(*args: Any) -> Any:
     r"""Return the maximum between multiple values.
 
     Args:
-        *args: Specifies the values.
+        *args: The values.
 
     Returns:
         ``max(arg1, arg2, arg3, ..., argN)``
@@ -236,6 +244,7 @@ def max_resolver(*args: Any) -> Any:
     Example usage:
 
     ```pycon
+
     >>> import hya
     >>> from omegaconf import OmegaConf
     >>> hya.register_resolvers()
@@ -253,7 +262,7 @@ def min_resolver(*args: Any) -> Any:
     r"""Return the minimum between multiple values.
 
     Args:
-        *args: Specifies the values.
+        *args: The values.
 
     Returns:
         ``min(arg1, arg2, arg3, ..., argN)``
@@ -261,6 +270,7 @@ def min_resolver(*args: Any) -> Any:
     Example usage:
 
     ```pycon
+
     >>> import hya
     >>> from omegaconf import OmegaConf
     >>> hya.register_resolvers()
@@ -278,7 +288,7 @@ def mul_resolver(*args: Any) -> Any:
     r"""Return the multiplication of several objects.
 
     Args:
-        *args: Specifies the values to multiply.
+        *args: The values to multiply.
 
     Returns:
         ``arg1 * arg2 * arg3 * ... * argN``
@@ -286,6 +296,7 @@ def mul_resolver(*args: Any) -> Any:
     Example usage:
 
     ```pycon
+
     >>> import hya
     >>> from omegaconf import OmegaConf
     >>> hya.register_resolvers()
@@ -309,7 +320,7 @@ def neg_resolver(number: float) -> float:
     r"""Return the negation (``-number``).
 
     Args:
-        number: Specifies the number.
+        number: The number to transform.
 
     Returns:
         The negated input number.
@@ -317,6 +328,7 @@ def neg_resolver(number: float) -> float:
     Example usage:
 
     ```pycon
+
     >>> import hya
     >>> from omegaconf import OmegaConf
     >>> hya.register_resolvers()
@@ -334,7 +346,7 @@ def path_resolver(path: str) -> Path:
     r"""Return a path object.
 
     Args:
-        path: Specifies the target path.
+        path: The target path.
 
     Returns:
         The path object.
@@ -342,6 +354,7 @@ def path_resolver(path: str) -> Path:
     Example usage:
 
     ```pycon
+
     >>> import hya
     >>> from omegaconf import OmegaConf
     >>> hya.register_resolvers()
@@ -364,6 +377,7 @@ def pi_resolver() -> float:
     Example usage:
 
     ```pycon
+
     >>> import hya
     >>> from omegaconf import OmegaConf
     >>> hya.register_resolvers()
@@ -390,6 +404,7 @@ def pow_resolver(value: float, exponent: float) -> float:
     Example usage:
 
     ```pycon
+
     >>> import hya
     >>> from omegaconf import OmegaConf
     >>> hya.register_resolvers()
@@ -407,7 +422,7 @@ def sqrt_resolver(number: float) -> float:
     r"""Return the square root of a number.
 
     Args:
-        number: Specifies the number to compute the
+        number: The number to compute the
             square root.
 
     Returns:
@@ -416,6 +431,7 @@ def sqrt_resolver(number: float) -> float:
     Example usage:
 
     ```pycon
+
     >>> import hya
     >>> from omegaconf import OmegaConf
     >>> hya.register_resolvers()
@@ -433,7 +449,7 @@ def sha256_resolver(obj: Any) -> str:
     r"""Return the SHA-256 hash of the input object.
 
     Args:
-        obj: Specifies the object to compute the SHA-256 hash.
+        obj: The object to compute the SHA-256 hash.
 
     Returns:
         The SHA-256 hash of the object.
@@ -441,6 +457,7 @@ def sha256_resolver(obj: Any) -> str:
     Example usage:
 
     ```pycon
+
     >>> import hya
     >>> from omegaconf import OmegaConf
     >>> hya.register_resolvers()
@@ -458,7 +475,7 @@ def sinh_resolver(number: float) -> float:
     r"""Return the hyperbolic sine.
 
     Args:
-        number: Specifies the number.
+        number: The number to transform.
 
     Returns:
         The hyperbolic sine of the input number.
@@ -466,6 +483,7 @@ def sinh_resolver(number: float) -> float:
     Example usage:
 
     ```pycon
+
     >>> import hya
     >>> from omegaconf import OmegaConf
     >>> hya.register_resolvers()
@@ -492,6 +510,7 @@ def sub_resolver(object1: Any, object2: Any) -> Any:
     Example usage:
 
     ```pycon
+
     >>> import hya
     >>> from omegaconf import OmegaConf
     >>> hya.register_resolvers()
@@ -509,7 +528,7 @@ def to_path_resolver(path: str) -> Path:
     r"""Return the input path into a ``pathlib.Path``.
 
     Args:
-        path: Specifies the path to convert. This value should be
+        path: The path to convert. This value should be
             compatible with ``pathlib.Path``.
 
     Returns:
@@ -518,6 +537,7 @@ def to_path_resolver(path: str) -> Path:
     Example usage:
 
     ```pycon
+
     >>> import hya
     >>> from omegaconf import OmegaConf
     >>> hya.register_resolvers()
@@ -544,6 +564,7 @@ def truediv_resolver(dividend: float, divisor: float) -> float:
     Example usage:
 
     ```pycon
+
     >>> import hya
     >>> from omegaconf import OmegaConf
     >>> hya.register_resolvers()

@@ -114,8 +114,10 @@ lint.select = [
     "BLE", # flake8-blind-except
     "C4", # flake8-comprehensions
     "D", # pydocstyle
+    "DTZ", # flake8-datetimez
     "E", # pycodestyle (Error)
     "EM", # flake8-errmsg
+    "EXE", # flake8-executable
     "F", # pyflakes
     "FA", # flake8-future-annotations
     "FURB", # refurb
@@ -124,6 +126,7 @@ lint.select = [
     "ISC", # flake8-implicit-str-concat
     "LOG", # logging
     "N", # naming
+    "NPY", # NumPy-specific rules
     "PD", # pandas-vet
     "PERF", # Perflint
     "PGH", # pygrep-hooks
@@ -135,6 +138,7 @@ lint.select = [
     "Q", # flake8-quotes
     "RET", # flake8-return
     "RSE", # flake8-raise
+    "RUF", # Ruff-specific rules
     "S", # flake8-bandit
     "SIM", # flake8-simplify
     "T20", # flake8-print
@@ -166,41 +170,47 @@ lint.ignore = [
 
 # Allow autofix for all enabled rules (when `--fix`) is provided.
 lint.fixable = [
-    "A",
-    "ANN",
-    "ARG",
-    "B",
-    "BLE",
-    "C4",
-    "D",
-    "E",
-    "EM",
-    "F",
-    "FA",
-    "FURB",
-    "ICN",
-    "INP",
-    "ISC",
-    "LOG",
-    "PD",
-    "PERF",
-    "PGH",
-    "PIE",
-    "PL",
-    "PT",
-    "PTH",
-    "PYI",
-    "Q",
-    "RET",
-    "RSE",
-    "S",
-    "SIM",
-    "T20",
-    "TCH",
-    "TD",
-    "TID",
-    "TRY",
-    "W",
+    "A", # builtins
+    "ANN", # annotations
+    "ARG", # flake8-unused-arguments
+    "B", # bugbear
+    "BLE", # flake8-blind-except
+    "C4", # flake8-comprehensions
+    "D", # pydocstyle
+    "DTZ", # flake8-datetimez
+    "E", # pycodestyle (Error)
+    "EM", # flake8-errmsg
+    "EXE", # flake8-executable
+    "F", # pyflakes
+    "FA", # flake8-future-annotations
+    "FURB", # refurb
+    "ICN", # flake8-import-conventions
+    "INP", # flake8-no-pep420
+    "ISC", # flake8-implicit-str-concat
+    "LOG", # logging
+    "N", # naming
+    "NPY", # NumPy-specific rules
+    "PD", # pandas-vet
+    "PERF", # Perflint
+    "PGH", # pygrep-hooks
+    "PIE", # flake8-pie
+    "PL", # Pylint
+    "PT", # flake8-pytest-style
+    "PTH", # pathlib
+    "PYI", # flake8-pyi
+    "Q", # flake8-quotes
+    "RET", # flake8-return
+    "RSE", # flake8-raise
+    "RUF", # Ruff-specific rules
+    "S", # flake8-bandit
+    "SIM", # flake8-simplify
+    "T20", # flake8-print
+    "TCH", # flake8-type-checking
+    "TD", # flake8-todos
+    "TID", # flake8-tidy-imports
+    "TRY", # tryceratops
+    "UP", # pyupgrade
+    "W", # pycodestyle (Warning)
 ]
 lint.unfixable = []
 

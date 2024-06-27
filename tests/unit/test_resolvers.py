@@ -70,6 +70,18 @@ def test_len_resolver_str() -> None:
     assert OmegaConf.create({"key": "${hya.len:abcdef}"}).key == 6
 
 
+def test_iter_join_resolver_list_str() -> None:
+    assert OmegaConf.create({"key": "${hya.iter_join:[a,b,c],-}"}).key == "a-b-c"
+
+
+def test_iter_join_resolver_list_int() -> None:
+    assert OmegaConf.create({"key": "${hya.iter_join:[1,2,3],x}"}).key == "1x2x3"
+
+
+def test_iter_join_resolver_empty_separator() -> None:
+    assert OmegaConf.create({"key": "${hya.iter_join:[a,b,c],}"}).key == "abc"
+
+
 def test_log_resolver_int() -> None:
     assert math.isclose(OmegaConf.create({"key": "${hya.log:2}"}).key, 0.6931471805599453)
 

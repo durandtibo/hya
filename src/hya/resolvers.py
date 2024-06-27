@@ -6,10 +6,13 @@ import hashlib
 import logging
 import math
 from pathlib import Path
-from typing import Any
+from typing import TYPE_CHECKING, Any
 from urllib.parse import unquote, urlparse
 
 from hya.registry import registry
+
+if TYPE_CHECKING:
+    from collections.abc import Iterable
 
 logger = logging.getLogger(__name__)
 
@@ -176,6 +179,35 @@ def len_resolver(obj: Any) -> int:
     ```
     """
     return len(obj)
+
+
+@registry.register("hya.iter_join")
+def iter_join_resolver(iterable: Iterable, separator: str) -> str:
+    r"""Convert all items in an iterable to a string and joins them into
+    one string.
+
+    Args:
+        iterable: Any iterable object where all the returned values
+            are strings or can be converted to string.
+        separator: The separator to use between the items.
+
+    Returns:
+        The generated string.
+
+    Example usage:
+
+    ```pycon
+
+    >>> import hya
+    >>> from omegaconf import OmegaConf
+    >>> hya.register_resolvers()
+    >>> conf = OmegaConf.create({"key": "${hya.iter_join:[abc,2,def],-}"})
+    >>> conf.key
+    abc-2-def
+
+    ```
+    """
+    return separator.join(map(str, iterable))
 
 
 @registry.register("hya.log")

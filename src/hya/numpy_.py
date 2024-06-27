@@ -34,6 +34,7 @@ def to_array_resolver(data: ArrayLike) -> np.ndarray:
     Example usage:
 
     ```pycon
+
     >>> import hya
     >>> from omegaconf import OmegaConf
     >>> hya.register_resolvers()

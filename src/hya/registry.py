@@ -18,6 +18,7 @@ class ResolverRegistry:
     Example usage:
 
     ```pycon
+
     >>> from hya.registry import ResolverRegistry
     >>> registry = ResolverRegistry()
     >>> @registry.register("my_key")
@@ -86,6 +87,7 @@ def register_resolvers() -> None:
     Example usage:
 
     ```pycon
+
     >>> from hya import register_resolvers
     >>> register_resolvers()
 

@@ -23,6 +23,7 @@ def check_braceexpand() -> None:
     Example usage:
 
     ```pycon
+
     >>> from hya.imports import check_braceexpand
     >>> check_braceexpand()
 
@@ -46,6 +47,7 @@ def is_braceexpand_available() -> bool:
     Example usage:
 
     ```pycon
+
     >>> from hya.imports import is_braceexpand_available
     >>> is_braceexpand_available()
 
@@ -63,6 +65,7 @@ def check_numpy() -> None:
     Example usage:
 
     ```pycon
+
     >>> from hya.imports import check_numpy
     >>> check_numpy()
 
@@ -86,6 +89,7 @@ def is_numpy_available() -> bool:
     Example usage:
 
     ```pycon
+
     >>> from hya.imports import is_numpy_available
     >>> is_numpy_available()
 
@@ -103,6 +107,7 @@ def check_torch() -> None:
     Example usage:
 
     ```pycon
+
     >>> from hya.imports import check_torch
     >>> check_torch()
 
@@ -126,6 +131,7 @@ def is_torch_available() -> bool:
     Example usage:
 
     ```pycon
+
     >>> from hya.imports import is_torch_available
     >>> is_torch_available()
 

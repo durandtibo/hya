@@ -126,7 +126,7 @@ jobs:
       matrix:
         os: [ ubuntu-latest ]
         python-version: [ '3.12', '3.11' , '3.10', '3.9' ]
-        omegaconf-version: [ 2.3.0, 2.2.3, 2.1.2 ]
+        omegaconf-version: [ 2.3.0, 2.2.3, 2.1.2, 2.1.0 ]
 
     steps:
       - name: Checkout
@@ -141,9 +141,12 @@ jobs:
         run: |
           pip install hya
 
-      - name: Install OmegaConf
-        run: |
-          pip install omegaconf==${{ matrix.omegaconf-version }}
+      - name: Install valid package version
+        uses: durandtibo/pip-install-package-action@v0.2.2
+        with:
+          package-name: 'omegaconf'
+          package-version: ${{ matrix.omegaconf-version }}
+          python-version: ${{ matrix.python-version }}
 
       - name: Run some checks
         run: |
@@ -174,9 +177,12 @@ jobs:
         run: |
           pip install hya
 
-      - name: Install OmegaConf
-        run: |
-          pip install braceexpand==${{ matrix.braceexpand-version }}
+      - name: Install valid package version
+        uses: durandtibo/pip-install-package-action@v0.2.2
+        with:
+          package-name: 'braceexpand'
+          package-version: ${{ matrix.braceexpand-version }}
+          python-version: ${{ matrix.python-version }}
 
       - name: Run some checks
         run: |
@@ -192,24 +198,7 @@ jobs:
       matrix:
         os: [ ubuntu-latest ]
         python-version: [ '3.12', '3.11', '3.10', '3.9' ]
-        numpy-version: [ 2.0.0, 1.26.4, 1.25.2, 1.24.3, 1.23.5, 1.22.4, 1.21.6 ]
-        exclude:
-          # python 3.11
-          - numpy-version: 1.21.6
-            python-version: '3.11'
-          # python 3.12
-          - numpy-version: 1.21.6
-            python-version: '3.12'
-          - numpy-version: 1.21.6
-            python-version: '3.12'
-          - numpy-version: 1.22.4
-            python-version: '3.12'
-          - numpy-version: 1.23.5
-            python-version: '3.12'
-          - numpy-version: 1.24.3
-            python-version: '3.12'
-          - numpy-version: 1.25.2
-            python-version: '3.12'
+        numpy-version: [ 2.1.1, 2.0.1, 1.26.4, 1.25.2, 1.24.3, 1.23.5, 1.22.4, 1.21.6 ]
 
     steps:
       - name: Checkout
@@ -222,7 +211,14 @@ jobs:
 
       - name: Install package
         run: |
-          pip install hya numpy==${{ matrix.numpy-version }}
+          pip install hya
+
+      - name: Install valid package version
+        uses: durandtibo/pip-install-package-action@v0.2.2
+        with:
+          package-name: 'numpy'
+          package-version: ${{ matrix.numpy-version }}
+          python-version: ${{ matrix.python-version }}
 
       - name: Run some checks
         run: |
@@ -238,24 +234,7 @@ jobs:
       matrix:
         os: [ ubuntu-latest ]
         python-version: [ '3.12', '3.11', '3.10', '3.9' ]
-        torch-version: [ 2.3.1, 2.2.2, 2.1.2, 2.0.1, 1.13.1, 1.12.1, 1.11.0 ]
-        exclude:
-          # python 3.11
-          - torch-version: 1.11.0
-            python-version: 3.11
-          - torch-version: 1.12.1
-            python-version: 3.11
-          # python 3.12
-          - torch-version: 1.11.0
-            python-version: 3.12
-          - torch-version: 1.12.1
-            python-version: 3.12
-          - torch-version: 1.13.1
-            python-version: 3.12
-          - torch-version: 2.0.1
-            python-version: 3.12
-          - torch-version: 2.1.2
-            python-version: 3.12
+        torch-version: [ 2.4.1, 2.3.1, 2.2.2, 2.1.2, 2.0.1, 1.13.1, 1.12.1, 1.11.0 ]
 
     steps:
       - name: Checkout
@@ -268,7 +247,14 @@ jobs:
 
       - name: Install package
         run: |
-          pip install hya torch==${{ matrix.torch-version }}
+          pip install hya
+
+      - name: Install valid package version
+        uses: durandtibo/pip-install-package-action@v0.2.2
+        with:
+          package-name: 'torch'
+          package-version: ${{ matrix.torch-version }}
+          python-version: ${{ matrix.python-version }}
 
       - name: Run some checks
         run: |

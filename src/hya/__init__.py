@@ -3,9 +3,9 @@ r"""Contain the main features of the ``hya`` package."""
 from __future__ import annotations
 
 __all__ = [
-    "register_resolvers",
-    "is_torch_available",
     "is_braceexpand_available",
+    "is_torch_available",
+    "register_resolvers",
     "register_resolvers",
 ]
 

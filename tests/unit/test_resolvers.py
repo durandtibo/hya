@@ -51,11 +51,11 @@ def test_ceildiv_resolver() -> None:
 
 
 def test_exp_resolver_int() -> None:
-    assert math.isclose(OmegaConf.create({"key": "${hya.exp:1}"}).key, 2.718281828459045)
+    assert math.isclose(OmegaConf.create({"key": "${hya.exp:1}"}).key, math.e)
 
 
 def test_exp_resolver_float() -> None:
-    assert math.isclose(OmegaConf.create({"key": "${hya.exp:1.0}"}).key, 2.718281828459045)
+    assert math.isclose(OmegaConf.create({"key": "${hya.exp:1.0}"}).key, math.e)
 
 
 def test_floordiv_resolver() -> None:

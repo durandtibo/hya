@@ -19,19 +19,23 @@ jobs:
       - name: Install Poetry
         uses: snok/install-poetry@v1
 
+      - name: Set environment variable
+        run: |
+          echo $(poetry run poetry env info --path)/bin >> $GITHUB_PATH
+
       - name: Install packages
         run: |
-          poetry run make config-poetry
-          poetry run make install-all
+          make config-poetry
+          make install-all
 
       - name: Show installed packages
         run: |
-          poetry run poetry show
-          poetry run poetry show --tree
+          poetry show
+          poetry show --tree
 
       - name: Run doctest on source code
         run: |
-          poetry run make doctest-src
+          make doctest-src
 
   build:
     runs-on: ubuntu-latest
@@ -48,9 +52,13 @@ jobs:
       - name: Install Poetry
         uses: snok/install-poetry@v1
 
+      - name: Set environment variable
+        run: |
+          echo $(poetry run poetry env info --path)/bin >> $GITHUB_PATH
+
       - name: Install packages
         run: |
-          poetry run make config-poetry
+          make config-poetry
           make install-all
 
       - name: Setup doc deploy
@@ -62,4 +70,4 @@ jobs:
 
       - name: Build documentation
         run: |
-          poetry run mike deploy --config-file docs/mkdocs.yml --branch tmp-doc-build-1234 dev
+          mike deploy --config-file docs/mkdocs.yml --branch tmp-doc-build-1234 dev

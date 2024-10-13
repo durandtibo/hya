@@ -1,11 +1,9 @@
 name: Pre-commit auto-update
 
 on:
-  # every day at midnight
   schedule:
-    - cron: "0 8 * * *"
-  # on demand
-  workflow_dispatch:
+    - cron: "0 8 * * *" # run at 8:00 AM UTC
+  workflow_dispatch:  # to trigger manually
 
 jobs:
   auto-update:

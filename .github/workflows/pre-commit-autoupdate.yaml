@@ -39,12 +39,10 @@ jobs:
 
       - uses: peter-evans/create-pull-request@v3
         if: always()
-        env:
-          CI_BOT_EMAIL: ${{secrets.CI_BOT_EMAIL}}
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           branch: pre-commit-hooks
           title: Update pre-commit hooks
           commit-message: "Update pre-commit hooks"
           body: Update versions of pre-commit hooks to latest version.
-          author: ci-bot <${CI_BOT_EMAIL}>
+          author: ci-bot <${{secrets.CI_BOT_EMAIL}}>

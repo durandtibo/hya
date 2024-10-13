@@ -50,10 +50,10 @@ mkdocs-material = "^9.5"
 mkdocstrings = { extras = ["python"], version = "^0.26" }
 
 [tool.poetry.group.dev.dependencies]
-black = "^24.8"
+black = "^24.10"
 coverage = { extras = ["toml"], version = "^7.6" }
 docformatter = { extras = ["tomli"], version = "^1.7" }
-pre-commit = ">=3.8,<5.0"
+pre-commit = ">=4.0,<5.0"
 pygments = "^2.18"
 pytest = "^8.3"
 pytest-cov = "^5.0"

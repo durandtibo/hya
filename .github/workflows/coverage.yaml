@@ -19,19 +19,23 @@ jobs:
       - name: Install Poetry
         uses: snok/install-poetry@v1
 
+      - name: Set environment variable
+        run: |
+          echo $(poetry run poetry env info --path)/bin >> $GITHUB_PATH
+
       - name: Install packages
         run: |
-          poetry run make config-poetry
-          poetry run make install-all
+          make config-poetry
+          make install-all
 
       - name: Show installed packages
         run: |
-          poetry run poetry show
-          poetry run poetry show --tree
+          poetry show
+          poetry show --tree
 
       - name: Run unit tests
         run: |
-          poetry run make unit-test-cov
+          make unit-test-cov
 
       - name: Upload coverage to Codecov
         if: github.repository == 'durandtibo/hya' && (github.event_name == 'push' || github.event_name == 'pull_request')

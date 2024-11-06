@@ -57,7 +57,7 @@ docformatter = { extras = ["tomli"], version = "^1.7" }
 pre-commit = ">=4.0,<5.0"
 pygments = "^2.18"
 pytest = "^8.3"
-pytest-cov = "^5.0"
+pytest-cov = ">=5,<7"
 pytest-timeout = "^2.3"
 ruff = ">=0.6,<1.0"
 xdoctest = "^1.2"

@@ -5,7 +5,7 @@ default_stages: [ pre-commit ]
 
 repos:
   - repo: https://github.com/asottile/pyupgrade
-    rev: v3.19.0
+    rev: v3.19.1
     hooks:
       - id: pyupgrade
         args: [--py39-plus]
@@ -58,7 +58,7 @@ repos:
         additional_dependencies:
           - black>=24.8
   - repo: https://github.com/charliermarsh/ruff-pre-commit
-    rev: v0.8.2
+    rev: v0.8.3
     hooks:
       - id: ruff
         types_or: [ python, pyi, jupyter ]

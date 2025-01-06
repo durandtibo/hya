@@ -14,7 +14,7 @@ conda :
 
 .PHONY : config-poetry
 config-poetry :
-	poetry config experimental.system-git-client true
+	poetry config system-git-client true
 	poetry config --list
 
 .PHONY : install

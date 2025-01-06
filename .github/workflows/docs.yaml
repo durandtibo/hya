@@ -31,7 +31,6 @@ jobs:
 
       - name: Install packages
         run: |
-          make config-poetry
           make install-all
 
       - name: Setup doc deploy

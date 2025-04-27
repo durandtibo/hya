@@ -3,6 +3,9 @@ on:
   workflow_call:
   workflow_dispatch:  # to trigger manually
 
+permissions:
+  contents: read
+
 jobs:
   format:
     runs-on: ubuntu-latest

@@ -10,22 +10,15 @@
     <a href="https://github.com/durandtibo/hya/actions">
         <img alt="Nightly Package Tests" src="https://github.com/durandtibo/hya/workflows/Nightly%20Package%20Tests/badge.svg">
     </a>
+    <a href="https://codecov.io/gh/durandtibo/hya">
+        <img alt="Codecov" src="https://codecov.io/gh/durandtibo/hya/branch/main/graph/badge.svg">
+    </a>
     <br/>
     <a href="https://durandtibo.github.io/hya/">
         <img alt="Documentation" src="https://github.com/durandtibo/hya/workflows/Documentation%20(stable)/badge.svg">
     </a>
     <a href="https://durandtibo.github.io/hya/">
         <img alt="Documentation" src="https://github.com/durandtibo/hya/workflows/Documentation%20(unstable)/badge.svg">
-    </a>
-    <br/>
-    <a href="https://codecov.io/gh/durandtibo/hya">
-        <img alt="Codecov" src="https://codecov.io/gh/durandtibo/hya/branch/main/graph/badge.svg">
-    </a>
-    <a href="https://codeclimate.com/github/durandtibo/hya/maintainability">
-        <img src="https://api.codeclimate.com/v1/badges/372b4c4212452ab0b0ad/maintainability" />
-    </a>
-    <a href="https://codeclimate.com/github/durandtibo/hya/test_coverage">
-        <img src="https://api.codeclimate.com/v1/badges/372b4c4212452ab0b0ad/test_coverage" />
     </a>
     <br/>
     <a href="https://github.com/psf/black">

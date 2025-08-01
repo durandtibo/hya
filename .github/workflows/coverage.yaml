@@ -50,11 +50,3 @@ jobs:
           # in the github UI just because the coverage report failed to
           # be published.
           fail_ci_if_error: false
-
-      - name: Test & publish code coverage
-        uses: paambaati/codeclimate-action@v9.0.0
-        env:
-          CC_TEST_REPORTER_ID: ${{secrets.CC_TEST_REPORTER_ID}}
-        with:
-          coverageLocations: ./coverage.xml:coverage.py
-          debug: true

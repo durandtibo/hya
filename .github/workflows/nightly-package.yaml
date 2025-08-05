@@ -145,7 +145,7 @@ jobs:
           pip install hya
 
       - name: Install valid package version
-        uses: durandtibo/pip-install-package-action@v0.3.2
+        uses: durandtibo/pip-install-package-action@v0.3.3
         with:
           package-name: 'omegaconf'
           package-version: ${{ matrix.omegaconf-version }}
@@ -181,7 +181,7 @@ jobs:
           pip install hya
 
       - name: Install valid package version
-        uses: durandtibo/pip-install-package-action@v0.3.2
+        uses: durandtibo/pip-install-package-action@v0.3.3
         with:
           package-name: 'braceexpand'
           package-version: ${{ matrix.braceexpand-version }}
@@ -228,7 +228,7 @@ jobs:
           pip install hya
 
       - name: Install valid package version
-        uses: durandtibo/pip-install-package-action@v0.3.2
+        uses: durandtibo/pip-install-package-action@v0.3.3
         with:
           package-name: 'numpy'
           package-version: ${{ matrix.numpy-version }}
@@ -276,7 +276,7 @@ jobs:
           pip install hya
 
       - name: Install valid package version
-        uses: durandtibo/pip-install-package-action@v0.3.2
+        uses: durandtibo/pip-install-package-action@v0.3.3
         with:
           package-name: 'torch'
           package-version: ${{ matrix.torch-version }}

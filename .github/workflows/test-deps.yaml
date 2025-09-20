@@ -50,10 +50,6 @@ jobs:
           poetry show
           poetry show --tree
 
-      - name: Lint
-        run: |
-          make lint
-
       - name: Run unit tests
         run: |
           make unit-test-cov
@@ -100,10 +96,6 @@ jobs:
         run: |
           poetry show
           poetry show --tree
-
-      - name: Lint
-        run: |
-          make lint
 
       - name: Run unit tests
         run: |
@@ -218,10 +210,6 @@ jobs:
         run: |
           poetry show
           poetry show --tree
-
-      - name: Lint
-        run: |
-          make lint
 
       - name: Run unit tests
         run: |

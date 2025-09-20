@@ -24,14 +24,14 @@ def test_resolver_registry_register() -> None:
 
 def test_resolver_registry_register_not_callable() -> None:
     register = ResolverRegistry()
-    with pytest.raises(TypeError, match="Each resolver has to be callable but received"):
+    with pytest.raises(TypeError, match=r"Each resolver has to be callable but received"):
         register.register("key")(NonCallableMock())
 
 
 def test_resolver_registry_register_duplicate_exist_ok_false() -> None:
     register = ResolverRegistry()
     register.register("key")(Mock())
-    with pytest.raises(RuntimeError, match="A resolver is already registered for `key`."):
+    with pytest.raises(RuntimeError, match=r"A resolver is already registered for `key`."):
         register.register("key")(Mock())
 
 

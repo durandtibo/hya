@@ -26,7 +26,7 @@ def test_check_braceexpand_with_package() -> None:
 def test_check_braceexpand_without_package() -> None:
     with (
         patch("hya.imports.is_braceexpand_available", lambda: False),
-        pytest.raises(RuntimeError, match="`braceexpand` package is required but not installed."),
+        pytest.raises(RuntimeError, match=r"`braceexpand` package is required but not installed."),
     ):
         check_braceexpand()
 
@@ -48,7 +48,7 @@ def test_check_numpy_with_package() -> None:
 def test_check_numpy_without_package() -> None:
     with (
         patch("hya.imports.is_numpy_available", lambda: False),
-        pytest.raises(RuntimeError, match="`numpy` package is required but not installed."),
+        pytest.raises(RuntimeError, match=r"`numpy` package is required but not installed."),
     ):
         check_numpy()
 
@@ -70,7 +70,7 @@ def test_check_torch_with_package() -> None:
 def test_check_torch_without_package() -> None:
     with (
         patch("hya.imports.is_torch_available", lambda: False),
-        pytest.raises(RuntimeError, match="`torch` package is required but not installed."),
+        pytest.raises(RuntimeError, match=r"`torch` package is required but not installed."),
     ):
         check_torch()
 

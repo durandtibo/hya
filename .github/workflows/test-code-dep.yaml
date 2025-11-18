@@ -1,0 +1,40 @@
+name: Test Code with Dependency Version
+on:
+  workflow_call:
+    inputs:
+      package-name:
+        type: string
+        required: true
+      package-versions:
+        type: string
+        required: true
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 10
+    strategy:
+      max-parallel: 8
+      fail-fast: false
+      matrix:
+        os: [ ubuntu-latest ]
+        python-version: [ '3.14', '3.13', '3.12', '3.11', '3.10' ]
+        package-version: ${{ fromJson(inputs.package-versions) }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Setup python environment
+        uses: ./.github/actions/setup-env
+        with:
+          package-name: ${{ inputs.package-name }}
+          package-version: ${{ matrix.package-version }}
+          python-version: ${{ matrix.python-version }}
+
+      - name: Run unit tests
+        run: |
+          inv unit-test

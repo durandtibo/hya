@@ -10,12 +10,22 @@ jobs:
   get-versions:
     uses: ./.github/workflows/get-versions.yaml
 
+
+  ########################
+  #     Dependencies     #
+  ########################
+
   omegaconf:
     needs: get-versions
     uses: ./.github/workflows/test-code-dep.yaml
     with:
       package-name: omegaconf
       package-versions: ${{ toJson(fromJson(needs.get-versions.outputs.package_versions).omegaconf) }}
+
+
+  #################################
+  #     Optional dependencies     #
+  #################################
 
   braceexpand:
     needs: get-versions

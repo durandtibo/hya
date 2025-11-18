@@ -36,7 +36,7 @@ jobs:
 
       - name: Install package
         run: |
-          uv pip install objectory
+          uv pip install hya
 
       - name: Install valid package version
         uses: durandtibo/uv-install-package-action@v0.1.1

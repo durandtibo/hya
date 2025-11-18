@@ -8,6 +8,8 @@ permissions:
   contents: read
 
 jobs:
+  build:
+    uses: ./.github/workflows/build.yaml
   doctest:
     uses: ./.github/workflows/doctest.yaml
     secrets: inherit

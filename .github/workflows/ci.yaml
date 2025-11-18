@@ -12,6 +12,8 @@ permissions:
   contents: read
 
 jobs:
+  build:
+    uses: ./.github/workflows/build.yaml
   coverage:
     uses: ./.github/workflows/coverage.yaml
     secrets: inherit

@@ -7,6 +7,21 @@ on:
         description: "Command to install the package"
         required: false
         type: string
+      os:
+        type: string
+        required: false
+        default: '[
+          "ubuntu-latest",
+          "ubuntu-24.04",
+          "ubuntu-22.04",
+          "ubuntu-24.04-arm",
+          "ubuntu-22.04-arm",
+          "macos-latest",
+          "macos-26",
+          "macos-15",
+          "macos-14",
+          "macos-15-intel"
+        ]'
 
 permissions:
   contents: read
@@ -19,18 +34,7 @@ jobs:
       max-parallel: 8
       fail-fast: false
       matrix:
-        os: [
-          ubuntu-latest,
-          ubuntu-24.04,
-          ubuntu-22.04,
-          ubuntu-24.04-arm,
-          ubuntu-22.04-arm,
-          macos-latest,
-          macos-26,
-          macos-15,
-          macos-14,
-          macos-15-intel,
-        ]
+        os: ${{ fromJson(inputs.os) }}
         python-version: [ '3.14', '3.13', '3.12', '3.11', '3.10' ]
 
     steps:

@@ -21,20 +21,16 @@ jobs:
     with:
       install-cmd: 'uv pip install "batcharray[all]"'
 
-  stable-braceexpand:
-    uses: ./.github/workflows/test-package.yaml
-    with:
-      install-cmd: 'uv pip install "batcharray[braceexpand]"'
-
-  stable-numpy:
-    uses: ./.github/workflows/test-package.yaml
-    with:
-      install-cmd: 'uv pip install "batcharray[numpy]"'
-
-  stable-torch:
-    uses: ./.github/workflows/test-package.yaml
-    with:
-      install-cmd: 'uv pip install "batcharray[torch]"'
+  stable-extras:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        extra: [ 'braceexpand', 'numpy', 'torch' ]
+    steps:
+      - uses: ./.github/workflows/test-package.yaml
+        with:
+          install-cmd: 'uv pip install "batcharray[${{ matrix.extra }}]"'
+          os: "[ 'ubuntu-latest' ]"
 
   latest:
     uses: ./.github/workflows/test-package.yaml
@@ -46,20 +42,16 @@ jobs:
     with:
       install-cmd: 'uv pip install --pre "batcharray[all]"'
 
-  latest-braceexpand:
-    uses: ./.github/workflows/test-package.yaml
-    with:
-      install-cmd: 'uv pip install --pre "batcharray[braceexpand]"'
-
-  latest-numpy:
-    uses: ./.github/workflows/test-package.yaml
-    with:
-      install-cmd: 'uv pip install --pre "batcharray[numpy]"'
-
-  latest-torch:
-    uses: ./.github/workflows/test-package.yaml
-    with:
-      install-cmd: 'uv pip install --pre "batcharray[torch]"'
+  latest-extras:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        extra: [ 'braceexpand', 'numpy', 'torch' ]
+    steps:
+      - uses: ./.github/workflows/test-package.yaml
+        with:
+          install-cmd: 'uv pip install --pre "batcharray[${{ matrix.extra }}]"'
+          os: "[ 'ubuntu-latest' ]"
 
 
   ########################

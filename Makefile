@@ -1,76 +1,77 @@
 SHELL=/bin/bash
-NAME=hya
-SOURCE=src/$(NAME)
-TESTS=tests
-UNIT_TESTS=tests/unit
-INTEGRATION_TESTS=tests/integration
-
-LAST_GIT_TAG := $(shell git tag --sort=taggerdate | grep -o 'v.*' | tail -1)
-DOC_TAG := $(shell echo $(LAST_GIT_TAG) | cut -c 2- | awk -F \. {'print $$1"."$$2'})
 
 .PHONY : conda
 conda :
-	conda env create -f environment.yaml --force
-
-.PHONY : config-poetry
-config-poetry :
-	poetry config system-git-client true
-	poetry config --list
+	conda env create -f environment.yaml --yes
 
 .PHONY : install
 install :
-	poetry install --no-interaction
+	inv install --no-optional-deps
 
 .PHONY : install-all
 install-all :
-	poetry install --no-interaction --all-extras --with docs
+	inv install --docs-deps
 
 .PHONY : update
 update :
-	-poetry self update
-	poetry update
-	-pre-commit autoupdate
+	inv update
 
 .PHONY : lint
 lint :
-	ruff check --output-format=github .
+	inv check-lint
 
 .PHONY : format
 format :
-	black --check .
+	inv check-format
 
 .PHONY : docformat
 docformat :
-	docformatter --config ./pyproject.toml --in-place $(SOURCE)
+	inv docformat
 
 .PHONY : doctest-src
 doctest-src :
-	python -m pytest --xdoctest $(SOURCE)
-
-.PHONY : test
-test :
-	python -m pytest
+	inv doctest-src
 
 .PHONY : unit-test
 unit-test :
-	python -m pytest --xdoctest --timeout 10 $(UNIT_TESTS)
+	inv unit-test
 
 .PHONY : unit-test-cov
 unit-test-cov :
-	python -m pytest --xdoctest --timeout 10 --cov-report html --cov-report xml --cov-report term --cov=$(NAME) $(UNIT_TESTS)
+	inv unit-test --cov
+
+.PHONY : integration-test
+integration-test :
+	inv integration-test
+
+.PHONY : integration-test-cov
+integration-test-cov :
+	inv integration-test --cov
 
 .PHONY : publish-pypi
 publish-pypi :
-	poetry config pypi-token.pypi ${PYPI_TOKEN}
-	poetry publish --build
+	inv publish-pypi
 
 .PHONY : publish-doc-dev
 publish-doc-dev :
-	-mike delete --config-file docs/mkdocs.yml main  # delete previous version if it exists
-	mike deploy --config-file docs/mkdocs.yml --push --update-aliases main dev
+	inv publish-doc-dev
 
 .PHONY : publish-doc-latest
 publish-doc-latest :
-	-mike delete --config-file docs/mkdocs.yml $(DOC_TAG) 	# delete previous version if it exists
-	mike deploy --config-file docs/mkdocs.yml --push --update-aliases $(DOC_TAG) latest;
-	mike set-default --config-file docs/mkdocs.yml --push --allow-empty latest
+	inv publish-doc-latest
+
+.PHONY : setup-venv
+setup-venv :
+	$(MAKE) update-uv
+	uv venv --python 3.13 --clear
+	$(MAKE) install-invoke
+	.venv/bin/inv create-venv
+	.venv/bin/inv install --docs-deps
+
+.PHONY : install-invoke
+install-invoke :
+	uv pip install "invoke>=2.2.0"
+
+.PHONY : update-uv
+update-uv :
+	uv self update

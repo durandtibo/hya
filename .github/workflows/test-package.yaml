@@ -1,0 +1,57 @@
+name: Test Package
+on:
+  workflow_call:
+    inputs:
+      install-cmd:
+        default: "uv pip install objectory"
+        description: "Command to install the package"
+        required: false
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 10
+    strategy:
+      max-parallel: 8
+      fail-fast: false
+      matrix:
+        os: [
+          ubuntu-latest,
+          ubuntu-24.04,
+          ubuntu-22.04,
+          ubuntu-24.04-arm,
+          ubuntu-22.04-arm,
+          macos-latest,
+          macos-26,
+          macos-15,
+          macos-14,
+          macos-15-intel,
+        ]
+        python-version: [ '3.14', '3.13', '3.12', '3.11', '3.10' ]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Install uv and set the python version
+        uses: astral-sh/setup-uv@v7
+        with:
+          python-version: ${{ matrix.python-version }}
+          activate-environment: true
+
+      - name: Install package
+        run: |
+          ${{ inputs.install-cmd }}
+
+      - name: Show dependency tree
+        shell: bash
+        run: |
+          uv pip tree --show-version-specifiers
+
+      - name: Run some checks
+        run: |
+          python tests/package_checks.py

@@ -7,211 +7,33 @@ permissions:
   contents: read
 
 jobs:
+  get-versions:
+    uses: ./.github/workflows/get-versions.yaml
+
   omegaconf:
-    runs-on: ${{ matrix.os }}
-    timeout-minutes: 10
-    strategy:
-      max-parallel: 8
-      fail-fast: false
-      matrix:
-        os: [ ubuntu-latest ]
-        python-version: [ '3.14', '3.13', '3.12', '3.11', '3.10' ]
-        omegaconf-version: [ 2.3.0, 2.2.3, 2.2.1 ]
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v5
-
-      - name: Set up Python
-        uses: actions/setup-python@v6
-        with:
-          python-version: ${{ matrix.python-version }}
-
-      - name: Install Poetry
-        uses: snok/install-poetry@v1
-
-      - name: Set environment variable
-        run: |
-          echo $(poetry run poetry env info --path)/bin >> $GITHUB_PATH
-
-      - name: Install packages
-        run: |
-          make install-all
-
-      - name: Install valid package version
-        uses: durandtibo/pip-install-package-action@v0.4.1
-        with:
-          package-name: 'omegaconf'
-          package-version: ${{ matrix.omegaconf-version }}
-          python-version: ${{ matrix.python-version }}
-
-      - name: Show installed packages
-        run: |
-          poetry show
-          poetry show --tree
-
-      - name: Run unit tests
-        run: |
-          make unit-test-cov
+    needs: get-versions
+    uses: ./.github/workflows/test-code-dep.yaml
+    with:
+      package-name: omegaconf
+      package-versions: ${{ toJson(fromJson(needs.get-versions.outputs.package_versions).omegaconf) }}
 
   braceexpand:
-    runs-on: ${{ matrix.os }}
-    timeout-minutes: 10
-    strategy:
-      max-parallel: 8
-      fail-fast: false
-      matrix:
-        os: [ ubuntu-latest ]
-        python-version: [ '3.14', '3.13', '3.12', '3.11', '3.10' ]
-        braceexpand-version: [ 0.1.7 ]
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v5
-
-      - name: Set up Python
-        uses: actions/setup-python@v6
-        with:
-          python-version: ${{ matrix.python-version }}
-
-      - name: Install Poetry
-        uses: snok/install-poetry@v1
-
-      - name: Set environment variable
-        run: |
-          echo $(poetry run poetry env info --path)/bin >> $GITHUB_PATH
-
-      - name: Install packages
-        run: |
-          make install-all
-
-      - name: Install valid package version
-        uses: durandtibo/pip-install-package-action@v0.4.1
-        with:
-          package-name: 'braceexpand'
-          package-version: ${{ matrix.braceexpand-version }}
-          python-version: ${{ matrix.python-version }}
-
-      - name: Show installed packages
-        run: |
-          poetry show
-          poetry show --tree
-
-      - name: Run unit tests
-        run: |
-          make unit-test-cov
-
+    needs: get-versions
+    uses: ./.github/workflows/test-code-dep.yaml
+    with:
+      package-name: braceexpand
+      package-versions: ${{ toJson(fromJson(needs.get-versions.outputs.package_versions).braceexpand) }}
 
   numpy:
-    runs-on: ${{ matrix.os }}
-    timeout-minutes: 10
-    strategy:
-      max-parallel: 8
-      fail-fast: false
-      matrix:
-        os: [ ubuntu-latest ]
-        python-version: [ '3.14', '3.13', '3.12', '3.11', '3.10' ]
-        numpy-version: [
-          2.3.4,
-          2.2.6,
-          2.1.3,
-          2.0.2,
-          1.26.4,
-          1.25.2,
-          1.24.3,
-        ]
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v5
-
-      - name: Set up Python
-        uses: actions/setup-python@v6
-        with:
-          python-version: ${{ matrix.python-version }}
-
-      - name: Install Poetry
-        uses: snok/install-poetry@v1
-
-      - name: Set environment variable
-        run: |
-          echo $(poetry run poetry env info --path)/bin >> $GITHUB_PATH
-
-      - name: Install packages
-        run: |
-          make install
-
-      - name: Install valid package version
-        uses: durandtibo/pip-install-package-action@v0.4.1
-        with:
-          package-name: 'numpy'
-          package-version: ${{ matrix.numpy-version }}
-          python-version: ${{ matrix.python-version }}
-
-      - name: Show installed packages
-        run: |
-          poetry show
-          poetry show --tree
-
-      - name: Run unit tests
-        run: |
-          make unit-test-cov
-
+    needs: get-versions
+    uses: ./.github/workflows/test-code-dep.yaml
+    with:
+      package-name: numpy
+      package-versions: ${{ toJson(fromJson(needs.get-versions.outputs.package_versions).numpy) }}
 
   torch:
-    runs-on: ${{ matrix.os }}
-    timeout-minutes: 10
-    strategy:
-      max-parallel: 8
-      fail-fast: false
-      matrix:
-        os: [ ubuntu-latest ]
-        python-version: [ '3.14', '3.13', '3.12', '3.11', '3.10' ]
-        torch-version: [
-          2.9.0,
-          2.8.0,
-          2.7.1,
-          2.6.0,
-          2.5.1,
-          2.4.1,
-          2.3.1,
-          2.2.2,
-          2.1.2,
-          2.0.1,
-        ]
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v5
-
-      - name: Set up Python
-        uses: actions/setup-python@v6
-        with:
-          python-version: ${{ matrix.python-version }}
-
-      - name: Install Poetry
-        uses: snok/install-poetry@v1
-
-      - name: Set environment variable
-        run: |
-          echo $(poetry run poetry env info --path)/bin >> $GITHUB_PATH
-
-      - name: Install packages
-        run: |
-          make install-all
-
-      - name: Install valid package version
-        uses: durandtibo/pip-install-package-action@v0.4.1
-        with:
-          package-name: 'torch'
-          package-version: ${{ matrix.torch-version }}
-          python-version: ${{ matrix.python-version }}
-
-      - name: Show installed packages
-        run: |
-          poetry show
-          poetry show --tree
-
-      - name: Run unit tests
-        run: |
-          make unit-test-cov
+    needs: get-versions
+    uses: ./.github/workflows/test-code-dep.yaml
+    with:
+      package-name: torch
+      package-versions: ${{ toJson(fromJson(needs.get-versions.outputs.package_versions).torch) }}

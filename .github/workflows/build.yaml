@@ -31,16 +31,16 @@ jobs:
 
       - name: Inspect package
         run: |
-          uv pip show objectory
+          uv pip show hya
 
       - name: Show dependency tree
         shell: bash
         run: |
-          uv pip tree --package objectory --show-version-specifiers
+          uv pip tree --package hya --show-version-specifiers
 
       - name: Import package
         run: |
-          python -c "import objectory; print('OK')"
+          python -c "import hya; print('OK')"
 
   extras:
     runs-on: ubuntu-latest
@@ -73,13 +73,13 @@ jobs:
 
       - name: Inspect package
         run: |
-          uv pip show objectory
+          uv pip show hya
 
       - name: Show dependency tree
         shell: bash
         run: |
-          uv pip tree --package objectory --show-version-specifiers
+          uv pip tree --package hya --show-version-specifiers
 
       - name: Import package
         run: |
-          python -c "import objectory; print('OK')"
+          python -c "import hya; print('OK')"

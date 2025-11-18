@@ -15,23 +15,13 @@ jobs:
     timeout-minutes: 10
 
     steps:
-      - uses: actions/checkout@v5
+      - name: Checkout
+        uses: actions/checkout@v5
 
-      - name: Set up Python
-        uses: actions/setup-python@v6
+      - name: Setup python environment
+        uses: ./.github/actions/setup-env
         with:
-          python-version: '3.13'
-
-      - name: Install Poetry
-        uses: snok/install-poetry@v1
-
-      - name: Set environment variable
-        run: |
-          echo $(poetry run poetry env info --path)/bin >> $GITHUB_PATH
-
-      - name: Install packages
-        run: |
-          make install-all
+          install-args: '--docs-deps'
 
       - name: Setup doc deploy
         env:
@@ -43,4 +33,4 @@ jobs:
 
       - name: Build and deploy documentation
         run: |
-          make publish-doc-dev
+          inv publish-doc-dev

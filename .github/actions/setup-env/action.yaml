@@ -1,0 +1,66 @@
+name: "Setup Python environment"
+description: "Checkout code and install dependencies"
+
+inputs:
+  python-version:
+    default: "3.13"
+    description: "Python version to use"
+    required: false
+    type: string
+  package-name:
+    default: ""
+    description: "Optional package name to install"
+    required: false
+    type: string
+  package-version:
+    default: ""
+    description: "Optional package version to install"
+    required: false
+    type: string
+  install-args:
+    default: ""
+    description: "Optional arguments when installing dependencies"
+    required: false
+    type: string
+
+runs:
+  using: "composite"
+  steps:
+    - name: Install uv and set the python version
+      uses: astral-sh/setup-uv@v7
+      with:
+        python-version: ${{ inputs.python-version }}
+        activate-environment: true
+
+    - name: Install invoke
+      shell: bash
+      run: |
+        make install-invoke
+
+    - name: Install dependencies
+      shell: bash
+      run: |
+        inv install ${{ inputs.install-args }}
+
+    - name: Install valid package version
+      if: ${{ inputs.package-name != '' }}
+      uses: durandtibo/uv-install-package-action@v0.1.1
+      with:
+        package-name: ${{ inputs.package-name }}
+        package-version: ${{ matrix.package-version }}
+        python-version: ${{ matrix.python-version }}
+
+    - name: Show python config
+      shell: bash
+      run: |
+        inv show-python-config
+
+    - name: Show installed packages
+      shell: bash
+      run: |
+        inv show-installed-packages
+
+    - name: Show dependency tree
+      shell: bash
+      run: |
+        uv pip tree --show-version-specifiers

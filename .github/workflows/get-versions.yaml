@@ -1,0 +1,30 @@
+name: Get Versions
+on:
+  workflow_call:
+    outputs:
+      package_versions:
+        description: "JSON string containing all package versions"
+        value: ${{ jobs.get-versions.outputs.package_versions }}
+  workflow_dispatch:  # to trigger manually
+
+permissions:
+  contents: read
+
+jobs:
+  get-versions:
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    outputs:
+      package_versions: ${{ steps.extract.outputs.versions }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Read versions
+        id: extract
+        run: |
+          echo "versions=$(cat dev/config/package_versions.json)" >> $GITHUB_OUTPUT
+
+      - name: Show versions
+        run: |
+          echo "versions: ${{ toJson(fromJson(steps.extract.outputs.versions)) }}"

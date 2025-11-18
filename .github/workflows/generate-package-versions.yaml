@@ -1,0 +1,36 @@
+name: Generate package versions
+on:
+  schedule:
+    - cron: "0 6 * * 4" # run every Thursday at 6:00 AM UTC
+  workflow_call:
+  workflow_dispatch:  # to trigger manually
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  generate-package-versions:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Setup python environment
+        uses: ./.github/actions/setup-env
+
+      - name: Generate package versions
+        run: |
+          python dev/generate_versions.py
+
+      - uses: peter-evans/create-pull-request@v7
+        if: always()
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          branch: update/versions
+          title: Generate package versions
+          commit-message: "Generate package versions"
+          body: Generate package versions.
+          author: ci-bot <${{secrets.CI_BOT_EMAIL}}>

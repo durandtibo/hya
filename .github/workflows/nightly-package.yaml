@@ -14,12 +14,12 @@ jobs:
   stable:
     uses: ./.github/workflows/test-package.yaml
     with:
-      install-cmd: 'uv pip install batcharray'
+      install-cmd: 'uv pip install hya'
 
   stable-all:
     uses: ./.github/workflows/test-package.yaml
     with:
-      install-cmd: 'uv pip install "batcharray[all]"'
+      install-cmd: 'uv pip install "hya[all]"'
 
   stable-extras:
     runs-on: ubuntu-latest
@@ -29,18 +29,18 @@ jobs:
     steps:
       - uses: ./.github/workflows/test-package.yaml
         with:
-          install-cmd: 'uv pip install "batcharray[${{ matrix.extra }}]"'
+          install-cmd: 'uv pip install "hya[${{ matrix.extra }}]"'
           os: "[ 'ubuntu-latest' ]"
 
   latest:
     uses: ./.github/workflows/test-package.yaml
     with:
-      install-cmd: 'uv pip install --pre batcharray'
+      install-cmd: 'uv pip install --pre hya'
 
   latest-all:
     uses: ./.github/workflows/test-package.yaml
     with:
-      install-cmd: 'uv pip install --pre "batcharray[all]"'
+      install-cmd: 'uv pip install --pre "hya[all]"'
 
   latest-extras:
     runs-on: ubuntu-latest
@@ -50,7 +50,7 @@ jobs:
     steps:
       - uses: ./.github/workflows/test-package.yaml
         with:
-          install-cmd: 'uv pip install --pre "batcharray[${{ matrix.extra }}]"'
+          install-cmd: 'uv pip install --pre "hya[${{ matrix.extra }}]"'
           os: "[ 'ubuntu-latest' ]"
 
 

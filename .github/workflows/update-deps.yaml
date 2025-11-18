@@ -1,0 +1,48 @@
+name: Update dependencies
+on:
+  schedule:
+    - cron: "0 6 * * 6" # run every Saturday at 6:00 AM UTC
+  workflow_call:
+  workflow_dispatch:  # to trigger manually
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  update-deps:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Setup python environment
+        uses: ./.github/actions/setup-env
+
+      - name: Install packages
+        run: |
+          inv update
+
+      - name: Install packages
+        run: |
+          inv install --docs-deps
+
+      - name: Show dependency tree
+        shell: bash
+        run: |
+          uv pip tree --show-version-specifiers
+
+      - name: Run unit tests
+        run: |
+          inv unit-test --cov
+
+      - uses: peter-evans/create-pull-request@v7
+        if: always()
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          branch: update/dependencies
+          title: Update dependencies
+          commit-message: "Update dependencies"
+          body: Update dependencies to latest compatible version.
+          author: ci-bot <${{secrets.CI_BOT_EMAIL}}>

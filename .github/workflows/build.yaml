@@ -49,7 +49,7 @@ jobs:
       max-parallel: 8
       fail-fast: false
       matrix:
-        extra: [ 'all' ]
+        extra: [ 'all', 'braceexpand', 'numpy', 'torch' ]
 
     steps:
       - name: Checkout

@@ -1,0 +1,53 @@
+name: Test Package with Extras
+on:
+  workflow_call:
+    install-args:
+      default: ""
+      description: "Optional arguments to install the package"
+      required: false
+      type: string
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 10
+    strategy:
+      max-parallel: 8
+      fail-fast: false
+      matrix:
+        os: [ ubuntu-latest ]
+        python-version: [ '3.14', '3.13', '3.12', '3.11', '3.10' ]
+        extra: [ 'all', 'braceexpand', 'numpy', 'torch' ]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Install uv and set the python version
+        uses: astral-sh/setup-uv@v7
+        with:
+          python-version: ${{ matrix.python-version }}
+          activate-environment: true
+
+      - name: Install package
+        run: |
+          uv pip install ${{ inputs.install-args }} "hya[${{ matrix.extra }}]"
+
+      - name: Install valid package version
+        uses: durandtibo/uv-install-package-action@v0.1.1
+        with:
+          package-name: ${{ inputs.package-name }}
+          package-version: ${{ matrix.package-version }}
+          python-version: ${{ matrix.python-version }}
+
+      - name: Show dependency tree
+        shell: bash
+        run: |
+          uv pip tree --show-version-specifiers
+
+      - name: Run some checks
+        run: |
+          python tests/package_checks.py

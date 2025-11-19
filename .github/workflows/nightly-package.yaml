@@ -14,52 +14,30 @@ jobs:
   stable:
     uses: ./.github/workflows/test-package.yaml
     with:
-      install-cmd: 'uv pip install batcharray'
+      install-cmd: 'uv pip install hya'
 
   stable-all:
     uses: ./.github/workflows/test-package.yaml
     with:
-      install-cmd: 'uv pip install "batcharray[all]"'
+      install-cmd: 'uv pip install "hya[all]"'
 
-  stable-braceexpand:
-    uses: ./.github/workflows/test-package.yaml
-    with:
-      install-cmd: 'uv pip install "batcharray[braceexpand]"'
-
-  stable-numpy:
-    uses: ./.github/workflows/test-package.yaml
-    with:
-      install-cmd: 'uv pip install "batcharray[numpy]"'
-
-  stable-torch:
-    uses: ./.github/workflows/test-package.yaml
-    with:
-      install-cmd: 'uv pip install "batcharray[torch]"'
+  stable-extras:
+    uses: ./.github/workflows/test-package-extras.yaml
 
   latest:
     uses: ./.github/workflows/test-package.yaml
     with:
-      install-cmd: 'uv pip install --pre batcharray'
+      install-cmd: 'uv pip install --pre hya'
 
   latest-all:
     uses: ./.github/workflows/test-package.yaml
     with:
-      install-cmd: 'uv pip install --pre "batcharray[all]"'
+      install-cmd: 'uv pip install --pre "hya[all]"'
 
-  latest-braceexpand:
-    uses: ./.github/workflows/test-package.yaml
+  latest-extras:
+    uses: ./.github/workflows/test-package-extras.yaml
     with:
-      install-cmd: 'uv pip install --pre "batcharray[braceexpand]"'
-
-  latest-numpy:
-    uses: ./.github/workflows/test-package.yaml
-    with:
-      install-cmd: 'uv pip install --pre "batcharray[numpy]"'
-
-  latest-torch:
-    uses: ./.github/workflows/test-package.yaml
-    with:
-      install-cmd: 'uv pip install --pre "batcharray[torch]"'
+      install-args: '--pre'
 
 
   ########################

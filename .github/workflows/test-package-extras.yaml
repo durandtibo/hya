@@ -1,13 +1,12 @@
-name: Test Package with Dependency Version
+name: Test Package with Extras
 on:
   workflow_call:
     inputs:
-      package-name:
+      install-args:
+        default: ""
+        description: "Optional arguments to install the package"
+        required: false
         type: string
-        required: true
-      package-versions:
-        type: string
-        required: true
 
 permissions:
   contents: read
@@ -22,7 +21,7 @@ jobs:
       matrix:
         os: [ ubuntu-latest ]
         python-version: [ '3.14', '3.13', '3.12', '3.11', '3.10' ]
-        package-version: ${{ fromJson(inputs.package-versions) }}
+        extra: [ 'braceexpand', 'numpy', 'torch' ]
 
     steps:
       - name: Checkout
@@ -36,14 +35,7 @@ jobs:
 
       - name: Install package
         run: |
-          uv pip install hya
-
-      - name: Install valid package version
-        uses: durandtibo/uv-install-package-action@v0.1.1
-        with:
-          package-name: ${{ inputs.package-name }}
-          package-version: ${{ matrix.package-version }}
-          python-version: ${{ matrix.python-version }}
+          uv pip install ${{ inputs.install-args }} "hya[${{ matrix.extra }}]"
 
       - name: Show dependency tree
         run: |

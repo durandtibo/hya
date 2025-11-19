@@ -1,11 +1,12 @@
 name: Test Package with Extras
 on:
   workflow_call:
-    install-args:
-      default: ""
-      description: "Optional arguments to install the package"
-      required: false
-      type: string
+    inputs:
+      install-args:
+        default: ""
+        description: "Optional arguments to install the package"
+        required: false
+        type: string
 
 permissions:
   contents: read
@@ -35,13 +36,6 @@ jobs:
       - name: Install package
         run: |
           uv pip install ${{ inputs.install-args }} "hya[${{ matrix.extra }}]"
-
-      - name: Install valid package version
-        uses: durandtibo/uv-install-package-action@v0.1.1
-        with:
-          package-name: ${{ inputs.package-name }}
-          package-version: ${{ matrix.package-version }}
-          python-version: ${{ matrix.python-version }}
 
       - name: Show dependency tree
         shell: bash

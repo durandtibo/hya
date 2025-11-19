@@ -29,7 +29,6 @@ jobs:
           inv install --docs-deps
 
       - name: Show dependency tree
-        shell: bash
         run: |
           uv pip tree --show-version-specifiers
 

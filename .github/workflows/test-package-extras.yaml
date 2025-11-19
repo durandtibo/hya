@@ -38,7 +38,6 @@ jobs:
           uv pip install ${{ inputs.install-args }} "hya[${{ matrix.extra }}]"
 
       - name: Show dependency tree
-        shell: bash
         run: |
           uv pip tree --show-version-specifiers
 

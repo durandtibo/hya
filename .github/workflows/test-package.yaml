@@ -48,7 +48,6 @@ jobs:
           ${{ inputs.install-cmd }}
 
       - name: Show dependency tree
-        shell: bash
         run: |
           uv pip tree --show-version-specifiers
 

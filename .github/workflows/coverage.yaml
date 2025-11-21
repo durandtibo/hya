@@ -22,6 +22,10 @@ jobs:
         run: |
           inv unit-test --cov
 
+      - name: Run integration tests
+        run: |
+          inv integration-test --cov
+
       - name: Upload coverage to Codecov
         if: github.repository == 'durandtibo/hya' && (github.event_name == 'push' || github.event_name == 'pull_request')
         uses: codecov/codecov-action@v5

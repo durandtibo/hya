@@ -31,7 +31,7 @@ def check_braceexpand() -> None:
     """
     if not is_braceexpand_available():
         msg = (
-            "`braceexpand` package is required but not installed. "
+            "'braceexpand' package is required but not installed. "
             "You can install `braceexpand` package with the command:\n\n"
             "pip install braceexpand\n"
         )
@@ -73,7 +73,7 @@ def check_numpy() -> None:
     """
     if not is_numpy_available():
         msg = (
-            "`numpy` package is required but not installed. "
+            "'numpy' package is required but not installed. "
             "You can install `numpy` package with the command:\n\n"
             "pip install numpy\n"
         )
@@ -115,7 +115,7 @@ def check_torch() -> None:
     """
     if not is_torch_available():
         msg = (
-            "`torch` package is required but not installed. "
+            "'torch' package is required but not installed. "
             "You can install `torch` package with the command:\n\n"
             "pip install torch\n"
         )

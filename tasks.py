@@ -75,6 +75,7 @@ def update(c: Context) -> None:
     c.run("uv sync --upgrade", pty=True)
     c.run("uv tool upgrade --all", pty=True)
     c.run("pre-commit autoupdate", pty=True)
+    install(c, docs_deps=True)
 
 
 @task

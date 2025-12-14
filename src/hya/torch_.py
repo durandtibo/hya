@@ -6,7 +6,6 @@ The resolvers are registered only if ``torch`` is available.
 from __future__ import annotations
 
 from typing import Any
-from unittest.mock import Mock
 
 from omegaconf.errors import InterpolationResolutionError
 
@@ -16,7 +15,7 @@ from hya.registry import registry
 if is_torch_available():
     import torch
 else:  # pragma: no cover
-    torch = Mock()
+    from hya.utils.fallback.torch import torch
 
 
 def to_tensor_resolver(data: Any) -> torch.Tensor:

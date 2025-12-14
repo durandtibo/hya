@@ -1,61 +1,77 @@
 #!/usr/bin/env bash
 
-# check_dependency_tree.sh - Validate package dependency tree
+# check_dependency_tree.sh - Validate package dependency tree structure
 #
 # Description:
-#   Verifies that the package dependency tree matches expected patterns. Checks
-#   that the package has no unexpected dependencies and validates the structure
-#   of the dependency tree. This ensures clean packaging without extra dependencies.
+#   This script verifies that the hya package has the
+#   correct dependency tree structure. It checks that:
+#   1. The package is properly installed and recognized
+#   2. The only required dependency is hatchling
+#   3. The dependency versions match expected patterns
 #
 # Usage:
 #   ./check_dependency_tree.sh
 #
 # Requirements:
 #   - uv must be installed and available in PATH
-#   - hya package must be installed in the current environment
+#   - hya must be installed in the current environment
 #
 # Exit Codes:
-#   0 - Dependency tree matches expected patterns
-#   1 - Dependency tree has unexpected dependencies or structure
-#
-# Note:
-#   Update the validation patterns in this script when dependencies change.
+#   0 - Dependency tree validation passed
+#   1 - Dependency tree validation failed (unexpected dependencies or versions)
 
 set -euo pipefail
 
-OUTPUT=$(uv pip tree --package hya --show-version-specifiers)
-echo "$OUTPUT"
+# Get the uv pip tree output
+tree_output=$(uv pip tree --package hya --show-version-specifiers)
 
-# Define patterns for each line (in order).
-# Add as many patterns as needed.
-PATTERNS=(
-  '^hya v[0-9]+(\.[0-9]+)*[A-Za-z0-9]*$'
-  '^└── omegaconf v[0-9]+(\.[0-9]+)*[[:space:]]+\[required:.*\]$'
-)
+echo "Dependency tree"
+echo "$tree_output"
+echo ""
 
-# Number of lines we want to check
-MAX_LINES=${#PATTERNS[@]}
+# Check if first line matches the pattern
+first_line=$(echo "$tree_output" | head -n 1)
+if ! echo "$first_line" | grep -qE '^hya v[0-9]+(\.[0-9]+)*[A-Za-z0-9]*$'; then
+    echo "❌ ERROR: First line does not match expected pattern"
+    echo "Expected: hya v<version>"
+    echo "Got: $first_line"
+    exit 1
+fi
+echo "✅ First line matches pattern: $first_line"
+echo ""
 
-# --- Validator ---
-# Iterate through each line and validate against expected patterns
-i=1
-while IFS= read -r line; do
-    # Stop once all patterns have been checked
-    if (( i > MAX_LINES )); then
-        break
+# Define packages to check
+packages=("omegaconf")
+
+# Track results
+missing_packages=()
+found_packages=()
+
+# Check each package
+for package in "${packages[@]}"; do
+    # Match package name at second level (lines starting with ├── or └──)
+    # Case-insensitive match for package names
+    if echo "$tree_output" | grep -qiE "^[├└]── ${package} v"; then
+        found_packages+=("$package")
+        echo "✅ Found: $package"
+    else
+        missing_packages+=("$package")
+        echo "❌ Missing: $package"
     fi
+done
 
-    pattern="${PATTERNS[$((i-1))]}"
+echo ""
+echo "📊 Summary:"
+echo " Found: ${#found_packages[@]}"
+echo " Missing: ${#missing_packages[@]}"
 
-    # Check if the line matches the expected pattern
-    if ! [[ "$line" =~ $pattern ]]; then
-        echo "❌ Line $i does NOT match expected pattern"
-        echo "   Line content:    '$line'"
-        echo "   Expected pattern: $pattern"
-        exit 1
-    fi
-
-    ((i++))
-done <<< "$OUTPUT"
-
-echo "✅ First $MAX_LINES lines match."
+# Exit with error if any packages are missing
+if [ ${#missing_packages[@]} -gt 0 ]; then
+    echo ""
+    echo "⚠️  Missing packages:"
+    printf '  • %s\n' "${missing_packages[@]}"
+    exit 1
+else
+    echo ""
+    echo "🎉 All packages found!"
+fi

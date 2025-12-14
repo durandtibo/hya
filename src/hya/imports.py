@@ -9,15 +9,13 @@ __all__ = [
     "is_braceexpand_available",
     "is_numpy_available",
     "is_torch_available",
-    "raise_error_torch_missing",
 ]
 
 from importlib.util import find_spec
-from typing import NoReturn
 
-#################################
-#     Tests for braceexpand     #
-#################################
+#######################
+#     braceexpand     #
+#######################
 
 
 def check_braceexpand() -> None:
@@ -36,7 +34,12 @@ def check_braceexpand() -> None:
     ```
     """
     if not is_braceexpand_available():
-        raise_error_braceexpand_missing()
+        msg = (
+            "'braceexpand' package is required but not installed. "
+            "You can install `braceexpand` package with the command:\n\n"
+            "pip install braceexpand\n"
+        )
+        raise RuntimeError(msg)
 
 
 def is_braceexpand_available() -> bool:
@@ -57,20 +60,9 @@ def is_braceexpand_available() -> bool:
     return find_spec("braceexpand") is not None
 
 
-def raise_error_braceexpand_missing() -> NoReturn:
-    r"""Raise a RuntimeError to indicate the ``braceexpand`` package is
-    missing."""
-    msg = (
-        "'braceexpand' package is required but not installed. "
-        "You can install `braceexpand` package with the command:\n\n"
-        "pip install braceexpand\n"
-    )
-    raise RuntimeError(msg)
-
-
-###########################
-#     Tests for numpy     #
-###########################
+#################
+#     numpy     #
+#################
 
 
 def check_numpy() -> None:
@@ -89,7 +81,12 @@ def check_numpy() -> None:
     ```
     """
     if not is_numpy_available():
-        raise_error_numpy_missing()
+        msg = (
+            "'numpy' package is required but not installed. "
+            "You can install `numpy` package with the command:\n\n"
+            "pip install numpy\n"
+        )
+        raise RuntimeError(msg)
 
 
 def is_numpy_available() -> bool:
@@ -110,20 +107,9 @@ def is_numpy_available() -> bool:
     return find_spec("numpy") is not None
 
 
-def raise_error_numpy_missing() -> NoReturn:
-    r"""Raise a RuntimeError to indicate the ``numpy`` package is
-    missing."""
-    msg = (
-        "'numpy' package is required but not installed. "
-        "You can install `numpy` package with the command:\n\n"
-        "pip install numpy\n"
-    )
-    raise RuntimeError(msg)
-
-
-###########################
-#     Tests for torch     #
-###########################
+#################
+#     torch     #
+#################
 
 
 def check_torch() -> None:
@@ -142,7 +128,12 @@ def check_torch() -> None:
     ```
     """
     if not is_torch_available():
-        raise_error_torch_missing()
+        msg = (
+            "'torch' package is required but not installed. "
+            "You can install `torch` package with the command:\n\n"
+            "pip install torch\n"
+        )
+        raise RuntimeError(msg)
 
 
 def is_torch_available() -> bool:
@@ -161,14 +152,3 @@ def is_torch_available() -> bool:
     ```
     """
     return find_spec("torch") is not None
-
-
-def raise_error_torch_missing() -> NoReturn:
-    r"""Raise a RuntimeError to indicate the ``torch`` package is
-    missing."""
-    msg = (
-        "'torch' package is required but not installed. "
-        "You can install `torch` package with the command:\n\n"
-        "pip install torch\n"
-    )
-    raise RuntimeError(msg)

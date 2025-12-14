@@ -5,7 +5,7 @@ from __future__ import annotations
 
 __all__ = ["torch"]
 
-from types import SimpleNamespace
+from types import ModuleType
 
 # Create a fake torch package
-torch = SimpleNamespace()
+torch = ModuleType("torch")

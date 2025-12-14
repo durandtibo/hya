@@ -5,7 +5,7 @@ from __future__ import annotations
 
 __all__ = ["numpy"]
 
-from types import SimpleNamespace
+from types import ModuleType
 
 # Create a fake numpy package
-numpy = SimpleNamespace()
+numpy = ModuleType("numpy")

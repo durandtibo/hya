@@ -5,14 +5,14 @@ The resolvers are registered only if ``torch`` is available.
 
 from __future__ import annotations
 
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from omegaconf.errors import InterpolationResolutionError
 
 from hya.imports import check_torch, is_torch_available
 from hya.registry import registry
 
-if is_torch_available():
+if TYPE_CHECKING or is_torch_available():
     import torch
 else:  # pragma: no cover
     from hya.utils.fallback.torch import torch

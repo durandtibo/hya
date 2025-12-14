@@ -10,7 +10,7 @@ from typing import TYPE_CHECKING
 from hya.imports import check_numpy, is_numpy_available
 from hya.registry import registry
 
-if is_numpy_available():
+if TYPE_CHECKING or is_numpy_available():
     import numpy as np
 else:  # pragma: no cover
     from hya.utils.fallback.numpy import numpy as np

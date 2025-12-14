@@ -5,7 +5,7 @@ from __future__ import annotations
 
 __all__ = ["braceexpand"]
 
-from types import SimpleNamespace
+from types import ModuleType
 
 # Create a fake braceexpand package
-braceexpand = SimpleNamespace()
+braceexpand = ModuleType("braceexpand")

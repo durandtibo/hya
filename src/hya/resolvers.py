@@ -76,7 +76,7 @@ def asinh_resolver(number: float) -> float:
 
 
 @registry.register("hya.ceildiv")
-def ceildiv_resolver(dividend: float, divisor: float) -> int:
+def ceildiv_resolver(dividend: float, divisor: float) -> float:
     r"""Return the ceiling division of two numbers.
 
     Args:
@@ -84,7 +84,7 @@ def ceildiv_resolver(dividend: float, divisor: float) -> int:
         divisor: The divisor.
 
     Returns:
-        int: The output of the ceiling division.
+        The output of the ceiling division.
 
     Example usage:
 
@@ -129,7 +129,7 @@ def exp_resolver(number: float) -> float:
 
 
 @registry.register("hya.floordiv")
-def floordiv_resolver(dividend: float, divisor: float) -> int:
+def floordiv_resolver(dividend: float, divisor: float) -> float:
     r"""Return the floor division of two numbers.
 
     Args:

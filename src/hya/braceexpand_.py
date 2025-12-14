@@ -6,7 +6,6 @@ The resolver is registered only if ``braceexpand`` is available.
 from __future__ import annotations
 
 from typing import TYPE_CHECKING
-from unittest.mock import Mock
 
 from hya.imports import check_braceexpand, is_braceexpand_available
 from hya.registry import registry
@@ -14,7 +13,7 @@ from hya.registry import registry
 if is_braceexpand_available():
     import braceexpand
 else:  # pragma: no cover
-    braceexpand = Mock()
+    from hya.utils.fallback.braceexpand import braceexpand
 
 if TYPE_CHECKING:
     from collections.abc import Iterator

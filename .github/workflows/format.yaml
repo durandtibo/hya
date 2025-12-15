@@ -24,3 +24,29 @@ jobs:
       - name: Check lint
         run: |
           inv check-lint
+
+  shell:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Install ShellCheck
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y shellcheck
+
+      - name: Run ShellCheck
+        run: |
+          echo "🔍 Running ShellCheck..."
+          shellcheck -- **/*.sh || exit 1
+
+      - name: Install shfmt
+        run: sudo snap install shfmt
+
+      - name: Run shfmt
+        run: |
+          echo "✨ Checking formatting using shfmt..."
+          shfmt -d -- **/*.sh

@@ -14,7 +14,7 @@ from hya.registry import registry
 if TYPE_CHECKING:
     from collections.abc import Iterable
 
-logger = logging.getLogger(__name__)
+logger: logging.Logger = logging.getLogger(__name__)
 
 
 @registry.register("hya.add")
@@ -182,7 +182,7 @@ def len_resolver(obj: Any) -> int:
 
 
 @registry.register("hya.iter_join")
-def iter_join_resolver(iterable: Iterable, separator: str) -> str:
+def iter_join_resolver(iterable: Iterable[Any], separator: str) -> str:
     r"""Convert all items in an iterable to a string and joins them into
     one string.
 

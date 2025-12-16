@@ -2,9 +2,9 @@ r"""Implement the resolver registry to easily register resolvers."""
 
 from __future__ import annotations
 
-__all__ = ["ResolverRegistry", "registry"]
+__all__ = ["ResolverRegistry", "register_resolvers", "registry"]
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from omegaconf import OmegaConf
 
@@ -30,14 +30,14 @@ class ResolverRegistry:
     """
 
     def __init__(self) -> None:
-        self._state: dict[str, Callable] = {}
+        self._state: dict[str, Callable[..., Any]] = {}
 
     @property
-    def state(self) -> dict[str, Callable]:
+    def state(self) -> dict[str, Callable[..., Any]]:
         r"""The state of the registry."""
         return self._state
 
-    def register(self, key: str, exist_ok: bool = False) -> Callable:
+    def register(self, key: str, exist_ok: bool = False) -> Callable[..., Any]:
         r"""Register a resolver to registry with ``key``.
 
         Args:
@@ -62,7 +62,7 @@ class ResolverRegistry:
         ```
         """
 
-        def wrap(resolver: Callable) -> Callable:
+        def wrap(resolver: Callable[..., Any]) -> Callable[..., Any]:
             if not callable(resolver):
                 msg = f"Each resolver has to be callable but received {type(resolver)}"
                 raise TypeError(msg)
@@ -78,11 +78,11 @@ class ResolverRegistry:
         return wrap
 
 
-registry = ResolverRegistry()
+registry: ResolverRegistry = ResolverRegistry()
 
 
 def register_resolvers() -> None:
-    r"""Register the resolvers.
+    r"""Register the default resolvers.
 
     Example usage:
 

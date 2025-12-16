@@ -10,11 +10,15 @@ permissions:
 jobs:
   build:
     uses: ./.github/workflows/build.yaml
+  cyclic-imports:
+    uses: ./.github/workflows/cyclic-imports.yaml
   doctest:
     uses: ./.github/workflows/doctest.yaml
     secrets: inherit
   format:
     uses: ./.github/workflows/format.yaml
+  type-checking:
+    uses: ./.github/workflows/type-checking.yaml
   pre-commit:
     uses: ./.github/workflows/pre-commit.yaml
   test:

@@ -12,19 +12,40 @@ permissions:
   contents: read
 
 jobs:
+  # Validate package can be built and installed correctly
   build:
     uses: ./.github/workflows/build.yaml
+
+  # Generate and upload code coverage reports
   coverage:
     uses: ./.github/workflows/coverage.yaml
     secrets: inherit
+
+  # Check for circular import dependencies
+  cyclic-imports:
+    uses: ./.github/workflows/cyclic-imports.yaml
+
+  # Run doctests on code examples
   doctest:
     uses: ./.github/workflows/doctest.yaml
     secrets: inherit
+
+  # Verify code formatting and linting
   format:
     uses: ./.github/workflows/format.yaml
+
+  # Check type annotations with pyright
+  type-checking:
+    uses: ./.github/workflows/type-checking.yaml
+
+  # Run pre-commit hooks for code quality
   pre-commit:
     uses: ./.github/workflows/pre-commit.yaml
+
+  # Run unit and integration tests across multiple Python versions and OS
   test:
     uses: ./.github/workflows/test.yaml
+
+  # Test compatibility with different dependency versions
   test-deps:
     uses: ./.github/workflows/test-deps.yaml

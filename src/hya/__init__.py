@@ -4,8 +4,8 @@ from __future__ import annotations
 
 __all__ = [
     "is_braceexpand_available",
+    "is_numpy_available",
     "is_torch_available",
-    "register_resolvers",
     "register_resolvers",
 ]
 

@@ -66,7 +66,7 @@ def check_types(c: Context) -> None:
         c: The invoke context.
     """
     logger.info("🔬 Checking type hints with pyright...")
-    c.run(f"pyright {SOURCE}", pty=True)
+    c.run(f"pyright --verifytypes {NAME} --ignoreexternal", pty=True)
     logger.info("✅ Type check passed")
 
 

@@ -12,6 +12,9 @@ from omegaconf.errors import InterpolationResolutionError
 from hya.imports import check_torch, is_torch_available
 from hya.registry import registry
 
+if TYPE_CHECKING:
+    from collections.abc import Callable
+
 if TYPE_CHECKING or is_torch_available():
     import torch
 else:  # pragma: no cover
@@ -92,9 +95,11 @@ def get_dtypes() -> set[torch.dtype]:
 
 
 if is_torch_available():  # pragma: no cover
-    resolvers = {
+    resolvers: dict[str, Callable[..., Any]] = {
         "hya.torch.tensor": to_tensor_resolver,
         "hya.torch.dtype": torch_dtype_resolver,
     }
+    name: str
+    resolver: Callable[..., Any]
     for name, resolver in resolvers.items():
         registry.register(name)(resolver)

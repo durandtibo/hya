@@ -1,0 +1,30 @@
+# Workflow validation workflow.
+# Verifies GitHub Actions workflow files are valid and follow best practices.
+# Triggers on changes to workflow files to catch issues early.
+
+name: Verify Workflows
+
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/*" # Trigger on changes to workflow files
+  push:
+    paths:
+      - ".github/workflows/*" # Trigger on changes to workflow files
+  workflow_dispatch: # to trigger manually
+
+permissions:
+  contents: read
+
+jobs:
+  verify-workflows:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      # Verify workflow files are valid and follow best practices
+      - name: Verify GitHub Workflows
+        uses: durandtibo/verify-github-workflow-action@v0.0.3

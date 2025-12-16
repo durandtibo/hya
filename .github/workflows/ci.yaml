@@ -21,9 +21,9 @@ jobs:
     uses: ./.github/workflows/coverage.yaml
     secrets: inherit
 
-#  # Check for circular import dependencies
-#  cyclic-imports:
-#    uses: ./.github/workflows/cyclic-imports.yaml
+  # Check for circular import dependencies
+  cyclic-imports:
+    uses: ./.github/workflows/cyclic-imports.yaml
 
   # Run doctests on code examples
   doctest:

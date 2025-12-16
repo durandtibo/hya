@@ -1,11 +1,28 @@
 name: Get Versions
+
+# This reusable workflow reads package version configuration from a JSON file
+# and exposes it as an output for use in other workflows.
+#
+# Usage:
+#   jobs:
+#     get-versions:
+#       uses: ./.github/workflows/get-versions.yaml
+#
+#     use-versions:
+#       needs: get-versions
+#       runs-on: ubuntu-latest
+#       steps:
+#         - name: Use versions
+#           run: echo "${{ needs.get-versions.outputs.package_versions }}"
+
 on:
   workflow_call:
     outputs:
       package_versions:
-        description: "JSON string containing all package versions"
+        description: "JSON string containing all package versions from dev/config/package_versions.json"
         value: ${{ jobs.get-versions.outputs.package_versions }}
-  workflow_dispatch:  # to trigger manually
+
+  workflow_dispatch:  # Allows manual triggering for testing purposes
 
 permissions:
   contents: read
@@ -15,16 +32,18 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 2
     outputs:
-      package_versions: ${{ steps.extract.outputs.versions }}
+      package_versions: ${{ steps.read-json.outputs.json-content }}
     steps:
-      - name: Checkout
+      - name: Checkout repository
         uses: actions/checkout@v6
 
-      - name: Read versions
-        id: extract
-        run: |
-          echo "versions=$(cat dev/config/package_versions.json)" >> $GITHUB_OUTPUT
+      - name: Read and validate JSON file
+        uses: durandtibo/read-json-action@v0.1
+        id: read-json
+        with:
+          file-path: dev/config/package_versions.json
 
-      - name: Show versions
+      - name: Display package versions
         run: |
-          echo "versions: ${{ toJson(fromJson(steps.extract.outputs.versions)) }}"
+          echo "📦 Package versions loaded successfully:"
+          echo '${{ steps.read-json.outputs.json-content }}' | jq '.'

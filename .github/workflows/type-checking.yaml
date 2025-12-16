@@ -1,0 +1,26 @@
+# Type checking workflow.
+# Validates type annotations using pyright to ensure type safety.
+# Helps catch type-related bugs before runtime.
+
+name: Type Checking
+on:
+  workflow_call:
+  workflow_dispatch:  # to trigger manually
+
+permissions:
+  contents: read
+
+jobs:
+  type-checking:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup python environment
+        uses: durandtibo/setup-venv-uv-action@v0.0.1
+
+      - name: Check types
+        run: |
+          inv check-types

@@ -19,7 +19,7 @@ jobs:
       fail-fast: false
       matrix:
         dist-type: [ "sdist", "wheel" ]
-        package-extra: [ "", "all" ]
+        package-extra: [ "", "all", 'braceexpand', 'numpy', 'torch' ]
 
     steps:
       - name: Checkout

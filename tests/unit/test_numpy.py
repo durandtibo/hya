@@ -4,11 +4,10 @@ import pytest
 from omegaconf import OmegaConf
 
 from hya import is_numpy_available, register_resolvers
+from hya.testing import numpy_available
 
 if is_numpy_available():
     import numpy as np
-
-numpy_available = pytest.mark.skipif(not is_numpy_available(), reason="Requires NumPy")
 
 
 @pytest.fixture(scope="module", autouse=True)

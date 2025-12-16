@@ -5,15 +5,11 @@ from omegaconf import OmegaConf
 from omegaconf.errors import InterpolationResolutionError
 
 from hya import is_torch_available, register_resolvers
+from hya.testing import torch_available
 from hya.torch_ import get_dtypes
 
 if is_torch_available():
     import torch
-    from torch import dtype
-else:
-    dtype = None
-
-torch_available = pytest.mark.skipif(not is_torch_available(), reason="Requires PyTorch")
 
 
 @pytest.fixture(scope="module", autouse=True)

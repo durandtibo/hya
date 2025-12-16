@@ -8,4 +8,4 @@ __all__ = ["torch"]
 from types import ModuleType
 
 # Create a fake torch package
-torch = ModuleType("torch")
+torch: ModuleType = ModuleType("torch")

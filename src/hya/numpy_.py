@@ -5,7 +5,7 @@ The resolvers are registered only if ``numpy`` is available.
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from hya.imports import check_numpy, is_numpy_available
 from hya.registry import registry
@@ -16,6 +16,8 @@ else:  # pragma: no cover
     from hya.utils.fallback.numpy import numpy as np
 
 if TYPE_CHECKING:
+    from collections.abc import Callable
+
     from numpy.typing import ArrayLike
 
 
@@ -48,8 +50,10 @@ def to_array_resolver(data: ArrayLike) -> np.ndarray:
 
 
 if is_numpy_available():  # pragma: no cover
-    resolvers = {
+    resolvers: dict[str, Callable[..., Any]] = {
         "hya.np.array": to_array_resolver,
     }
+    name: str
+    resolver: Callable[..., Any]
     for name, resolver in resolvers.items():
         registry.register(name)(resolver)

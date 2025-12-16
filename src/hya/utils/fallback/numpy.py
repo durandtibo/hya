@@ -8,4 +8,4 @@ __all__ = ["numpy"]
 from types import ModuleType
 
 # Create a fake numpy package
-numpy = ModuleType("numpy")
+numpy: ModuleType = ModuleType("numpy")

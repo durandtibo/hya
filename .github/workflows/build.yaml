@@ -1,3 +1,7 @@
+# Build and package validation workflow.
+# Tests that the package can be built correctly as both source distribution and wheel.
+# Validates package metadata, dependencies, and that the package is properly typed.
+
 name: Build Tests
 on:
   workflow_call:
@@ -10,76 +14,29 @@ jobs:
   build:
     runs-on: ubuntu-latest
     timeout-minutes: 10
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v6
-
-      - name: Install uv
-        uses: astral-sh/setup-uv@v7
-        with:
-          python-version: '3.13'
-          activate-environment: true
-
-      - name: Build package
-        run: |
-          uv build
-
-      - name: Install package
-        run: |
-          uv pip install dist/*.whl
-
-      - name: Inspect package
-        run: |
-          uv pip show hya
-
-      - name: Show dependency tree
-        shell: bash
-        run: |
-          uv pip tree --package hya --show-version-specifiers
-
-      - name: Import package
-        run: |
-          python -c "import hya; print('OK')"
-
-  extras:
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
     strategy:
       max-parallel: 8
       fail-fast: false
       matrix:
-        extra: [ 'all', 'braceexpand', 'numpy', 'torch' ]
+        dist-type: [ "sdist", "wheel" ]
+        package-extra: [ "", "all" ]
 
     steps:
       - name: Checkout
         uses: actions/checkout@v6
 
-      - name: Install uv
-        uses: astral-sh/setup-uv@v7
+      - name: Verify Build
+        uses: durandtibo/verify-uv-build-action@v0.0.5
         with:
-          python-version: '3.13'
-          activate-environment: true
+          package-name: hya
+          package-extra: ${{ matrix.package-extra }}
+          package-dependencies: omegaconf
+          dist-type: ${{ matrix.dist-type }}
 
-      - name: Build package
-        run: |
-          uv build
-
-      - name: Install package
-        run: |
-          WHEEL=(dist/*.whl)
-          echo $WHEEL
-          uv pip install "${WHEEL}[${{ matrix.extra }}]"
-
-      - name: Inspect package
-        run: |
-          uv pip show hya
-
-      - name: Show dependency tree
+      - name: Run package checks
         shell: bash
         run: |
-          uv pip tree --package hya --show-version-specifiers
-
-      - name: Import package
-        run: |
-          python -c "import hya; print('OK')"
+          set -euo pipefail
+          echo "🔍 Running package checks..."
+          python tests/package_checks.py
+          echo "✅ Package checks passed"

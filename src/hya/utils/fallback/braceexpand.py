@@ -8,4 +8,4 @@ __all__ = ["braceexpand"]
 from types import ModuleType
 
 # Create a fake braceexpand package
-braceexpand = ModuleType("braceexpand")
+braceexpand: ModuleType = ModuleType("braceexpand")

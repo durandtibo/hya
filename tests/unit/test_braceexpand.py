@@ -3,11 +3,8 @@ from __future__ import annotations
 import pytest
 from omegaconf import OmegaConf
 
-from hya import is_braceexpand_available, register_resolvers
-
-braceexpand_available = pytest.mark.skipif(
-    not is_braceexpand_available(), reason="Requires braceexpand"
-)
+from hya import register_resolvers
+from hya.testing import braceexpand_available
 
 
 @pytest.fixture(scope="module", autouse=True)

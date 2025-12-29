@@ -19,7 +19,7 @@ jobs:
         uses: actions/checkout@v6
 
       - name: Setup python environment
-        uses: durandtibo/setup-venv-uv-action@v0.0.2
+        uses: durandtibo/setup-venv-uv-action@v0.0.3
 
       - name: Check types
         run: |

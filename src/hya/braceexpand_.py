@@ -19,7 +19,9 @@ if TYPE_CHECKING:
     from collections.abc import Iterator
 
 
-registry = get_default_registry() if is_braceexpand_available() else ResolverRegistry()
+registry: ResolverRegistry = (
+    get_default_registry() if is_braceexpand_available() else ResolverRegistry()
+)
 
 
 @registry.register("hya.braceexpand")

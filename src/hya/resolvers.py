@@ -9,14 +9,14 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Any
 from urllib.parse import unquote, urlparse
 
-from hya.registry import get_default_registry
+from hya.registry import ResolverRegistry, get_default_registry
 
 if TYPE_CHECKING:
     from collections.abc import Iterable
 
 logger: logging.Logger = logging.getLogger(__name__)
 
-registry = get_default_registry()
+registry: ResolverRegistry = get_default_registry()
 
 
 @registry.register("hya.add")

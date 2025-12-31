@@ -17,7 +17,7 @@ if TYPE_CHECKING or is_torch_available():
 else:  # pragma: no cover
     from hya.utils.fallback.torch import torch
 
-registry = get_default_registry() if is_torch_available() else ResolverRegistry()
+registry: ResolverRegistry = get_default_registry() if is_torch_available() else ResolverRegistry()
 
 
 @registry.register("hya.torch.tensor")

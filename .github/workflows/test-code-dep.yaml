@@ -1,3 +1,7 @@
+# Reusable workflow for testing code with specific dependency versions.
+# Used by test-deps.yaml to test compatibility with different versions of dependencies.
+# Runs unit tests with each specified version of a package.
+
 name: Test Code with Dependency Version
 on:
   workflow_call:
@@ -14,27 +18,32 @@ permissions:
 
 jobs:
   test:
-    runs-on: ${{ matrix.os }}
-    timeout-minutes: 10
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
     strategy:
       max-parallel: 8
       fail-fast: false
       matrix:
-        os: [ ubuntu-latest ]
+        # Test across all supported Python versions
         python-version: [ '3.14', '3.14t', '3.13', '3.13t', '3.12', '3.11', '3.10' ]
+        # Test with each version of the specified package
         package-version: ${{ fromJson(inputs.package-versions) }}
 
     steps:
       - name: Checkout
         uses: actions/checkout@v6
 
+      # Install specific version of dependency for compatibility testing
       - name: Setup python environment
         uses: durandtibo/setup-venv-uv-action@v0.0.3
         with:
           package-name: ${{ inputs.package-name }}
           package-version: ${{ matrix.package-version }}
           python-version: ${{ matrix.python-version }}
+          install-args: '--no-optional-deps'
+          package-install-args: '--upgrade'
 
+      # Run unit tests to verify compatibility
       - name: Run unit tests
         run: |
           inv unit-test

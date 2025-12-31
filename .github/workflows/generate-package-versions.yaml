@@ -1,18 +1,22 @@
+# Package version generation workflow.
+# Generates configuration for testing different dependency versions.
+# Creates a pull request with updated version configuration weekly.
+
 name: Generate package versions
 on:
   schedule:
-    - cron: "0 6 * * 4" # run every Thursday at 6:00 AM UTC
+    - cron: "0 6 * * 4" # Run every Thursday at 6:00 AM UTC
   workflow_call:
   workflow_dispatch:  # to trigger manually
 
 permissions:
-  contents: write
-  pull-requests: write
+  contents: write      # Required to push changes
+  pull-requests: write # Required to create pull requests
 
 jobs:
   generate-package-versions:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 2
 
     steps:
       - name: Checkout
@@ -21,10 +25,12 @@ jobs:
       - name: Setup python environment
         uses: durandtibo/setup-venv-uv-action@v0.0.3
 
+      # Generate version configuration for dependency testing
       - name: Generate package versions
         run: |
           python dev/generate_versions.py
 
+      # Create a pull request with updated version configuration
       - uses: peter-evans/create-pull-request@v8
         if: always()
         with:

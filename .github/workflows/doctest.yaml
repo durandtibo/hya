@@ -1,3 +1,7 @@
+# Documentation testing workflow.
+# Runs doctests on code examples in docstrings to ensure they work correctly.
+# Also validates that the documentation can be built without errors.
+
 name: Documentation Tests
 on:
   workflow_call:
@@ -7,9 +11,10 @@ permissions:
   contents: read
 
 jobs:
+  # Run doctests embedded in source code docstrings
   doctest:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 2
 
     steps:
       - name: Checkout
@@ -18,23 +23,27 @@ jobs:
       - name: Setup python environment
         uses: durandtibo/setup-venv-uv-action@v0.0.3
 
+      # Run doctest to validate code examples in docstrings
       - name: Run doctest on source code
         run: |
           inv doctest-src
 
+  # Verify documentation can be built without errors
   build:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 2
 
     steps:
       - name: Checkout
         uses: actions/checkout@v6
 
+      # Install dependencies including documentation tools (mkdocs, mike, etc.)
       - name: Setup python environment
         uses: durandtibo/setup-venv-uv-action@v0.0.3
         with:
           install-args: '--docs-deps'
 
+      # Configure git for mike (documentation versioning tool)
       - name: Setup doc deploy
         env:
           CI_BOT_EMAIL: ${{secrets.CI_BOT_EMAIL}}
@@ -42,6 +51,7 @@ jobs:
           git config --global user.name ci-docs-bot
           git config --global user.email "$CI_BOT_EMAIL"
 
+      # Build documentation to a temporary branch to verify no errors
       - name: Build documentation
         run: |
           mike deploy --config-file docs/mkdocs.yml --branch tmp-doc-build-1234 dev

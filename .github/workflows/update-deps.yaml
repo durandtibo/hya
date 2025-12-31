@@ -1,18 +1,22 @@
+# Automated dependency update workflow.
+# Updates all dependencies to their latest compatible versions weekly.
+# Creates a pull request with the updates after running tests.
+
 name: Update dependencies
 on:
   schedule:
-    - cron: "0 6 * * 6" # run every Saturday at 6:00 AM UTC
+    - cron: "0 6 * * 6" # Run every Saturday at 6:00 AM UTC
   workflow_call:
   workflow_dispatch:  # to trigger manually
 
 permissions:
-  contents: write
-  pull-requests: write
+  contents: write      # Required to push changes
+  pull-requests: write # Required to create pull requests
 
 jobs:
   update-deps:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 2
 
     steps:
       - uses: actions/checkout@v6
@@ -20,22 +24,28 @@ jobs:
       - name: Setup python environment
         uses: durandtibo/setup-venv-uv-action@v0.0.3
 
-      - name: Install packages
+      # Update all dependencies to their latest compatible versions
+      - name: Update dependencies
         run: |
           inv update
 
-      - name: Install packages
+      # Install dependencies including documentation dependencies
+      - name: Install dependencies with docs
         run: |
           inv install --docs-deps
 
+      # Display updated dependency tree
       - name: Show dependency tree
+        shell: bash
         run: |
           uv pip tree --show-version-specifiers
 
+      # Run tests to ensure updates don't break functionality
       - name: Run unit tests
         run: |
           inv unit-test --cov
 
+      # Create a pull request with the dependency updates
       - uses: peter-evans/create-pull-request@v8
         if: always()
         with:

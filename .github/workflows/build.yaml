@@ -13,13 +13,13 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 2
     strategy:
       max-parallel: 8
       fail-fast: false
       matrix:
         dist-type: [ "sdist", "wheel" ]
-        package-extra: [ "", "all", 'braceexpand', 'numpy', 'torch' ]
+        package-extra: [ "", 'braceexpand', 'numpy', 'torch' ]
 
     steps:
       - name: Checkout
@@ -30,11 +30,41 @@ jobs:
         with:
           package-name: hya
           package-extra: ${{ matrix.package-extra }}
-          package-dependencies: omegaconf
+          package-dependencies: ""
           dist-type: ${{ matrix.dist-type }}
 
       - name: Run package checks
         shell: bash
+        run: |
+          set -euo pipefail
+          echo "🔍 Running package checks..."
+          python tests/package_checks.py
+          echo "✅ Package checks passed"
+
+
+  build-all:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    strategy:
+      max-parallel: 8
+      fail-fast: false
+      matrix:
+        dist-type: [ "sdist", "wheel" ]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Verify Build
+        uses: durandtibo/verify-uv-build-action@v0.0.7
+        with:
+          package-name: hya
+          package-extra: all
+          package-dependencies: ""
+          dist-type: ${{ matrix.dist-type }}
+          verify-sdist-extra: false
+
+      - name: Run package checks
         run: |
           set -euo pipefail
           echo "🔍 Running package checks..."

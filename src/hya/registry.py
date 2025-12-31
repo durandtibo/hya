@@ -29,8 +29,8 @@ class ResolverRegistry:
     ```
     """
 
-    def __init__(self) -> None:
-        self._state: dict[str, Callable[..., Any]] = {}
+    def __init__(self, state: dict[str, Callable[..., Any]] | None = None) -> None:
+        self._state: dict[str, Callable[..., Any]] = state.copy() if state else {}
 
     @property
     def state(self) -> dict[str, Callable[..., Any]]:

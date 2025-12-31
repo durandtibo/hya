@@ -123,7 +123,7 @@ The following is the corresponding `hya` versions and tested dependencies.
 
 ## Contributing
 
-Please check the instructions in [CONTRIBUTING.md](.github/CONTRIBUTING.md).
+Please check the instructions in [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## API stability
 

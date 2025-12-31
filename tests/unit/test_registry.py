@@ -51,6 +51,14 @@ def test_resolver_registry_init_with_state() -> None:
     assert "add1" not in registry.state
 
 
+def test_resolver_registry_has_resolver_true() -> None:
+    assert ResolverRegistry({"add2": add_two}).has_resolver("add2")
+
+
+def test_resolver_registry_has_resolver_false() -> None:
+    assert not ResolverRegistry().has_resolver("add2")
+
+
 def test_resolver_registry_register() -> None:
     registry = ResolverRegistry()
 

@@ -8,7 +8,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 from hya.imports import check_braceexpand, is_braceexpand_available
-from hya.registry import registry
+from hya.registry import ResolverRegistry, get_default_registry
 
 if TYPE_CHECKING or is_braceexpand_available():
     import braceexpand
@@ -19,6 +19,10 @@ if TYPE_CHECKING:
     from collections.abc import Iterator
 
 
+registry = get_default_registry() if is_braceexpand_available() else ResolverRegistry()
+
+
+@registry.register("hya.braceexpand")
 def braceexpand_resolver(pattern: str) -> Iterator[str]:
     r"""Return an iterator from a brace expansion of pattern.
 
@@ -33,7 +37,3 @@ def braceexpand_resolver(pattern: str) -> Iterator[str]:
     """
     check_braceexpand()
     return braceexpand.braceexpand(pattern)
-
-
-if is_braceexpand_available():  # pragma: no cover
-    registry.register("hya.braceexpand")(braceexpand_resolver)

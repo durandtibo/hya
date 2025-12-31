@@ -2,7 +2,7 @@ r"""Implement the resolver registry to easily register resolvers."""
 
 from __future__ import annotations
 
-__all__ = ["ResolverRegistry", "get_default_registry", "register_resolvers", "registry"]
+__all__ = ["ResolverRegistry", "get_default_registry", "register_resolvers"]
 from typing import TYPE_CHECKING, Any
 
 from omegaconf import OmegaConf
@@ -16,8 +16,8 @@ class ResolverRegistry:
 
     Example:
         ```pycon
-        >>> from hya.registry import ResolverRegistry
-        >>> registry = ResolverRegistry()
+        >>> from hya.registry import get_default_registry
+        >>> registry = get_default_registry()
         >>> @registry.register("my_key")
         ... def my_resolver(value):
         ...     pass
@@ -77,7 +77,8 @@ class ResolverRegistry:
 
         Example:
             ```pycon
-            >>> from hya.registry import registry
+            >>> from hya.registry import get_default_registry
+            >>> registry = get_default_registry()
             >>> @registry.register("my_key")
             ... def my_resolver(value):
             ...     pass
@@ -100,9 +101,6 @@ class ResolverRegistry:
             return resolver
 
         return wrap
-
-
-registry: ResolverRegistry = ResolverRegistry()
 
 
 def get_default_registry() -> ResolverRegistry:
@@ -149,6 +147,6 @@ def register_resolvers() -> None:
 
         ```
     """
-    for key, resolver in registry.state.items():
+    for key, resolver in get_default_registry().state.items():
         if not OmegaConf.has_resolver(key):
             OmegaConf.register_new_resolver(key, resolver)

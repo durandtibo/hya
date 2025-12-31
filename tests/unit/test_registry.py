@@ -10,7 +10,6 @@ from hya.registry import (
     ResolverRegistry,
     get_default_registry,
     register_resolvers,
-    registry,
 )
 
 if TYPE_CHECKING:
@@ -126,7 +125,7 @@ def test_get_default_registry_modifications_persist() -> None:
 ########################################
 
 
-@pytest.mark.parametrize("name", registry.state.keys())
+@pytest.mark.parametrize("name", get_default_registry().state.keys())
 def test_register_resolvers(name: str) -> None:
     register_resolvers()
     assert OmegaConf.has_resolver(name)

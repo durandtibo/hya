@@ -30,7 +30,7 @@ jobs:
         with:
           package-name: hya
           package-extra: ${{ matrix.package-extra }}
-          package-dependencies: ""
+          package-dependencies: "omegaconf"
           dist-type: ${{ matrix.dist-type }}
 
       - name: Run package checks
@@ -60,7 +60,7 @@ jobs:
         with:
           package-name: hya
           package-extra: all
-          package-dependencies: ""
+          package-dependencies: "omegaconf"
           dist-type: ${{ matrix.dist-type }}
           verify-sdist-extra: false
 

@@ -1,25 +1,48 @@
-# Workflow run cleanup workflow.
-# Cancels stale queued workflow runs to save CI resources.
-# Runs every hour to keep the action queue clean.
+# Cancel Stale Queued Runs
+#
+# This workflow automatically cancels stale queued workflow runs to prevent
+# resource waste and reduce queue congestion. It helps maintain a clean and
+# efficient CI/CD environment by cleaning up abandoned runs.
+#
+# Schedule:
+#   - Runs hourly (every hour at minute 0)
+#   - Can also be triggered manually via workflow_dispatch
+#
+# Configuration:
+#   - Uses GitHub token for authentication
+#   - Operates on the current repository
+#   - No age threshold specified (uses action's default)
+#
+# Uses:
+#   - durandtibo/cancel-queued-runs-action@v1.9
+#     Specialized action for managing workflow run queue
+#
+# Purpose:
+#   - Resource optimization: Prevents wasted compute on stale runs
+#   - Queue management: Keeps workflow queue clean and responsive
+#   - Cost reduction: Reduces unnecessary workflow execution time
+#
+# Permissions:
+#   - actions: write - Required to cancel workflow runs
+#   - contents: read - Required for repository access
 
 name: Cancel stale queued runs
 
 on:
   schedule:
-    - cron: "0 * * * *"   # Run every hour to clean up queued runs
-  workflow_dispatch:      # Allow manual triggering
+    - cron: "0 * * * *" # runs every hour
+  workflow_dispatch: # optional, for manual triggering
 
 permissions:
-  actions: write   # Required to cancel workflow runs
+  actions: write
   contents: read
 
 jobs:
   cancel-stale-runs:
     runs-on: ubuntu-24.04
-    timeout-minutes: 10
+    timeout-minutes: 2
 
     steps:
-      # Cancel queued workflow runs that are waiting to save CI resources
       - uses: durandtibo/cancel-queued-runs-action@v1.9
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}

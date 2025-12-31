@@ -9,7 +9,7 @@ permissions:
 jobs:
   all:
     runs-on: ${{ matrix.os }}
-    timeout-minutes: 10
+    timeout-minutes: 5
     strategy:
       max-parallel: 8
       fail-fast: false
@@ -47,7 +47,7 @@ jobs:
 
   min:
     runs-on: ${{ matrix.os }}
-    timeout-minutes: 10
+    timeout-minutes: 2
     strategy:
       max-parallel: 8
       fail-fast: false

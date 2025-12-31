@@ -1,28 +1,34 @@
+# Development documentation deployment workflow.
+# Builds and deploys documentation for the development version to GitHub Pages.
+# Triggered on every push to main branch to keep dev docs up to date.
+
 name: Documentation (unstable)
 on:
   workflow_call:
   workflow_dispatch:  # to trigger manually
   push:
     branches:
-      - main
+      - main  # Trigger on pushes to main branch
 
 permissions:
-  contents: write
+  contents: write  # Required to push to gh-pages branch
 
 jobs:
   build:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 2
 
     steps:
       - name: Checkout
         uses: actions/checkout@v6
 
+      # Install dependencies including documentation tools
       - name: Setup python environment
         uses: durandtibo/setup-venv-uv-action@v0.0.3
         with:
           install-args: '--docs-deps'
 
+      # Configure git and fetch gh-pages branch for mike
       - name: Setup doc deploy
         env:
           CI_BOT_EMAIL: ${{secrets.CI_BOT_EMAIL}}
@@ -31,6 +37,7 @@ jobs:
           git config --global user.email "$CI_BOT_EMAIL"
           git fetch origin gh-pages --depth=1 --tags
 
+      # Build and deploy documentation for the development version
       - name: Build and deploy documentation
         run: |
           inv publish-doc-dev

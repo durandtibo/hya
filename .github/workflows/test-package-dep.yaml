@@ -1,3 +1,7 @@
+# Reusable workflow for testing installed package with specific dependency versions.
+# Tests the PyPI package with different versions of optional dependencies.
+# Ensures published package works across supported dependency version ranges.
+
 name: Test Package with Dependency Version
 on:
   workflow_call:
@@ -14,30 +18,33 @@ permissions:
 
 jobs:
   test:
-    runs-on: ${{ matrix.os }}
-    timeout-minutes: 10
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
     strategy:
       max-parallel: 8
       fail-fast: false
       matrix:
-        os: [ ubuntu-latest ]
         python-version: [ '3.14', '3.14t', '3.13', '3.13t', '3.12', '3.11', '3.10' ]
+        # Test with each version of the specified package
         package-version: ${{ fromJson(inputs.package-versions) }}
 
     steps:
       - name: Checkout
         uses: actions/checkout@v6
 
+      # Install uv package manager
       - name: Install uv and set the python version
         uses: astral-sh/setup-uv@v7
         with:
           python-version: ${{ matrix.python-version }}
           activate-environment: true
 
+      # Install the package from PyPI
       - name: Install package
         run: |
           uv pip install hya
 
+      # Install specific version of dependency for compatibility testing
       - name: Install valid package version
         uses: durandtibo/uv-install-package-action@v0.1.1
         with:
@@ -45,10 +52,13 @@ jobs:
           package-version: ${{ matrix.package-version }}
           python-version: ${{ matrix.python-version }}
 
+      # Display dependency tree
       - name: Show dependency tree
+        shell: bash
         run: |
           uv pip tree --show-version-specifiers
 
+      # Run basic package checks
       - name: Run some checks
         run: |
           python tests/package_checks.py

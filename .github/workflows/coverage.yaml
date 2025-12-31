@@ -1,3 +1,7 @@
+# Code coverage workflow.
+# Runs tests with coverage tracking and uploads results to Codecov.
+# Only uploads coverage for the main repository to avoid spam from forks.
+
 name: Code Coverage
 on:
   workflow_call:
@@ -9,8 +13,7 @@ permissions:
 jobs:
   coverage:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
-
+    timeout-minutes: 2
     steps:
       - name: Checkout
         uses: actions/checkout@v6
@@ -18,14 +21,17 @@ jobs:
       - name: Setup python environment
         uses: durandtibo/setup-venv-uv-action@v0.0.3
 
+      # Run unit tests with coverage tracking
       - name: Run unit tests
         run: |
           inv unit-test --cov
 
+      # Run integration tests with coverage tracking
       - name: Run integration tests
         run: |
           inv integration-test --cov
 
+      # Upload coverage report to Codecov (only for main repository)
       - name: Upload coverage to Codecov
         if: github.repository == 'durandtibo/hya' && (github.event_name == 'push' || github.event_name == 'pull_request')
         uses: codecov/codecov-action@v5

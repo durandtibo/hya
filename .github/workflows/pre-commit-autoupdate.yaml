@@ -1,18 +1,23 @@
+# Pre-commit hooks auto-update workflow.
+# Automatically updates pre-commit hook versions weekly.
+# Creates a pull request with updated hook versions after validation.
+
 name: pre-commit auto-update
 
 on:
   schedule:
-    - cron: "0 8 * * 2" # run every Tuesday at 8:00 AM UTC
+    - cron: "0 8 * * 2" # Run every Tuesday at 8:00 AM UTC
   workflow_call:
   workflow_dispatch:  # to trigger manually
 
 permissions:
-  contents: write
-  pull-requests: write
+  contents: write      # Required to push changes
+  pull-requests: write # Required to create pull requests
 
 jobs:
   auto-update:
     runs-on: ubuntu-latest
+    timeout-minutes: 2
     steps:
       - name: Checkout
         uses: actions/checkout@v6
@@ -20,14 +25,17 @@ jobs:
       - name: Setup python environment
         uses: durandtibo/setup-venv-uv-action@v0.0.3
 
+      # Update pre-commit hooks to their latest versions
       - name: Autoupdate pre-commit hooks
         run: |
           pre-commit autoupdate
 
+      # Run pre-commit on all files to test updated hooks
       - name: Run pre-commit hooks
         run: |
           pre-commit run --all-files
 
+      # Create a pull request with the updates
       - uses: peter-evans/create-pull-request@v8
         if: always()
         with:

@@ -15,18 +15,16 @@ if TYPE_CHECKING:
 class ResolverRegistry:
     r"""Implement a resolver registry.
 
-    Example usage:
+    Example:
+        ```pycon
+        >>> from hya.registry import ResolverRegistry
+        >>> registry = ResolverRegistry()
+        >>> @registry.register("my_key")
+        ... def my_resolver(value):
+        ...     pass
+        ...
 
-    ```pycon
-
-    >>> from hya.registry import ResolverRegistry
-    >>> registry = ResolverRegistry()
-    >>> @registry.register("my_key")
-    ... def my_resolver(value):
-    ...     pass
-    ...
-
-    ```
+        ```
     """
 
     def __init__(self, state: dict[str, Callable[..., Any]] | None = None) -> None:
@@ -50,16 +48,15 @@ class ResolverRegistry:
             TypeError: if the resolver is not callable
             TypeError: if the key already exists and ``exist_ok=False``
 
-        Example usage:
+        Example:
+            ```pycon
+            >>> from hya.registry import registry
+            >>> @registry.register("my_key")
+            ... def my_resolver(value):
+            ...     pass
+            ...
 
-        ```pycon
-        >>> from hya.registry import registry
-        >>> @registry.register("my_key")
-        ... def my_resolver(value):
-        ...     pass
-        ...
-
-        ```
+            ```
         """
 
         def wrap(resolver: Callable[..., Any]) -> Callable[..., Any]:
@@ -84,14 +81,12 @@ registry: ResolverRegistry = ResolverRegistry()
 def register_resolvers() -> None:
     r"""Register the default resolvers.
 
-    Example usage:
+    Example:
+        ```pycon
+        >>> from hya import register_resolvers
+        >>> register_resolvers()
 
-    ```pycon
-
-    >>> from hya import register_resolvers
-    >>> register_resolvers()
-
-    ```
+        ```
     """
     for key, resolver in registry.state.items():
         if not OmegaConf.has_resolver(key):

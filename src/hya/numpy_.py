@@ -32,18 +32,16 @@ def to_array_resolver(data: ArrayLike) -> np.ndarray:
     Returns:
         The input in a ``numpy.ndarray`` object.
 
-    Example usage:
+    Example:
+        ```pycon
+        >>> import hya
+        >>> from omegaconf import OmegaConf
+        >>> hya.register_resolvers()
+        >>> conf = OmegaConf.create({"key": "${hya.np.array:[1, 2, 3]}"})
+        >>> conf.key
+        array([1, 2, 3])
 
-    ```pycon
-
-    >>> import hya
-    >>> from omegaconf import OmegaConf
-    >>> hya.register_resolvers()
-    >>> conf = OmegaConf.create({"key": "${hya.np.array:[1, 2, 3]}"})
-    >>> conf.key
-    array([1, 2, 3])
-
-    ```
+        ```
     """
     check_numpy()
     return np.array(data)

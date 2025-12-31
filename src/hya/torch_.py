@@ -32,18 +32,16 @@ def to_tensor_resolver(data: Any) -> torch.Tensor:
     Returns:
         The input in a ``torch.Tensor`` object.
 
-    Example usage:
+    Example:
+        ```pycon
+        >>> import hya
+        >>> from omegaconf import OmegaConf
+        >>> hya.register_resolvers()
+        >>> conf = OmegaConf.create({"key": "${hya.torch.tensor:[1,2,3,4,5]}"})
+        >>> conf.key
+        tensor([1, 2, 3, 4, 5])
 
-    ```pycon
-
-    >>> import hya
-    >>> from omegaconf import OmegaConf
-    >>> hya.register_resolvers()
-    >>> conf = OmegaConf.create({"key": "${hya.torch.tensor:[1,2,3,4,5]}"})
-    >>> conf.key
-    tensor([1, 2, 3, 4, 5])
-
-    ```
+        ```
     """
     check_torch()
     return torch.tensor(data)
@@ -59,18 +57,16 @@ def torch_dtype_resolver(target: str) -> torch.dtype:
     Returns:
         The data type.
 
-    Example usage:
+    Example:
+        ```pycon
+        >>> import hya
+        >>> from omegaconf import OmegaConf
+        >>> hya.register_resolvers()
+        >>> conf = OmegaConf.create({"key": "${hya.torch.dtype:float}"})
+        >>> conf.key
+        torch.float32
 
-    ```pycon
-
-    >>> import hya
-    >>> from omegaconf import OmegaConf
-    >>> hya.register_resolvers()
-    >>> conf = OmegaConf.create({"key": "${hya.torch.dtype:float}"})
-    >>> conf.key
-    torch.float32
-
-    ```
+        ```
     """
     check_torch()
     if not hasattr(torch, target) or not isinstance(getattr(torch, target), torch.dtype):

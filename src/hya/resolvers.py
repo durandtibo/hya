@@ -27,21 +27,19 @@ def add_resolver(*args: Any) -> Any:
     Returns:
         ``arg1 + arg2 + arg3 + ... + argN``
 
-    Example usage:
+    Example:
+        ```pycon
+        >>> import hya
+        >>> from omegaconf import OmegaConf
+        >>> hya.register_resolvers()
+        >>> conf = OmegaConf.create({"key": "${hya.add:1,2}"})
+        >>> conf.key
+        3
+        >>> conf = OmegaConf.create({"key": "${hya.add:1,2,3,4}"})
+        >>> conf.key
+        10
 
-    ```pycon
-
-    >>> import hya
-    >>> from omegaconf import OmegaConf
-    >>> hya.register_resolvers()
-    >>> conf = OmegaConf.create({"key": "${hya.add:1,2}"})
-    >>> conf.key
-    3
-    >>> conf = OmegaConf.create({"key": "${hya.add:1,2,3,4}"})
-    >>> conf.key
-    10
-
-    ```
+        ```
     """
     output = args[0]
     for arg in args[1:]:
@@ -59,18 +57,16 @@ def asinh_resolver(number: float) -> float:
     Returns:
         The inverse hyperbolic sine of the input number.
 
-    Example usage:
+    Example:
+        ```pycon
+        >>> import hya
+        >>> from omegaconf import OmegaConf
+        >>> hya.register_resolvers()
+        >>> conf = OmegaConf.create({"key": "${hya.asinh:1}"})
+        >>> conf.key
+        0.881373...
 
-    ```pycon
-
-    >>> import hya
-    >>> from omegaconf import OmegaConf
-    >>> hya.register_resolvers()
-    >>> conf = OmegaConf.create({"key": "${hya.asinh:1}"})
-    >>> conf.key
-    0.881373...
-
-    ```
+        ```
     """
     return math.asinh(number)
 
@@ -86,18 +82,16 @@ def ceildiv_resolver(dividend: float, divisor: float) -> float:
     Returns:
         The output of the ceiling division.
 
-    Example usage:
+    Example:
+        ```pycon
+        >>> import hya
+        >>> from omegaconf import OmegaConf
+        >>> hya.register_resolvers()
+        >>> conf = OmegaConf.create({"key": "${hya.ceildiv:11,4}"})
+        >>> conf.key
+        3
 
-    ```pycon
-
-    >>> import hya
-    >>> from omegaconf import OmegaConf
-    >>> hya.register_resolvers()
-    >>> conf = OmegaConf.create({"key": "${hya.ceildiv:11,4}"})
-    >>> conf.key
-    3
-
-    ```
+        ```
     """
     return -(dividend // -divisor)
 
@@ -112,18 +106,16 @@ def exp_resolver(number: float) -> float:
     Returns:
         The exponential value of the input.
 
-    Example usage:
+    Example:
+        ```pycon
+        >>> import hya
+        >>> from omegaconf import OmegaConf
+        >>> hya.register_resolvers()
+        >>> conf = OmegaConf.create({"key": "${hya.exp:0}"})
+        >>> conf.key
+        1.0
 
-    ```pycon
-
-    >>> import hya
-    >>> from omegaconf import OmegaConf
-    >>> hya.register_resolvers()
-    >>> conf = OmegaConf.create({"key": "${hya.exp:0}"})
-    >>> conf.key
-    1.0
-
-    ```
+        ```
     """
     return math.exp(number)
 
@@ -139,18 +131,16 @@ def floordiv_resolver(dividend: float, divisor: float) -> float:
     Returns:
         ``dividend // divisor``
 
-    Example usage:
+    Example:
+        ```pycon
+        >>> import hya
+        >>> from omegaconf import OmegaConf
+        >>> hya.register_resolvers()
+        >>> conf = OmegaConf.create({"key": "${hya.floordiv:11,4}"})
+        >>> conf.key
+        2
 
-    ```pycon
-
-    >>> import hya
-    >>> from omegaconf import OmegaConf
-    >>> hya.register_resolvers()
-    >>> conf = OmegaConf.create({"key": "${hya.floordiv:11,4}"})
-    >>> conf.key
-    2
-
-    ```
+        ```
     """
     return dividend // divisor
 
@@ -165,18 +155,16 @@ def len_resolver(obj: Any) -> int:
     Returns:
         The length of the object.
 
-    Example usage:
+    Example:
+        ```pycon
+        >>> import hya
+        >>> from omegaconf import OmegaConf
+        >>> hya.register_resolvers()
+        >>> conf = OmegaConf.create({"key": "${hya.len:[1,2,3]}"})
+        >>> conf.key
+        3
 
-    ```pycon
-
-    >>> import hya
-    >>> from omegaconf import OmegaConf
-    >>> hya.register_resolvers()
-    >>> conf = OmegaConf.create({"key": "${hya.len:[1,2,3]}"})
-    >>> conf.key
-    3
-
-    ```
+        ```
     """
     return len(obj)
 
@@ -194,18 +182,16 @@ def iter_join_resolver(iterable: Iterable[Any], separator: str) -> str:
     Returns:
         The generated string.
 
-    Example usage:
+    Example:
+        ```pycon
+        >>> import hya
+        >>> from omegaconf import OmegaConf
+        >>> hya.register_resolvers()
+        >>> conf = OmegaConf.create({"key": "${hya.iter_join:[abc,2,def],-}"})
+        >>> conf.key
+        abc-2-def
 
-    ```pycon
-
-    >>> import hya
-    >>> from omegaconf import OmegaConf
-    >>> hya.register_resolvers()
-    >>> conf = OmegaConf.create({"key": "${hya.iter_join:[abc,2,def],-}"})
-    >>> conf.key
-    abc-2-def
-
-    ```
+        ```
     """
     return separator.join(map(str, iterable))
 
@@ -221,18 +207,16 @@ def log_resolver(number: float, base: float = math.e) -> float:
     Returns:
         The logarithm of the input value to the given base.
 
-    Example usage:
+    Example:
+        ```pycon
+        >>> import hya
+        >>> from omegaconf import OmegaConf
+        >>> hya.register_resolvers()
+        >>> conf = OmegaConf.create({"key": "${hya.log:1}"})
+        >>> conf.key
+        0.0
 
-    ```pycon
-
-    >>> import hya
-    >>> from omegaconf import OmegaConf
-    >>> hya.register_resolvers()
-    >>> conf = OmegaConf.create({"key": "${hya.log:1}"})
-    >>> conf.key
-    0.0
-
-    ```
+        ```
     """
     return math.log(number, base)
 
@@ -247,18 +231,16 @@ def log10_resolver(number: float) -> float:
     Returns:
         The base 10 logarithm of the input value.
 
-    Example usage:
+    Example:
+        ```pycon
+        >>> import hya
+        >>> from omegaconf import OmegaConf
+        >>> hya.register_resolvers()
+        >>> conf = OmegaConf.create({"key": "${hya.log10:1}"})
+        >>> conf.key
+        0.0
 
-    ```pycon
-
-    >>> import hya
-    >>> from omegaconf import OmegaConf
-    >>> hya.register_resolvers()
-    >>> conf = OmegaConf.create({"key": "${hya.log10:1}"})
-    >>> conf.key
-    0.0
-
-    ```
+        ```
     """
     return math.log10(number)
 
@@ -273,18 +255,16 @@ def max_resolver(*args: Any) -> Any:
     Returns:
         ``max(arg1, arg2, arg3, ..., argN)``
 
-    Example usage:
+    Example:
+        ```pycon
+        >>> import hya
+        >>> from omegaconf import OmegaConf
+        >>> hya.register_resolvers()
+        >>> conf = OmegaConf.create({"key": "${hya.max:1,2,3}"})
+        >>> conf.key
+        3
 
-    ```pycon
-
-    >>> import hya
-    >>> from omegaconf import OmegaConf
-    >>> hya.register_resolvers()
-    >>> conf = OmegaConf.create({"key": "${hya.max:1,2,3}"})
-    >>> conf.key
-    3
-
-    ```
+        ```
     """
     return max(*args)
 
@@ -299,18 +279,16 @@ def min_resolver(*args: Any) -> Any:
     Returns:
         ``min(arg1, arg2, arg3, ..., argN)``
 
-    Example usage:
+    Example:
+        ```pycon
+        >>> import hya
+        >>> from omegaconf import OmegaConf
+        >>> hya.register_resolvers()
+        >>> conf = OmegaConf.create({"key": "${hya.min:1,2,3}"})
+        >>> conf.key
+        1
 
-    ```pycon
-
-    >>> import hya
-    >>> from omegaconf import OmegaConf
-    >>> hya.register_resolvers()
-    >>> conf = OmegaConf.create({"key": "${hya.min:1,2,3}"})
-    >>> conf.key
-    1
-
-    ```
+        ```
     """
     return min(*args)
 
@@ -325,21 +303,19 @@ def mul_resolver(*args: Any) -> Any:
     Returns:
         ``arg1 * arg2 * arg3 * ... * argN``
 
-    Example usage:
+    Example:
+        ```pycon
+        >>> import hya
+        >>> from omegaconf import OmegaConf
+        >>> hya.register_resolvers()
+        >>> conf = OmegaConf.create({"key": "${hya.mul:1,2}"})
+        >>> conf.key
+        2
+        >>> conf = OmegaConf.create({"key": "${hya.mul:1,2,3}"})
+        >>> conf.key
+        6
 
-    ```pycon
-
-    >>> import hya
-    >>> from omegaconf import OmegaConf
-    >>> hya.register_resolvers()
-    >>> conf = OmegaConf.create({"key": "${hya.mul:1,2}"})
-    >>> conf.key
-    2
-    >>> conf = OmegaConf.create({"key": "${hya.mul:1,2,3}"})
-    >>> conf.key
-    6
-
-    ```
+        ```
     """
     output = args[0]
     for arg in args[1:]:
@@ -357,18 +333,16 @@ def neg_resolver(number: float) -> float:
     Returns:
         The negated input number.
 
-    Example usage:
+    Example:
+        ```pycon
+        >>> import hya
+        >>> from omegaconf import OmegaConf
+        >>> hya.register_resolvers()
+        >>> conf = OmegaConf.create({"key": "${hya.neg:1}"})
+        >>> conf.key
+        -1
 
-    ```pycon
-
-    >>> import hya
-    >>> from omegaconf import OmegaConf
-    >>> hya.register_resolvers()
-    >>> conf = OmegaConf.create({"key": "${hya.neg:1}"})
-    >>> conf.key
-    -1
-
-    ```
+        ```
     """
     return -number
 
@@ -383,18 +357,16 @@ def path_resolver(path: str) -> Path:
     Returns:
         The path object.
 
-    Example usage:
+    Example:
+        ```pycon
+        >>> import hya
+        >>> from omegaconf import OmegaConf
+        >>> hya.register_resolvers()
+        >>> conf = OmegaConf.create({"key": "${hya.path:/my/path}"})
+        >>> conf.key
+        PosixPath('/my/path')
 
-    ```pycon
-
-    >>> import hya
-    >>> from omegaconf import OmegaConf
-    >>> hya.register_resolvers()
-    >>> conf = OmegaConf.create({"key": "${hya.path:/my/path}"})
-    >>> conf.key
-    PosixPath('/my/path')
-
-    ```
+        ```
     """
     return Path(path).expanduser().resolve()
 
@@ -406,18 +378,16 @@ def pi_resolver() -> float:
     Returns:
         The value of PI.
 
-    Example usage:
+    Example:
+        ```pycon
+        >>> import hya
+        >>> from omegaconf import OmegaConf
+        >>> hya.register_resolvers()
+        >>> conf = OmegaConf.create({"key": "${hya.pi:}"})
+        >>> conf.key
+        3.14159...
 
-    ```pycon
-
-    >>> import hya
-    >>> from omegaconf import OmegaConf
-    >>> hya.register_resolvers()
-    >>> conf = OmegaConf.create({"key": "${hya.pi:}"})
-    >>> conf.key
-    3.14159...
-
-    ```
+        ```
     """
     return math.pi
 
@@ -433,18 +403,16 @@ def pow_resolver(value: float, exponent: float) -> float:
     Returns:
         ``x ** y``
 
-    Example usage:
+    Example:
+        ```pycon
+        >>> import hya
+        >>> from omegaconf import OmegaConf
+        >>> hya.register_resolvers()
+        >>> conf = OmegaConf.create({"key": "${hya.pow:2,3}"})
+        >>> conf.key
+        8
 
-    ```pycon
-
-    >>> import hya
-    >>> from omegaconf import OmegaConf
-    >>> hya.register_resolvers()
-    >>> conf = OmegaConf.create({"key": "${hya.pow:2,3}"})
-    >>> conf.key
-    8
-
-    ```
+        ```
     """
     return value**exponent
 
@@ -460,18 +428,16 @@ def sqrt_resolver(number: float) -> float:
     Returns:
         The square root of the input number.
 
-    Example usage:
+    Example:
+        ```pycon
+        >>> import hya
+        >>> from omegaconf import OmegaConf
+        >>> hya.register_resolvers()
+        >>> conf = OmegaConf.create({"key": "${hya.sqrt:4}"})
+        >>> conf.key
+        2.0
 
-    ```pycon
-
-    >>> import hya
-    >>> from omegaconf import OmegaConf
-    >>> hya.register_resolvers()
-    >>> conf = OmegaConf.create({"key": "${hya.sqrt:4}"})
-    >>> conf.key
-    2.0
-
-    ```
+        ```
     """
     return math.sqrt(number)
 
@@ -486,18 +452,16 @@ def sha256_resolver(obj: Any) -> str:
     Returns:
         The SHA-256 hash of the object.
 
-    Example usage:
+    Example:
+        ```pycon
+        >>> import hya
+        >>> from omegaconf import OmegaConf
+        >>> hya.register_resolvers()
+        >>> conf = OmegaConf.create({"key": "${hya.sha256:mystring}"})
+        >>> conf.key
+        bd3ff47540b31e62d4ca6b07794e5a886b0f655fc322730f26ecd65cc7dd5c90
 
-    ```pycon
-
-    >>> import hya
-    >>> from omegaconf import OmegaConf
-    >>> hya.register_resolvers()
-    >>> conf = OmegaConf.create({"key": "${hya.sha256:mystring}"})
-    >>> conf.key
-    bd3ff47540b31e62d4ca6b07794e5a886b0f655fc322730f26ecd65cc7dd5c90
-
-    ```
+        ```
     """
     return hashlib.sha256(bytes(str(obj), "utf-8")).hexdigest()
 
@@ -512,18 +476,16 @@ def sinh_resolver(number: float) -> float:
     Returns:
         The hyperbolic sine of the input number.
 
-    Example usage:
+    Example:
+        ```pycon
+        >>> import hya
+        >>> from omegaconf import OmegaConf
+        >>> hya.register_resolvers()
+        >>> conf = OmegaConf.create({"key": "${hya.sinh:1}"})
+        >>> conf.key
+        1.175201...
 
-    ```pycon
-
-    >>> import hya
-    >>> from omegaconf import OmegaConf
-    >>> hya.register_resolvers()
-    >>> conf = OmegaConf.create({"key": "${hya.sinh:1}"})
-    >>> conf.key
-    1.175201...
-
-    ```
+        ```
     """
     return math.sinh(number)
 
@@ -539,18 +501,16 @@ def sub_resolver(object1: Any, object2: Any) -> Any:
     Returns:
         ``object1 - object2``
 
-    Example usage:
+    Example:
+        ```pycon
+        >>> import hya
+        >>> from omegaconf import OmegaConf
+        >>> hya.register_resolvers()
+        >>> conf = OmegaConf.create({"key": "${hya.sub:3,1}"})
+        >>> conf.key
+        2
 
-    ```pycon
-
-    >>> import hya
-    >>> from omegaconf import OmegaConf
-    >>> hya.register_resolvers()
-    >>> conf = OmegaConf.create({"key": "${hya.sub:3,1}"})
-    >>> conf.key
-    2
-
-    ```
+        ```
     """
     return object1 - object2
 
@@ -566,18 +526,16 @@ def to_path_resolver(path: str) -> Path:
     Returns:
         The converted path.
 
-    Example usage:
+    Example:
+        ```pycon
+        >>> import hya
+        >>> from omegaconf import OmegaConf
+        >>> hya.register_resolvers()
+        >>> conf = OmegaConf.create({"key": "${hya.to_path:/my/path}"})
+        >>> conf.key
+        PosixPath('/my/path')
 
-    ```pycon
-
-    >>> import hya
-    >>> from omegaconf import OmegaConf
-    >>> hya.register_resolvers()
-    >>> conf = OmegaConf.create({"key": "${hya.to_path:/my/path}"})
-    >>> conf.key
-    PosixPath('/my/path')
-
-    ```
+        ```
     """
     return Path(unquote(urlparse(path).path)).expanduser().resolve()
 
@@ -593,17 +551,15 @@ def truediv_resolver(dividend: float, divisor: float) -> float:
     Returns:
         ``dividend / divisor``
 
-    Example usage:
+    Example:
+        ```pycon
+        >>> import hya
+        >>> from omegaconf import OmegaConf
+        >>> hya.register_resolvers()
+        >>> conf = OmegaConf.create({"key": "${hya.truediv:1,2}"})
+        >>> conf.key
+        0.5
 
-    ```pycon
-
-    >>> import hya
-    >>> from omegaconf import OmegaConf
-    >>> hya.register_resolvers()
-    >>> conf = OmegaConf.create({"key": "${hya.truediv:1,2}"})
-    >>> conf.key
-    0.5
-
-    ```
+        ```
     """
     return dividend / divisor

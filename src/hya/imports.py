@@ -24,14 +24,12 @@ def check_braceexpand() -> None:
     Raises:
         RuntimeError: if the ``braceexpand`` package is not installed.
 
-    Example usage:
+    Example:
+        ```pycon
+        >>> from hya.imports import check_braceexpand
+        >>> check_braceexpand()
 
-    ```pycon
-
-    >>> from hya.imports import check_braceexpand
-    >>> check_braceexpand()
-
-    ```
+        ```
     """
     if not is_braceexpand_available():
         msg = (
@@ -48,14 +46,12 @@ def is_braceexpand_available() -> bool:
     Returns:
         ``True`` if ``braceexpand`` is installed, otherwise ``False``.
 
-    Example usage:
+    Example:
+        ```pycon
+        >>> from hya.imports import is_braceexpand_available
+        >>> is_braceexpand_available()
 
-    ```pycon
-
-    >>> from hya.imports import is_braceexpand_available
-    >>> is_braceexpand_available()
-
-    ```
+        ```
     """
     return find_spec("braceexpand") is not None
 
@@ -71,14 +67,12 @@ def check_numpy() -> None:
     Raises:
         RuntimeError: if the ``numpy`` package is not installed.
 
-    Example usage:
+    Example:
+        ```pycon
+        >>> from hya.imports import check_numpy
+        >>> check_numpy()
 
-    ```pycon
-
-    >>> from hya.imports import check_numpy
-    >>> check_numpy()
-
-    ```
+        ```
     """
     if not is_numpy_available():
         msg = (
@@ -95,14 +89,12 @@ def is_numpy_available() -> bool:
     Returns:
         ``True`` if ``numpy`` is installed, otherwise ``False``.
 
-    Example usage:
+    Example:
+        ```pycon
+        >>> from hya.imports import is_numpy_available
+        >>> is_numpy_available()
 
-    ```pycon
-
-    >>> from hya.imports import is_numpy_available
-    >>> is_numpy_available()
-
-    ```
+        ```
     """
     return find_spec("numpy") is not None
 
@@ -118,14 +110,12 @@ def check_torch() -> None:
     Raises:
         RuntimeError: if the ``torch`` package is not installed.
 
-    Example usage:
+    Example:
+        ```pycon
+        >>> from hya.imports import check_torch
+        >>> check_torch()
 
-    ```pycon
-
-    >>> from hya.imports import check_torch
-    >>> check_torch()
-
-    ```
+        ```
     """
     if not is_torch_available():
         msg = (
@@ -142,13 +132,11 @@ def is_torch_available() -> bool:
     Returns:
         ``True`` if ``torch`` is installed, otherwise ``False``.
 
-    Example usage:
+    Example:
+        ```pycon
+        >>> from hya.imports import is_torch_available
+        >>> is_torch_available()
 
-    ```pycon
-
-    >>> from hya.imports import is_torch_available
-    >>> is_torch_available()
-
-    ```
+        ```
     """
     return find_spec("torch") is not None

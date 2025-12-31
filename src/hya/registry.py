@@ -2,7 +2,7 @@ r"""Implement the resolver registry to easily register resolvers."""
 
 from __future__ import annotations
 
-__all__ = ["ResolverRegistry", "get_default_registry", "register_resolvers"]
+__all__ = ["ResolverRegistry", "get_default_registry"]
 from collections.abc import Callable
 from typing import Any, TypeVar
 
@@ -175,18 +175,3 @@ def get_default_registry() -> ResolverRegistry:
     if not hasattr(get_default_registry, "_registry"):
         get_default_registry._registry = ResolverRegistry()
     return get_default_registry._registry
-
-
-def register_resolvers() -> None:
-    r"""Register the default resolvers.
-
-    Example:
-        ```pycon
-        >>> from hya import register_resolvers
-        >>> register_resolvers()
-
-        ```
-    """
-    for key, resolver in get_default_registry().state.items():
-        if not OmegaConf.has_resolver(key):
-            OmegaConf.register_new_resolver(key, resolver)

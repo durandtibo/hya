@@ -79,7 +79,7 @@ def test_iter_join_resolver_list_int() -> None:
 
 
 def test_iter_join_resolver_empty_separator() -> None:
-    assert OmegaConf.create({"key": "${hya.iter_join:[a,b,c],}"}).key == "abc"
+    assert OmegaConf.create({"key": "${hya.iter_join:[a,b,c],''}"}).key == "abc"
 
 
 def test_log_resolver_int() -> None:

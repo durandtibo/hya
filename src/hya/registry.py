@@ -35,11 +35,39 @@ class ResolverRegistry:
         r"""The state of the registry."""
         return self._state
 
+    def has_resolver(self, key: str) -> bool:
+        """Check if a resolver is explicitly registered for the given
+        key.
+
+        Args:
+            key: The key to check.
+
+        Returns:
+            True if a resolver is registered for this key,
+            False otherwise
+
+        Example:
+            ```pycon
+            >>> from hya.registry import ResolverRegistry
+            >>> registry = ResolverRegistry()
+            >>> @registry.register("my_key")
+            ... def my_resolver(value):
+            ...     pass
+            ...
+            >>> registry.has_resolver("my_key")
+            True
+            >>> registry.has_resolver("missing")
+            False
+
+            ```
+        """
+        return key in self._state
+
     def register(self, key: str, exist_ok: bool = False) -> Callable[..., Any]:
         r"""Register a resolver to registry with ``key``.
 
         Args:
-            key: Specifies the key used to register the resolver.
+            key: The key used to register the resolver.
             exist_ok: If ``False``, a ``RuntimeError`` is raised if
                 you try to register a new resolver with an existing
                 key.

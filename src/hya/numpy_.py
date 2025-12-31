@@ -19,7 +19,7 @@ if TYPE_CHECKING:
     from numpy.typing import ArrayLike
 
 
-registry = get_default_registry() if is_numpy_available() else ResolverRegistry()
+registry: ResolverRegistry = get_default_registry() if is_numpy_available() else ResolverRegistry()
 
 
 @registry.register("hya.np.array")

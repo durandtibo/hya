@@ -83,6 +83,15 @@ def test_resolver_registry_register_resolvers() -> None:
     assert OmegaConf.has_resolver("hya.custom_resolver")
 
 
+def test_resolver_registry_register_resolvers_idempotent() -> None:
+    registry = ResolverRegistry()
+    registry.register("hya.custom_resolver")(Mock())
+    registry.register_resolvers()
+    assert OmegaConf.has_resolver("hya.custom_resolver")
+    registry.register_resolvers()
+    assert OmegaConf.has_resolver("hya.custom_resolver")
+
+
 ##########################################
 #     Tests for get_default_registry     #
 ##########################################

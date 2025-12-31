@@ -59,10 +59,15 @@
 `hya` is designed to be used with [Hydra](https://github.com/facebookresearch/hydra).
 The resolvers can be easily registered in your python project by adding the following lines:
 
-```python
-from hya import register_resolvers
+```pycon
+>>> from hya.registry import get_default_registry
+>>> registry = get_default_registry()
+>>> @registry.register("multiply")
+... def multiply_resolver(x, y):
+...     return x * y
+...
+>>> registry.register_resolvers()
 
-register_resolvers()
 ```
 
 - [Documentation](https://durandtibo.github.io/hya/)

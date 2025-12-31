@@ -60,14 +60,14 @@ def test_resolver_registry_register() -> None:
 
 def test_resolver_registry_register_not_callable() -> None:
     registry = ResolverRegistry()
-    with pytest.raises(TypeError, match=r"Each resolver has to be callable but received"):
+    with pytest.raises(TypeError, match=r"Resolver must be callable, but received"):
         registry.register("key")(NonCallableMock())
 
 
 def test_resolver_registry_register_duplicate_exist_ok_false() -> None:
     registry = ResolverRegistry()
     registry.register("key")(Mock())
-    with pytest.raises(RuntimeError, match=r"A resolver is already registered for `key`."):
+    with pytest.raises(RuntimeError, match=r"A resolver is already registered for 'key'."):
         registry.register("key")(Mock())
 
 
@@ -75,6 +75,13 @@ def test_resolver_registry_register_duplicate_exist_ok_true() -> None:
     registry = ResolverRegistry()
     registry.register("key")(Mock())
     registry.register("key", exist_ok=True)(Mock())
+
+
+def test_resolver_registry_register_resolvers() -> None:
+    registry = ResolverRegistry()
+    registry.register("hya.custom_resolver")(Mock())
+    registry.register_resolvers()
+    assert OmegaConf.has_resolver("hya.custom_resolver")
 
 
 ##########################################

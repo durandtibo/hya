@@ -3,16 +3,24 @@ r"""Implement the resolver registry to easily register resolvers."""
 from __future__ import annotations
 
 __all__ = ["ResolverRegistry", "get_default_registry", "register_resolvers"]
-from typing import TYPE_CHECKING, Any
+from collections.abc import Callable
+from typing import Any, TypeVar
 
 from omegaconf import OmegaConf
 
-if TYPE_CHECKING:
-    from collections.abc import Callable
+F = TypeVar("F", bound=Callable[..., Any])
 
 
 class ResolverRegistry:
     r"""Implement a resolver registry.
+
+    This class manages a collection of resolver functions that can be registered
+    with keys and later used with OmegaConf.
+
+
+    Args:
+        state: Optional initial state dictionary containing key-resolver pairs.
+            If provided, a copy is made to prevent external modifications.
 
     Example:
         ```pycon
@@ -62,18 +70,24 @@ class ResolverRegistry:
         """
         return key in self._state
 
-    def register(self, key: str, exist_ok: bool = False) -> Callable[..., Any]:
-        r"""Register a resolver to registry with ``key``.
+    def register(self, key: str, exist_ok: bool = False) -> Callable[[F], F]:
+        """Register a resolver to registry with the specified key.
+
+        This method returns a decorator that can be used to register resolver functions.
 
         Args:
-            key: The key used to register the resolver.
-            exist_ok: If ``False``, a ``RuntimeError`` is raised if
-                you try to register a new resolver with an existing
-                key.
+            key: The key used to register the resolver. Must be unique unless
+                exist_ok is True.
+            exist_ok: If False, a RuntimeError is raised if you try to register
+                a new resolver with an existing key. If True, the existing
+                resolver will be overridden.
+
+        Returns:
+            A decorator function that registers the resolver and returns it unchanged.
 
         Raises:
-            TypeError: if the resolver is not callable
-            TypeError: if the key already exists and ``exist_ok=False``
+            TypeError: If the resolver is not callable.
+            RuntimeError: If the key already exists and exist_ok is False.
 
         Example:
             ```pycon
@@ -81,26 +95,52 @@ class ResolverRegistry:
             >>> registry = get_default_registry()
             >>> @registry.register("my_key")
             ... def my_resolver(value):
-            ...     pass
+            ...     return value * 2
             ...
+            >>> my_resolver(5)
+            10
 
             ```
         """
 
-        def wrap(resolver: Callable[..., Any]) -> Callable[..., Any]:
+        def wrap(resolver: F) -> F:
             if not callable(resolver):
-                msg = f"Each resolver has to be callable but received {type(resolver)}"
+                msg = f"Resolver must be callable, but received {type(resolver).__name__}"
                 raise TypeError(msg)
+
             if key in self._state and not exist_ok:
                 msg = (
-                    f"A resolver is already registered for `{key}`. You can use another key "
-                    "or set `exist_ok=True` to override the existing resolver"
+                    f"A resolver is already registered for '{key}'. "
+                    "Use a different key or set exist_ok=True to override."
                 )
                 raise RuntimeError(msg)
+
             self._state[key] = resolver
             return resolver
 
         return wrap
+
+    def register_resolvers(self) -> None:
+        r"""Register the resolvers to OmegaConf.
+
+        This method iterates through all registered resolvers and registers them
+        with OmegaConf if they haven't been registered already.
+
+        Example:
+            ```pycon
+            >>> from hya.registry import get_default_registry
+            >>> registry = get_default_registry()
+            >>> @registry.register("multiply")
+            ... def multiply_resolver(x, y):
+            ...     return x * y
+            ...
+            >>> registry.register_resolvers()
+
+            ```
+        """
+        for key, resolver in self.state.items():
+            if not OmegaConf.has_resolver(key):
+                OmegaConf.register_new_resolver(key, resolver)
 
 
 def get_default_registry() -> ResolverRegistry:

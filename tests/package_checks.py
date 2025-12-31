@@ -5,11 +5,10 @@ from pathlib import Path
 
 from omegaconf import OmegaConf
 
-from hya import (
+from hya.imports import (
     is_braceexpand_available,
     is_numpy_available,
     is_torch_available,
-    register_resolvers,
 )
 
 if is_numpy_available():
@@ -65,7 +64,6 @@ def check_torch_resolvers() -> None:
 
 
 def main() -> None:
-    register_resolvers()
     check_native_resolvers()
     check_braceexpand_resolvers()
     check_numpy_resolvers()

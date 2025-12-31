@@ -1,15 +1,8 @@
 from __future__ import annotations
 
-import pytest
 from omegaconf import OmegaConf
 
-from hya import register_resolvers
 from hya.testing import braceexpand_available
-
-
-@pytest.fixture(scope="module", autouse=True)
-def _register() -> None:
-    register_resolvers()
 
 
 @braceexpand_available

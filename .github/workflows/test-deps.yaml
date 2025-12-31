@@ -14,3 +14,41 @@ jobs:
   # Get dependency version information from config file
   get-versions:
     uses: ./.github/workflows/get-versions.yaml
+
+
+  ########################
+  #     Dependencies     #
+  ########################
+
+  omegaconf:
+    needs: get-versions
+    uses: ./.github/workflows/test-code-dep.yaml
+    with:
+      package-name: omegaconf
+      package-versions: ${{ toJson(fromJson(needs.get-versions.outputs.package_versions).omegaconf) }}
+
+
+  #################################
+  #     Optional dependencies     #
+  #################################
+
+  braceexpand:
+    needs: get-versions
+    uses: ./.github/workflows/test-code-dep.yaml
+    with:
+      package-name: braceexpand
+      package-versions: ${{ toJson(fromJson(needs.get-versions.outputs.package_versions).braceexpand) }}
+
+  numpy:
+    needs: get-versions
+    uses: ./.github/workflows/test-code-dep.yaml
+    with:
+      package-name: numpy
+      package-versions: ${{ toJson(fromJson(needs.get-versions.outputs.package_versions).numpy) }}
+
+  torch:
+    needs: get-versions
+    uses: ./.github/workflows/test-code-dep.yaml
+    with:
+      package-name: torch
+      package-versions: ${{ toJson(fromJson(needs.get-versions.outputs.package_versions).torch) }}

@@ -26,7 +26,7 @@ class ResolverRegistry:
         ```pycon
         >>> from hya.registry import get_default_registry
         >>> registry = get_default_registry()
-        >>> @registry.register("my_key")
+        >>> @registry.register("my_key", exist_ok=True)
         ... def my_resolver(value):
         ...     pass
         ...
@@ -93,7 +93,7 @@ class ResolverRegistry:
             ```pycon
             >>> from hya.registry import get_default_registry
             >>> registry = get_default_registry()
-            >>> @registry.register("my_key")
+            >>> @registry.register("my_key", exist_ok=True)
             ... def my_resolver(value):
             ...     return value * 2
             ...
@@ -130,7 +130,7 @@ class ResolverRegistry:
             ```pycon
             >>> from hya.registry import get_default_registry
             >>> registry = get_default_registry()
-            >>> @registry.register("multiply")
+            >>> @registry.register("multiply", exist_ok=True)
             ... def multiply_resolver(x, y):
             ...     return x * y
             ...
@@ -165,7 +165,7 @@ def get_default_registry() -> ResolverRegistry:
         ```pycon
         >>> from hya.registry import get_default_registry
         >>> registry = get_default_registry()
-        >>> @registry.register("my_key")
+        >>> @registry.register("my_key", exist_ok=True)
         ... def my_resolver(value):
         ...     pass
         ...

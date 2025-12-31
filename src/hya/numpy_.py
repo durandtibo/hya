@@ -38,7 +38,6 @@ def to_array_resolver(data: ArrayLike) -> np.ndarray:
         ```pycon
         >>> import hya
         >>> from omegaconf import OmegaConf
-        >>> hya.register_resolvers()
         >>> conf = OmegaConf.create({"key": "${hya.np.array:[1, 2, 3]}"})
         >>> conf.key
         array([1, 2, 3])

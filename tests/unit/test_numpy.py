@@ -1,18 +1,12 @@
 from __future__ import annotations
 
-import pytest
 from omegaconf import OmegaConf
 
-from hya import is_numpy_available, register_resolvers
+from hya import is_numpy_available
 from hya.testing import numpy_available
 
 if is_numpy_available():
     import numpy as np
-
-
-@pytest.fixture(scope="module", autouse=True)
-def _register() -> None:
-    register_resolvers()
 
 
 @numpy_available

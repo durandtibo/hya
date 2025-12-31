@@ -4,17 +4,12 @@ import pytest
 from omegaconf import OmegaConf
 from omegaconf.errors import InterpolationResolutionError
 
-from hya import is_torch_available, register_resolvers
+from hya import is_torch_available
 from hya.testing import torch_available
 from hya.torch_ import get_dtypes
 
 if is_torch_available():
     import torch
-
-
-@pytest.fixture(scope="module", autouse=True)
-def _register() -> None:
-    register_resolvers()
 
 
 @torch_available

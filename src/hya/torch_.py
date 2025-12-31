@@ -36,7 +36,6 @@ def to_tensor_resolver(data: Any) -> torch.Tensor:
         ```pycon
         >>> import hya
         >>> from omegaconf import OmegaConf
-        >>> hya.register_resolvers()
         >>> conf = OmegaConf.create({"key": "${hya.torch.tensor:[1,2,3,4,5]}"})
         >>> conf.key
         tensor([1, 2, 3, 4, 5])
@@ -62,7 +61,6 @@ def torch_dtype_resolver(target: str) -> torch.dtype:
         ```pycon
         >>> import hya
         >>> from omegaconf import OmegaConf
-        >>> hya.register_resolvers()
         >>> conf = OmegaConf.create({"key": "${hya.torch.dtype:float}"})
         >>> conf.key
         torch.float32

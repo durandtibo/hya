@@ -130,7 +130,7 @@ class ResolverRegistry:
             ```pycon
             >>> from hya.registry import ResolverRegistry
             >>> registry = ResolverRegistry()
-            >>> @registry.register("multiply", exist_ok=True)
+            >>> @registry.register("multiply")
             ... def multiply_resolver(x, y):
             ...     return x * y
             ...

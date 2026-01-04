@@ -25,7 +25,7 @@ jobs:
       - name: check hya
         run: |
           python -c "import hya"
-          python -c "from hya import register_resolvers"
+          python -c "from hya import get_default_registry"
 
       # Test utils module imports
       - name: check hya.utils

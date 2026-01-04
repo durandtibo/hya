@@ -9,10 +9,12 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Any
 from urllib.parse import unquote, urlparse
 
-from hya.registry import ResolverRegistry, get_default_registry
+from hya.default import get_default_registry
 
 if TYPE_CHECKING:
     from collections.abc import Iterable
+
+    from hya.registry import ResolverRegistry
 
 logger: logging.Logger = logging.getLogger(__name__)
 

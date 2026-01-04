@@ -7,8 +7,9 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
+from hya.default import get_default_registry
 from hya.imports import check_braceexpand, is_braceexpand_available
-from hya.registry import ResolverRegistry, get_default_registry
+from hya.registry import ResolverRegistry
 
 if TYPE_CHECKING or is_braceexpand_available():
     import braceexpand

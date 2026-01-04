@@ -7,8 +7,8 @@ __all__ = []
 from importlib.metadata import PackageNotFoundError, version
 
 from hya import resolvers  # noqa: F401
+from hya.default import get_default_registry
 from hya.imports import is_braceexpand_available, is_numpy_available, is_torch_available
-from hya.registry import get_default_registry
 
 try:
     __version__ = version(__name__)

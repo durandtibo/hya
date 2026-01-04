@@ -9,19 +9,13 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Any
 from urllib.parse import unquote, urlparse
 
-from hya.default import get_default_registry
-
 if TYPE_CHECKING:
     from collections.abc import Iterable
 
-    from hya.registry import ResolverRegistry
 
 logger: logging.Logger = logging.getLogger(__name__)
 
-registry: ResolverRegistry = get_default_registry()
 
-
-@registry.register("hya.add")
 def add_resolver(*args: Any) -> Any:
     r"""Return the addition of several objects.
 
@@ -50,7 +44,6 @@ def add_resolver(*args: Any) -> Any:
     return output
 
 
-@registry.register("hya.asinh")
 def asinh_resolver(number: float) -> float:
     r"""Return the inverse hyperbolic sine.
 
@@ -73,7 +66,6 @@ def asinh_resolver(number: float) -> float:
     return math.asinh(number)
 
 
-@registry.register("hya.ceildiv")
 def ceildiv_resolver(dividend: float, divisor: float) -> float:
     r"""Return the ceiling division of two numbers.
 
@@ -97,7 +89,6 @@ def ceildiv_resolver(dividend: float, divisor: float) -> float:
     return -(dividend // -divisor)
 
 
-@registry.register("hya.exp")
 def exp_resolver(number: float) -> float:
     r"""Return the exponential value of the input.
 
@@ -120,7 +111,6 @@ def exp_resolver(number: float) -> float:
     return math.exp(number)
 
 
-@registry.register("hya.floordiv")
 def floordiv_resolver(dividend: float, divisor: float) -> float:
     r"""Return the floor division of two numbers.
 
@@ -144,7 +134,6 @@ def floordiv_resolver(dividend: float, divisor: float) -> float:
     return dividend // divisor
 
 
-@registry.register("hya.len")
 def len_resolver(obj: Any) -> int:
     r"""Return the length of an object.
 
@@ -167,7 +156,6 @@ def len_resolver(obj: Any) -> int:
     return len(obj)
 
 
-@registry.register("hya.iter_join")
 def iter_join_resolver(iterable: Iterable[Any], separator: str) -> str:
     r"""Convert all items in an iterable to a string and joins them into
     one string.
@@ -193,7 +181,6 @@ def iter_join_resolver(iterable: Iterable[Any], separator: str) -> str:
     return separator.join(map(str, iterable))
 
 
-@registry.register("hya.log")
 def log_resolver(number: float, base: float = math.e) -> float:
     r"""Compute logarithm of the input value to the given base.
 
@@ -217,7 +204,6 @@ def log_resolver(number: float, base: float = math.e) -> float:
     return math.log(number, base)
 
 
-@registry.register("hya.log10")
 def log10_resolver(number: float) -> float:
     r"""Compute base 10 logarithm of the input value.
 
@@ -240,7 +226,6 @@ def log10_resolver(number: float) -> float:
     return math.log10(number)
 
 
-@registry.register("hya.max")
 def max_resolver(*args: Any) -> Any:
     r"""Return the maximum between multiple values.
 
@@ -263,7 +248,6 @@ def max_resolver(*args: Any) -> Any:
     return max(*args)
 
 
-@registry.register("hya.min")
 def min_resolver(*args: Any) -> Any:
     r"""Return the minimum between multiple values.
 
@@ -286,7 +270,6 @@ def min_resolver(*args: Any) -> Any:
     return min(*args)
 
 
-@registry.register("hya.mul")
 def mul_resolver(*args: Any) -> Any:
     r"""Return the multiplication of several objects.
 
@@ -315,7 +298,6 @@ def mul_resolver(*args: Any) -> Any:
     return output
 
 
-@registry.register("hya.neg")
 def neg_resolver(number: float) -> float:
     r"""Return the negation (``-number``).
 
@@ -338,7 +320,6 @@ def neg_resolver(number: float) -> float:
     return -number
 
 
-@registry.register("hya.path")
 def path_resolver(path: str) -> Path:
     r"""Return a path object.
 
@@ -361,7 +342,6 @@ def path_resolver(path: str) -> Path:
     return Path(path).expanduser().resolve()
 
 
-@registry.register("hya.pi")
 def pi_resolver() -> float:
     r"""Return the value PI.
 
@@ -381,7 +361,6 @@ def pi_resolver() -> float:
     return math.pi
 
 
-@registry.register("hya.pow")
 def pow_resolver(value: float, exponent: float) -> float:
     r"""Return a value to a given power.
 
@@ -405,7 +384,6 @@ def pow_resolver(value: float, exponent: float) -> float:
     return value**exponent
 
 
-@registry.register("hya.sqrt")
 def sqrt_resolver(number: float) -> float:
     r"""Return the square root of a number.
 
@@ -429,7 +407,6 @@ def sqrt_resolver(number: float) -> float:
     return math.sqrt(number)
 
 
-@registry.register("hya.sha256")
 def sha256_resolver(obj: Any) -> str:
     r"""Return the SHA-256 hash of the input object.
 
@@ -452,7 +429,6 @@ def sha256_resolver(obj: Any) -> str:
     return hashlib.sha256(bytes(str(obj), "utf-8")).hexdigest()
 
 
-@registry.register("hya.sinh")
 def sinh_resolver(number: float) -> float:
     r"""Return the hyperbolic sine.
 
@@ -475,7 +451,6 @@ def sinh_resolver(number: float) -> float:
     return math.sinh(number)
 
 
-@registry.register("hya.sub")
 def sub_resolver(object1: Any, object2: Any) -> Any:
     r"""Return the subtraction of two objects.
 
@@ -499,7 +474,6 @@ def sub_resolver(object1: Any, object2: Any) -> Any:
     return object1 - object2
 
 
-@registry.register("hya.to_path")
 def to_path_resolver(path: str) -> Path:
     r"""Return the input path into a ``pathlib.Path``.
 
@@ -523,7 +497,6 @@ def to_path_resolver(path: str) -> Path:
     return Path(unquote(urlparse(path).path)).expanduser().resolve()
 
 
-@registry.register("hya.truediv")
 def truediv_resolver(dividend: float, divisor: float) -> float:
     r"""Return the true division of two numbers.
 

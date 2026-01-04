@@ -9,19 +9,14 @@ from typing import TYPE_CHECKING, Any
 
 from omegaconf.errors import InterpolationResolutionError
 
-from hya.default import get_default_registry
 from hya.imports import check_torch, is_torch_available
-from hya.registry import ResolverRegistry
 
 if TYPE_CHECKING or is_torch_available():
     import torch
 else:  # pragma: no cover
     from hya.utils.fallback.torch import torch
 
-registry: ResolverRegistry = get_default_registry() if is_torch_available() else ResolverRegistry()
 
-
-@registry.register("hya.torch.tensor")
 def to_tensor_resolver(data: Any) -> torch.Tensor:
     r"""Implement a resolver to transform the input to a
     ``torch.Tensor``.
@@ -47,7 +42,6 @@ def to_tensor_resolver(data: Any) -> torch.Tensor:
     return torch.tensor(data)
 
 
-@registry.register("hya.torch.dtype")
 def torch_dtype_resolver(target: str) -> torch.dtype:
     r"""Implement a resolver to create a ``torch.dtype`` from its string
     representation.

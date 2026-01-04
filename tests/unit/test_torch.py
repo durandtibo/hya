@@ -4,7 +4,7 @@ import pytest
 from omegaconf import OmegaConf
 from omegaconf.errors import InterpolationResolutionError
 
-from hya import is_torch_available
+from hya.imports import is_torch_available
 from hya.testing import torch_available
 from hya.torch_ import get_dtypes
 

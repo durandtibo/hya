@@ -7,9 +7,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from hya.default import get_default_registry
 from hya.imports import check_numpy, is_numpy_available
-from hya.registry import ResolverRegistry
 
 if TYPE_CHECKING or is_numpy_available():
     import numpy as np
@@ -20,10 +18,6 @@ if TYPE_CHECKING:
     from numpy.typing import ArrayLike
 
 
-registry: ResolverRegistry = get_default_registry() if is_numpy_available() else ResolverRegistry()
-
-
-@registry.register("hya.np.array")
 def to_array_resolver(data: ArrayLike) -> np.ndarray:
     r"""Implement a resolver to transform the input to a
     ``numpy.ndarray``.

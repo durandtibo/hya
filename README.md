@@ -60,7 +60,7 @@
 The resolvers can be easily registered in your python project by adding the following lines:
 
 ```pycon
->>> from hya.registry import get_default_registry
+>>> from hya import get_default_registry
 >>> registry = get_default_registry()
 >>> @registry.register("multiply")
 ... def multiply_resolver(x, y):

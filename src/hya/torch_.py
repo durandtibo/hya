@@ -9,8 +9,9 @@ from typing import TYPE_CHECKING, Any
 
 from omegaconf.errors import InterpolationResolutionError
 
+from hya.default import get_default_registry
 from hya.imports import check_torch, is_torch_available
-from hya.registry import ResolverRegistry, get_default_registry
+from hya.registry import ResolverRegistry
 
 if TYPE_CHECKING or is_torch_available():
     import torch

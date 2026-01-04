@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from omegaconf import OmegaConf
 
-from hya import is_numpy_available
+from hya.imports import is_numpy_available
 from hya.testing import numpy_available
 
 if is_numpy_available():

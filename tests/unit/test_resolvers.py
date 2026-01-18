@@ -3,7 +3,11 @@ from __future__ import annotations
 import math
 from pathlib import Path
 
+import pytest
 from omegaconf import OmegaConf
+from omegaconf.errors import InterpolationResolutionError
+
+import hya  # noqa: F401
 
 
 def test_add_resolver_int2() -> None:
@@ -186,3 +190,18 @@ def test_to_path_resolver() -> None:
 
 def test_truediv_resolver() -> None:
     assert OmegaConf.create({"key": "${hya.truediv:11,4}"}).key == 2.75
+
+
+def test_ceildiv_resolver_division_by_zero() -> None:
+    with pytest.raises(InterpolationResolutionError, match=r"ZeroDivisionError"):
+        OmegaConf.create({"key": "${hya.ceildiv:10,0}"}).key
+
+
+def test_floordiv_resolver_division_by_zero() -> None:
+    with pytest.raises(InterpolationResolutionError, match=r"ZeroDivisionError"):
+        OmegaConf.create({"key": "${hya.floordiv:10,0}"}).key
+
+
+def test_truediv_resolver_division_by_zero() -> None:
+    with pytest.raises(InterpolationResolutionError, match=r"ZeroDivisionError"):
+        OmegaConf.create({"key": "${hya.truediv:10,0}"}).key

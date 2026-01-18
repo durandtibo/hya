@@ -4,8 +4,8 @@
 
 ## Optional resolvers
 
-::: hya.braceexpand_
+::: hya.braceexpand
 
-::: hya.numpy_
+::: hya.numpy
 
-::: hya.torch_
+::: hya.torch

@@ -29,14 +29,13 @@ pip install hya torch
 ## Installing from source
 
 To install `hya` from source, you can follow the steps below. First, you will need to
-install [`poetry`](https://python-poetry.org/docs/master/). `poetry` is used to manage and install
+install [`uv`](https://docs.astral.sh/uv/). `uv` is used to manage and install
 the dependencies.
-If `poetry` is already installed on your machine, you can skip this step. There are several ways to
-install `poetry` so you can use the one that you prefer. You can check the `poetry` installation by
-running the following command:
+If `uv` is already installed on your machine, you can skip this step. You can check the `uv`
+installation by running the following command:
 
 ```shell
-poetry --version
+uv --version
 ```
 
 Then, you can clone the git repository:
@@ -45,7 +44,7 @@ Then, you can clone the git repository:
 git clone git@github.com:durandtibo/hya.git
 ```
 
-It is recommended to create a Python 3.8+ virtual environment. This step is optional so you
+It is recommended to create a Python 3.10+ virtual environment. This step is optional so you
 can skip it. To create a virtual environment, you can use the following command:
 
 ```shell

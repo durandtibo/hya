@@ -57,12 +57,19 @@
 
 `hya` is a library of custom [OmegaConf](https://github.com/omry/omegaconf) resolvers.
 `hya` is designed to be used with [Hydra](https://github.com/facebookresearch/hydra).
-The resolvers can be easily registered in your python project by adding the following lines:
+The default resolvers are automatically registered when you import `hya`.
+You can also register custom resolvers by adding the following lines:
 
 ```python
-from hya import register_resolvers
+from hya import get_default_registry
 
-register_resolvers()
+registry = get_default_registry()
+
+@registry.register("multiply")
+def multiply_resolver(x, y):
+    return x * y
+
+registry.register_resolvers()
 ```
 
 ## API stability

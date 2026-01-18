@@ -6,4 +6,6 @@
 
 ::: hya.braceexpand_
 
+::: hya.numpy_
+
 ::: hya.torch_

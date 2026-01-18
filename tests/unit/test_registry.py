@@ -18,6 +18,11 @@ def add_two(value: int) -> int:
     return value + 2
 
 
+######################################
+#     Tests for ResolverRegistry     #
+######################################
+
+
 def test_resolver_registry_init_empty() -> None:
     assert ResolverRegistry().state == {}
 

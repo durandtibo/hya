@@ -7,8 +7,6 @@ import pytest
 from omegaconf import OmegaConf
 from omegaconf.errors import InterpolationResolutionError
 
-import hya  # noqa: F401
-
 
 def test_add_resolver_int2() -> None:
     assert OmegaConf.create({"key": "${hya.add:1,4}"}).key == 5

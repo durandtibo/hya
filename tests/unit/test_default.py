@@ -22,11 +22,6 @@ def _reset_default_registry() -> Generator[None, None, None]:
         del get_default_registry._registry
 
 
-##########################################
-#     Tests for get_default_registry     #
-##########################################
-
-
 def test_get_default_registry_returns_resolver_registry() -> None:
     assert isinstance(get_default_registry(), ResolverRegistry)
 

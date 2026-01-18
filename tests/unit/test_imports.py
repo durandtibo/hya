@@ -13,10 +13,6 @@ from hya.imports import (
     is_torch_available,
 )
 
-#######################
-#     braceexpand     #
-#######################
-
 
 def test_check_braceexpand_with_package() -> None:
     with patch("hya.imports.is_braceexpand_available", lambda: True):
@@ -35,11 +31,6 @@ def test_is_braceexpand_available() -> None:
     assert isinstance(is_braceexpand_available(), bool)
 
 
-#################
-#     numpy     #
-#################
-
-
 def test_check_numpy_with_package() -> None:
     with patch("hya.imports.is_numpy_available", lambda: True):
         check_numpy()
@@ -55,11 +46,6 @@ def test_check_numpy_without_package() -> None:
 
 def test_is_numpy_available() -> None:
     assert isinstance(is_numpy_available(), bool)
-
-
-#################
-#     torch     #
-#################
 
 
 def test_check_torch_with_package() -> None:

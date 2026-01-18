@@ -19,10 +19,6 @@ from hya.testing import (
     torch_not_available,
 )
 
-#######################
-#     braceexpand     #
-#######################
-
 
 @braceexpand_available
 def test_check_braceexpand_with_package() -> None:
@@ -45,11 +41,6 @@ def test_is_braceexpand_available_false() -> None:
     assert not is_braceexpand_available()
 
 
-#################
-#     numpy     #
-#################
-
-
 @numpy_available
 def test_check_numpy_with_package() -> None:
     check_numpy()
@@ -69,11 +60,6 @@ def test_is_numpy_available_true() -> None:
 @numpy_not_available
 def test_is_numpy_available_false() -> None:
     assert not is_numpy_available()
-
-
-#################
-#     torch     #
-#################
 
 
 @torch_available

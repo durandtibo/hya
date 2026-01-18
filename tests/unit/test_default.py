@@ -15,7 +15,6 @@ if TYPE_CHECKING:
 
 @pytest.fixture(autouse=True)
 def _reset_default_registry() -> Generator[None, None, None]:
-    """Reset the registry before and after each test."""
     if hasattr(get_default_registry, "_registry"):
         del get_default_registry._registry
     yield
@@ -29,21 +28,16 @@ def _reset_default_registry() -> Generator[None, None, None]:
 
 
 def test_get_default_registry_returns_resolver_registry() -> None:
-    """Test that get_default_registry returns a ResolverRegistry
-    instance."""
     assert isinstance(get_default_registry(), ResolverRegistry)
 
 
 def test_get_default_registry_returns_singleton() -> None:
-    """Test that get_default_registry returns the same instance on
-    multiple calls."""
     registry1 = get_default_registry()
     registry2 = get_default_registry()
     assert registry1 is registry2
 
 
 def test_get_default_registry_modifications_persist() -> None:
-    """Test that modifications to the registry persist across calls."""
     registry1 = get_default_registry()
 
     # Register a mock resolver
@@ -83,15 +77,11 @@ def test_get_default_registry_modifications_persist() -> None:
     ],
 )
 def test_get_default_registry_default_resolvers(name: str) -> None:
-    """Test that get_default_registry returns a registry with default
-    resolvers."""
     assert get_default_registry().has_resolver(name)
 
 
 @braceexpand_available
 def test_get_default_registry_default_braceexpand_resolvers() -> None:
-    """Test that get_default_registry returns a registry with default
-    resolvers."""
     assert get_default_registry().has_resolver("hya.braceexpand")
 
 
@@ -105,6 +95,4 @@ def test_get_default_registry_default_numpy_resolvers() -> None:
 @torch_available
 @pytest.mark.parametrize("name", ["hya.torch.tensor", "hya.torch.dtype"])
 def test_get_default_registry_default_torch_resolvers(name: str) -> None:
-    """Test that get_default_registry returns a registry with default
-    resolvers."""
     assert get_default_registry().has_resolver(name)

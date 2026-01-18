@@ -65,9 +65,11 @@ from hya import get_default_registry
 
 registry = get_default_registry()
 
+
 @registry.register("multiply")
 def multiply_resolver(x, y):
     return x * y
+
 
 registry.register_resolvers()
 ```

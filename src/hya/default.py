@@ -106,7 +106,7 @@ def _add_braceexpand_resolvers(resolvers: dict[str, Callable[[...], Any]]) -> No
         return
 
     # Local import because it is an optional resolver
-    from hya.braceexpand_ import braceexpand_resolver  # noqa: PLC0415
+    from hya.braceexpand import braceexpand_resolver  # noqa: PLC0415
 
     resolvers["hya.braceexpand"] = braceexpand_resolver
 
@@ -126,7 +126,7 @@ def _add_numpy_resolvers(resolvers: dict[str, Callable[[...], Any]]) -> None:
         return
 
     # Local import because it is an optional resolver
-    from hya.numpy_ import to_array_resolver  # noqa: PLC0415
+    from hya.numpy import to_array_resolver  # noqa: PLC0415
 
     resolvers["hya.np.array"] = to_array_resolver
 
@@ -146,7 +146,7 @@ def _add_torch_resolvers(resolvers: dict[str, Callable[[...], Any]]) -> None:
         return
 
     # Local import because it is an optional resolver
-    from hya.torch_ import to_tensor_resolver, torch_dtype_resolver  # noqa: PLC0415
+    from hya.torch import to_tensor_resolver, torch_dtype_resolver  # noqa: PLC0415
 
     resolvers["hya.torch.tensor"] = to_tensor_resolver
     resolvers["hya.torch.dtype"] = torch_dtype_resolver

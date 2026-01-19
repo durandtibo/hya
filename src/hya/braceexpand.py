@@ -4,15 +4,6 @@ This module provides OmegaConf resolvers that use the braceexpand library
 to expand string patterns with brace notation (similar to bash brace expansion).
 The resolver is registered only if the ``braceexpand`` package is available.
 
-Example:
-    Register and use the braceexpand resolver::
-
-        from hya import get_default_registry
-        registry = get_default_registry()
-        registry.register_resolvers()
-
-        # Then in your OmegaConf config:
-        # files: ${hya.braceexpand:file{1..3}.txt}
 """
 
 from __future__ import annotations

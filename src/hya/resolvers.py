@@ -194,10 +194,10 @@ def iter_join_resolver(iterable: Iterable[Any], separator: str) -> str:
         >>> from omegaconf import OmegaConf
         >>> conf = OmegaConf.create({"key": "${hya.iter_join:[abc,2,def],-}"})
         >>> conf.key
-        'abc-2-def'
+        abc-2-def
         >>> conf = OmegaConf.create({"path": "${hya.iter_join:[data,models,v1],/}"})
         >>> conf.path
-        'data/models/v1'
+        data/models/v1
 
         ```
     """
@@ -463,7 +463,7 @@ def sha256_resolver(obj: Any) -> str:
         >>> from omegaconf import OmegaConf
         >>> conf = OmegaConf.create({"key": "${hya.sha256:mystring}"})
         >>> conf.key
-        'bd3ff47540b31e62d4ca6b07794e5a886b0f655fc322730f26ecd65cc7dd5c90'
+        bd3ff47540b31e62d4ca6b07794e5a886b0f655fc322730f26ecd65cc7dd5c90
         >>> # Useful for generating consistent IDs
         >>> conf = OmegaConf.create({"id": "${hya.sha256:experiment_v1}"})
 

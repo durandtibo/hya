@@ -26,7 +26,8 @@ You can use resolvers directly in YAML configuration files:
 model:
   layers: 4
   hidden_size: 256
-  total_params: ${hya.mul:${model.layers},${model.hidden_size}}
+  # Simplified example: just layers × hidden_size for demonstration
+  approx_params: ${hya.mul:${model.layers},${model.hidden_size}}
 
 training:
   total_samples: 10000
@@ -42,9 +43,9 @@ import hya
 from omegaconf import OmegaConf
 
 conf = OmegaConf.load("config.yaml")
-print(conf.model.total_params)     # Output: 1024
-print(conf.training.num_batches)   # Output: 313
-print(conf.training.learning_rate) # Output: 0.001
+print(conf.model.approx_params)      # Output: 1024
+print(conf.training.num_batches)     # Output: 313
+print(conf.training.learning_rate)   # Output: 0.001
 ```
 
 ## Integration with Hydra

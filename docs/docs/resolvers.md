@@ -156,9 +156,9 @@ training:
 
 **Equivalent Python:**
 ```python
-value = -(dividend // -divisor)
-# or
-value = math.ceil(dividend / divisor)
+value = -(dividend // -divisor)  # Canonical implementation (no floating point)
+# Alternative (but may have precision issues with large integers):
+# value = math.ceil(dividend / divisor)
 ```
 
 **Use Case:** Calculating the number of batches needed to process all samples.
@@ -625,7 +625,7 @@ training:
   amp_dtype: ${hya.torch.dtype:float16}
 ```
 
-**Available dtypes:** `float`, `float16`, `float32`, `float64`, `bfloat16`, `int`, `int8`, `int16`, `int32`, `int64`, `uint8`, `bool`, `complex64`, `complex128`, etc.
+**Available dtypes:** Common dtype string names include `float`, `float16`, `float32`, `float64`, `bfloat16`, `int`, `int8`, `int16`, `int32`, `int64`, `uint8`, `bool`, `complex64`, `complex128`. The exact available dtypes depend on your PyTorch installation. For a complete list, see the [PyTorch dtype documentation](https://pytorch.org/docs/stable/tensor_attributes.html#torch-dtype).
 
 **Equivalent Python:**
 ```python

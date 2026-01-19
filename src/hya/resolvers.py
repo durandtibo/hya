@@ -358,6 +358,13 @@ def path_resolver(path: str) -> Path:
         A fully resolved pathlib.Path object with expanded user
         directory and converted to absolute path.
 
+    Note:
+        The tilde (~) expansion works when the path is passed as
+        a regular string, but may not work correctly when used
+        within OmegaConf interpolation syntax due to grammar
+        restrictions. For paths with tilde, consider using
+        direct Python code or configuration string values.
+
     Example:
         ```pycon
         >>> import hya
@@ -365,8 +372,6 @@ def path_resolver(path: str) -> Path:
         >>> conf = OmegaConf.create({"key": "${hya.path:/my/path}"})
         >>> conf.key
         PosixPath('/my/path')
-        >>> conf = OmegaConf.create({"key": "${hya.path:~/data}"})
-        >>> # Returns expanded path like PosixPath('/home/user/data')
 
         ```
     """

@@ -51,15 +51,18 @@ def braceexpand_resolver(pattern: str) -> Iterator[str]:
         An iterator yielding strings resulting from brace expansion
         of the pattern.
 
+    Note:
+        When using brace expansion patterns in OmegaConf, you may need
+        to escape or quote the pattern string to avoid conflicts with
+        OmegaConf's own syntax for curly braces.
+
     Example:
         ```pycon
         >>> import hya
-        >>> from omegaconf import OmegaConf
-        >>> conf = OmegaConf.create({"files": "${hya.braceexpand:file{1..3}.txt}"})
-        >>> list(conf.files)
+        >>> from hya.braceexpand import braceexpand_resolver
+        >>> list(braceexpand_resolver("file{1..3}.txt"))
         ['file1.txt', 'file2.txt', 'file3.txt']
-        >>> conf = OmegaConf.create({"names": "${hya.braceexpand:{a,b,c}}"})
-        >>> list(conf.names)
+        >>> list(braceexpand_resolver("{a,b,c}"))
         ['a', 'b', 'c']
 
         ```

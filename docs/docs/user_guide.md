@@ -26,7 +26,8 @@ You can use resolvers directly in YAML configuration files:
 model:
   layers: 4
   hidden_size: 256
-  # Simplified example: just layers × hidden_size for demonstration
+  # NOTE: This is a simple demonstration of the mul resolver
+  # Real neural network parameter counts are much more complex
   approx_params: ${hya.mul:${model.layers},${model.hidden_size}}
 
 training:
@@ -156,7 +157,9 @@ def clip_resolver(value, min_val, max_val):
     """Clip a value between min and max."""
     return max(min_val, min(value, max_val))
 
-# Make sure resolvers are registered with OmegaConf
+# Register custom resolvers with OmegaConf
+# Note: Default hya resolvers are already registered on import
+# This only registers your custom resolvers added to the default registry
 registry.register_resolvers()
 ```
 

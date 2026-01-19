@@ -8,16 +8,6 @@ allow tests to be conditionally skipped based on whether optional packages
 These fixtures are useful for ensuring tests only run when the required
 dependencies are present, avoiding import errors and test failures when
 optional packages are not installed.
-
-Example:
-    Use markers in your tests::
-
-        from hya.testing import numpy_available
-
-        @numpy_available
-        def test_numpy_resolver():
-            # This test only runs if numpy is installed
-            pass
 """
 
 from __future__ import annotations

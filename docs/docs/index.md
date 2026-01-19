@@ -55,24 +55,107 @@
 
 ## Overview
 
-`hya` is a library of custom [OmegaConf](https://github.com/omry/omegaconf) resolvers.
-`hya` is designed to be used with [Hydra](https://github.com/facebookresearch/hydra).
-The default resolvers are automatically registered when you import `hya`.
-You can also register custom resolvers by adding the following lines:
+`hya` is a library of custom [OmegaConf](https://github.com/omry/omegaconf) resolvers designed to be used with [Hydra](https://github.com/facebookresearch/hydra). It provides a comprehensive set of resolvers for mathematical operations, path manipulation, data type conversions, and more.
+
+## Quick Start
+
+The default resolvers are automatically registered when you import `hya`:
+
+```python
+import hya
+from omegaconf import OmegaConf
+
+# Use resolvers in your configuration
+conf = OmegaConf.create({
+    "batch_size": 32,
+    "num_samples": 1000,
+    "num_batches": "${hya.ceildiv:${num_samples},${batch_size}}",
+    "learning_rate": "${hya.pow:10,-3}",  # 0.001
+})
+
+print(conf.num_batches)  # Output: 32
+print(conf.learning_rate)  # Output: 0.001
+```
+
+### Using with Hydra
+
+Create a configuration file `config.yaml`:
+
+```yaml
+model:
+  input_dim: 784
+  hidden_dim: 256
+  output_dim: 10
+
+training:
+  batch_size: 32
+  num_epochs: 10
+  learning_rate: ${hya.pow:10,-3}  # 0.001
+
+paths:
+  data_dir: ${hya.path:/data}
+  model_dir: ${hya.iter_join:[${paths.data_dir},models,v1],/}
+  
+experiment:
+  name: mnist_classifier
+  id: ${hya.sha256:${experiment.name}}
+```
+
+Then use it in your Python script:
+
+```python
+import hya
+import hydra
+from omegaconf import DictConfig
+
+@hydra.main(version_base=None, config_path=".", config_name="config")
+def main(cfg: DictConfig):
+    print(f"Learning rate: {cfg.training.learning_rate}")
+    print(f"Model dir: {cfg.paths.model_dir}")
+    print(f"Experiment ID: {cfg.experiment.id}")
+
+if __name__ == "__main__":
+    main()
+```
+
+## Registering Custom Resolvers
+
+You can extend `hya` with your own custom resolvers:
 
 ```python
 from hya import get_default_registry
 
 registry = get_default_registry()
 
-
 @registry.register("multiply")
 def multiply_resolver(x, y):
     return x * y
 
-
+# Register the custom resolver with OmegaConf
 registry.register_resolvers()
+
+# Now use it in your configuration
+conf = OmegaConf.create({
+    "result": "${multiply:5,3}"
+})
+print(conf.result)  # Output: 15
 ```
+
+## Available Resolvers
+
+`hya` provides over 20 built-in resolvers organized into categories:
+
+- **Mathematical operations**: `add`, `sub`, `mul`, `truediv`, `floordiv`, `ceildiv`, `pow`, `sqrt`, `neg`, `max`, `min`
+- **Transcendental functions**: `exp`, `log`, `log10`, `sinh`, `asinh`
+- **Constants**: `pi`
+- **Path utilities**: `path`, `to_path`, `iter_join`
+- **Utilities**: `len`, `sha256`
+- **Optional (with dependencies)**:
+  - NumPy: `np.array`
+  - PyTorch: `torch.tensor`, `torch.dtype`
+  - Braceexpand: `braceexpand`
+
+See the [Resolvers](resolvers.md) page for complete documentation of all resolvers.
 
 ## API stability
 

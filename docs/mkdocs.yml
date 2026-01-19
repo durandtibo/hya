@@ -18,8 +18,9 @@ theme:
 
 nav:
   - Home: index.md
-  - get_started.md
-  - resolvers.md
+  - Get Started: get_started.md
+  - User Guide: user_guide.md
+  - Resolvers: resolvers.md
   - Reference:
       - refs/index.md
       - refs/registry.md

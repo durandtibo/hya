@@ -287,8 +287,6 @@ Computes the inverse hyperbolic sine.
 **Syntax:** `${hya.asinh:number}`
 
 **Example:**
-
-**Example:**
 ```yaml
 result: ${hya.asinh:1}  # Result: 0.881...
 ```

@@ -328,9 +328,9 @@ maximum: ${hya.max:10,25,15}  # Result: 25
 
 model:
   min_layers: 4
-  max_layers: 12
-  requested_layers: 20
-  actual_layers: ${hya.min:${model.requested_layers},${model.max_layers}}  # Result: 12
+  default_layers: 8
+  requested_layers: 2
+  actual_layers: ${hya.max:${model.requested_layers},${model.min_layers}}  # Result: 4 (enforces minimum)
 ```
 
 **Equivalent Python:**

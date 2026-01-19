@@ -3,7 +3,9 @@ from __future__ import annotations
 import math
 from pathlib import Path
 
+import pytest
 from omegaconf import OmegaConf
+from omegaconf.errors import InterpolationResolutionError
 
 
 def test_add_resolver_int2() -> None:
@@ -42,6 +44,11 @@ def test_ceildiv_resolver() -> None:
     assert OmegaConf.create({"key": "${hya.ceildiv:11,4}"}).key == 3
 
 
+def test_ceildiv_resolver_division_by_zero() -> None:
+    with pytest.raises(InterpolationResolutionError, match=r"ZeroDivisionError"):
+        OmegaConf.create({"key": "${hya.ceildiv:10,0}"}).key  # noqa: B018
+
+
 def test_exp_resolver_int() -> None:
     assert math.isclose(OmegaConf.create({"key": "${hya.exp:1}"}).key, math.e)
 
@@ -52,6 +59,11 @@ def test_exp_resolver_float() -> None:
 
 def test_floordiv_resolver() -> None:
     assert OmegaConf.create({"key": "${hya.floordiv:11,4}"}).key == 2
+
+
+def test_floordiv_resolver_division_by_zero() -> None:
+    with pytest.raises(InterpolationResolutionError, match=r"ZeroDivisionError"):
+        OmegaConf.create({"key": "${hya.floordiv:10,0}"}).key  # noqa: B018
 
 
 def test_len_resolver_list() -> None:
@@ -186,3 +198,8 @@ def test_to_path_resolver() -> None:
 
 def test_truediv_resolver() -> None:
     assert OmegaConf.create({"key": "${hya.truediv:11,4}"}).key == 2.75
+
+
+def test_truediv_resolver_division_by_zero() -> None:
+    with pytest.raises(InterpolationResolutionError, match=r"ZeroDivisionError"):
+        OmegaConf.create({"key": "${hya.truediv:10,0}"}).key  # noqa: B018

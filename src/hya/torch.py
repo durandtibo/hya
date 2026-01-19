@@ -4,17 +4,6 @@ This module provides OmegaConf resolvers that use PyTorch for tensor operations
 and data type specifications. The resolvers are registered only if the ``torch``
 package is available, enabling users to create PyTorch tensors and specify dtypes
 directly from configuration files.
-
-Example:
-    Register and use the torch resolvers::
-
-        from hya import get_default_registry
-        registry = get_default_registry()
-        registry.register_resolvers()
-
-        # Then in your OmegaConf config:
-        # tensor: ${hya.torch.tensor:[1, 2, 3, 4, 5]}
-        # dtype: ${hya.torch.dtype:float32}
 """
 
 from __future__ import annotations

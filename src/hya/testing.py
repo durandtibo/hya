@@ -1,4 +1,24 @@
-r"""Define some PyTest fixtures."""
+r"""Define PyTest fixtures for testing optional dependencies.
+
+This module provides pytest markers and fixtures that help with testing
+the hya library under different dependency configurations. The fixtures
+allow tests to be conditionally skipped based on whether optional packages
+(braceexpand, numpy, torch) are available in the test environment.
+
+These fixtures are useful for ensuring tests only run when the required
+dependencies are present, avoiding import errors and test failures when
+optional packages are not installed.
+
+Example:
+    Use markers in your tests::
+
+        from hya.testing import numpy_available
+
+        @numpy_available
+        def test_numpy_resolver():
+            # This test only runs if numpy is installed
+            pass
+"""
 
 from __future__ import annotations
 

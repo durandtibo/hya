@@ -4,12 +4,12 @@ It is highly recommended to install in
 a [virtual environment](https://packaging.python.org/guides/installing-using-pip-and-virtual-environments/)
 to keep your system in order.
 
-## Installing with `pip` (recommended)
+## Installing with `uv` (recommended)
 
 The following command installs the latest version of the library:
 
 ```shell
-pip install hya
+uv pip install hya
 ```
 
 To make the package as slim as possible, only the packages required to use `hya` are installed.
@@ -21,12 +21,12 @@ This minimal installation includes only `omegaconf`, which is sufficient for usi
 
 ```shell
 # Install all optional dependencies
-pip install 'hya[all]'
+uv pip install 'hya[all]'
 
 # Install specific optional dependencies
-pip install hya braceexpand  # For hya.braceexpand resolver
-pip install hya numpy        # For hya.np.array resolver
-pip install hya torch        # For hya.torch.tensor and hya.torch.dtype resolvers
+uv pip install hya braceexpand  # For hya.braceexpand resolver
+uv pip install hya numpy        # For hya.np.array resolver
+uv pip install hya torch        # For hya.torch.tensor and hya.torch.dtype resolvers
 ```
 
 ### Dependency Matrix

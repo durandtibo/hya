@@ -45,7 +45,7 @@ training:
 
 **Equivalent Python:**
 ```python
-value = object1 + object2 + object3 + ...
+value = value1 + value2 + value3 + ...
 ```
 
 #### `hya.sub`

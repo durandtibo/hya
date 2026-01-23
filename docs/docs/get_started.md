@@ -13,7 +13,8 @@ uv pip install hya
 ```
 
 To make the package as slim as possible, only the packages required to use `hya` are installed.
-This minimal installation includes only `omegaconf`, which is sufficient for using all the core resolvers.
+This minimal installation includes only `omegaconf`, which is sufficient for using all the core
+resolvers.
 
 ### Installing Optional Dependencies
 
@@ -33,16 +34,17 @@ uv pip install hya torch        # For hya.torch.tensor and hya.torch.dtype resol
 
 The following table shows which resolvers require which packages:
 
-| Resolver | Required Package | Description |
-|----------|-----------------|-------------|
-| `hya.braceexpand` | `braceexpand>=0.1.7` | Brace expansion patterns |
-| `hya.np.array` | `numpy>=1.24` | NumPy array creation |
-| `hya.torch.tensor` | `torch>=2.0` | PyTorch tensor creation |
-| `hya.torch.dtype` | `torch>=2.0` | PyTorch data type specification |
+| Resolver           | Required Package     | Description                     |
+|--------------------|----------------------|---------------------------------|
+| `hya.braceexpand`  | `braceexpand>=0.1.7` | Brace expansion patterns        |
+| `hya.np.array`     | `numpy>=1.24`        | NumPy array creation            |
+| `hya.torch.tensor` | `torch>=2.0`         | PyTorch tensor creation         |
+| `hya.torch.dtype`  | `torch>=2.0`         | PyTorch data type specification |
 
 All other resolvers work with the base installation (only `omegaconf` required).
 
-If you try to use a resolver that requires an optional package without installing it, you'll receive a helpful error message indicating which package needs to be installed.
+If you try to use a resolver that requires an optional package without installing it, you'll receive
+a helpful error message indicating which package needs to be installed.
 
 ## Installing from source
 

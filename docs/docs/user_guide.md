@@ -44,9 +44,9 @@ import hya
 from omegaconf import OmegaConf
 
 conf = OmegaConf.load("config.yaml")
-print(conf.model.approx_params)      # Output: 1024
-print(conf.training.num_batches)     # Output: 313
-print(conf.training.learning_rate)   # Output: 0.001
+print(conf.model.approx_params)  # Output: 1024
+print(conf.training.num_batches)  # Output: 313
+print(conf.training.learning_rate)  # Output: 0.001
 ```
 
 ## Integration with Hydra
@@ -89,6 +89,7 @@ import hya
 import hydra
 from omegaconf import DictConfig
 
+
 @hydra.main(version_base=None, config_path=".", config_name="config")
 def train(cfg: DictConfig):
     print(f"Dataset: {cfg.dataset.name}")
@@ -97,6 +98,7 @@ def train(cfg: DictConfig):
     print(f"Steps per epoch: {cfg.training.steps_per_epoch}")
     print(f"Train path: {cfg.paths.train}")
     print(f"Experiment version: {cfg.experiment.version}")
+
 
 if __name__ == "__main__":
     train()
@@ -145,17 +147,20 @@ from hya import get_default_registry
 # Get the default registry
 registry = get_default_registry()
 
+
 # Register a simple custom resolver
 @registry.register("double")
 def double_resolver(x):
     """Double the input value."""
     return x * 2
 
+
 # Register a more complex resolver
 @registry.register("clip")
 def clip_resolver(value, min_val, max_val):
     """Clip a value between min and max."""
     return max(min_val, min(value, max_val))
+
 
 # Register custom resolvers with OmegaConf
 # Note: Default hya resolvers are already registered on import
@@ -169,7 +174,7 @@ Now use them in your configuration:
 hyperparameters:
   base_lr: 0.001
   scaled_lr: ${double:${hyperparameters.base_lr}}
-  
+
   dropout: 0.7
   clipped_dropout: ${clip:${hyperparameters.dropout},0.0,0.5}
 ```
@@ -183,12 +188,14 @@ from hya import get_default_registry
 
 registry = get_default_registry()
 
+
 @registry.register("hya.add", exist_ok=True)
 def custom_add(*args):
     """Custom add that also prints the result."""
     result = sum(args)
     print(f"Adding {args} = {result}")
     return result
+
 
 registry.register_resolvers()
 ```
@@ -203,9 +210,11 @@ from hya.registry import ResolverRegistry
 # Create a new, isolated registry
 custom_registry = ResolverRegistry()
 
+
 @custom_registry.register("custom.multiply")
 def multiply(x, y):
     return x * y
+
 
 # Register only these custom resolvers
 custom_registry.register_resolvers()
@@ -222,11 +231,11 @@ paths:
   root: /data
   project: myproject
   version: v1
-  
+
   # Build paths using iter_join
   data_dir: ${hya.iter_join:[${paths.root},${paths.project},${paths.version}],/}
   train_file: ${hya.iter_join:[${paths.data_dir},train.csv],/}
-  
+
   # Use path resolver for proper Path objects
   model_checkpoint: ${hya.path:${paths.data_dir}/models/checkpoint.pth}
 ```
@@ -240,12 +249,12 @@ model:
   embedding_dim: 512
   num_heads: 8
   head_dim: ${hya.floordiv:${model.embedding_dim},${model.num_heads}}  # 64
-  
+
 training:
   total_steps: 100000
   warmup_ratio: 0.1
   warmup_steps: ${hya.mul:${training.total_steps},${training.warmup_ratio}}  # 10000
-  
+
   # Calculate batch size for distributed training
   per_device_batch_size: 16
   num_devices: 4
@@ -261,7 +270,7 @@ model:
   dtype: ${hya.torch.dtype:float32}
   use_half_precision: false
   compute_dtype: ${hya.torch.dtype:float16}
-  
+
 data:
   input_shape: [3, 224, 224]
   dummy_input: ${hya.torch.tensor:${data.input_shape}}
@@ -276,11 +285,11 @@ experiment:
   model_name: resnet50
   dataset: imagenet
   augmentation: heavy
-  
+
   # Create a unique experiment ID
   full_name: ${experiment.model_name}_${experiment.dataset}_${experiment.augmentation}
   experiment_id: ${hya.sha256:${experiment.full_name}}
-  
+
   # Use for reproducible paths
   output_dir: ${hya.iter_join:[outputs,${experiment.experiment_id}],/}
 ```
@@ -293,7 +302,7 @@ Work with lists and sequences:
 datasets:
   train: [mnist, cifar10, imagenet]
   num_datasets: ${hya.len:${datasets.train}}
-  
+
   # Join dataset names
   combined_name: ${hya.iter_join:${datasets.train},_}  # mnist_cifar10_imagenet
 ```
@@ -306,7 +315,7 @@ Generate multiple values from patterns:
 files:
   # Expands to iterator: file_1.txt, file_2.txt, ..., file_5.txt
   pattern: ${hya.braceexpand:file_{1..5}.txt}
-  
+
   # Expands to: train_a.json, train_b.json, train_c.json
   train_configs: ${hya.braceexpand:train_{a,b,c}.json}
 ```
@@ -400,10 +409,9 @@ num_batches: ${hya.ceildiv:${samples},${batch_size}}  # Integer result: 32
 Resolvers are evaluated lazily when accessed:
 
 ```python
-conf = OmegaConf.create({
-    "slow_computation": "${hya.pow:2,1000}",  # Not computed yet
-    "fast_value": 42
-})
+conf = OmegaConf.create(
+    {"slow_computation": "${hya.pow:2,1000}", "fast_value": 42}  # Not computed yet
+)
 
 # Only computed when accessed
 result = conf.slow_computation  # Computed here
@@ -417,7 +425,7 @@ model:
   vocab_size: 50000
   embedding_dim: 512
   total_embeddings: ${hya.mul:${model.vocab_size},${model.embedding_dim}}
-  
+
 layer1:
   input_size: ${model.total_embeddings}  # Reuses cached computation
 
@@ -500,11 +508,13 @@ Create NumPy arrays and PyTorch tensors:
 import hya
 from omegaconf import OmegaConf
 
-conf = OmegaConf.create({
-    "numpy_array": "${hya.np.array:[[1,2,3],[4,5,6]]}",
-    "torch_tensor": "${hya.torch.tensor:[1.0,2.0,3.0]}",
-    "torch_dtype": "${hya.torch.dtype:float32}",
-})
+conf = OmegaConf.create(
+    {
+        "numpy_array": "${hya.np.array:[[1,2,3],[4,5,6]]}",
+        "torch_tensor": "${hya.torch.tensor:[1.0,2.0,3.0]}",
+        "torch_dtype": "${hya.torch.dtype:float32}",
+    }
+)
 
 print(type(conf.numpy_array))  # <class 'numpy.ndarray'>
 print(type(conf.torch_tensor))  # <class 'torch.Tensor'>
@@ -520,7 +530,7 @@ model:
   base_size: 64
   multiplier: 4
   layers: 3
-  
+
   # Compute total size: (64 * 4) * 3 = 768
   intermediate_size: ${hya.mul:${model.base_size},${model.multiplier}}
   total_size: ${hya.mul:${model.intermediate_size},${model.layers}}

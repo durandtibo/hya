@@ -66,12 +66,14 @@ import hya
 from omegaconf import OmegaConf
 
 # Use resolvers in your configuration
-conf = OmegaConf.create({
-    "batch_size": 32,
-    "num_samples": 1000,
-    "num_batches": "${hya.ceildiv:${num_samples},${batch_size}}",
-    "learning_rate": "${hya.pow:10,-3}",  # 0.001
-})
+conf = OmegaConf.create(
+    {
+        "batch_size": 32,
+        "num_samples": 1000,
+        "num_batches": "${hya.ceildiv:${num_samples},${batch_size}}",
+        "learning_rate": "${hya.pow:10,-3}",  # 0.001
+    }
+)
 
 print(conf.num_batches)  # Output: 32
 print(conf.learning_rate)  # Output: 0.001
@@ -95,7 +97,7 @@ training:
 paths:
   data_dir: ${hya.path:/data}
   model_dir: ${hya.iter_join:[${paths.data_dir},models,v1],/}
-  
+
 experiment:
   name: mnist_classifier
   id: ${hya.sha256:${experiment.name}}
@@ -108,11 +110,13 @@ import hya
 import hydra
 from omegaconf import DictConfig
 
+
 @hydra.main(version_base=None, config_path=".", config_name="config")
 def main(cfg: DictConfig):
     print(f"Learning rate: {cfg.training.learning_rate}")
     print(f"Model dir: {cfg.paths.model_dir}")
     print(f"Experiment ID: {cfg.experiment.id}")
+
 
 if __name__ == "__main__":
     main()
@@ -127,17 +131,17 @@ from hya import get_default_registry
 
 registry = get_default_registry()
 
+
 @registry.register("multiply")
 def multiply_resolver(x, y):
     return x * y
+
 
 # Register the custom resolver with OmegaConf
 registry.register_resolvers()
 
 # Now use it in your configuration
-conf = OmegaConf.create({
-    "result": "${multiply:5,3}"
-})
+conf = OmegaConf.create({"result": "${multiply:5,3}"})
 print(conf.result)  # Output: 15
 ```
 

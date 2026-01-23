@@ -184,7 +184,7 @@ training:
 
 **Equivalent Python:**
 ```python
-value = base ** exponent
+value = base**exponent
 ```
 
 #### `hya.sqrt`
@@ -205,6 +205,7 @@ model:
 **Equivalent Python:**
 ```python
 import math
+
 value = math.sqrt(number)
 ```
 
@@ -223,6 +224,7 @@ growth: ${hya.exp:1}  # Result: 2.718...
 **Equivalent Python:**
 ```python
 import math
+
 value = math.exp(number)
 ```
 
@@ -242,6 +244,7 @@ log_base_10: ${hya.log:1000,10}  # Result: 3.0
 **Equivalent Python:**
 ```python
 import math
+
 value = math.log(number, base)  # or math.log(number) for natural log
 ```
 
@@ -260,6 +263,7 @@ decades: ${hya.log10:1000}  # Result: 3.0
 **Equivalent Python:**
 ```python
 import math
+
 value = math.log10(number)
 ```
 
@@ -277,6 +281,7 @@ result: ${hya.sinh:1}  # Result: 1.175...
 **Equivalent Python:**
 ```python
 import math
+
 value = math.sinh(number)
 ```
 
@@ -294,6 +299,7 @@ result: ${hya.asinh:1}  # Result: 0.881...
 **Equivalent Python:**
 ```python
 import math
+
 value = math.asinh(number)
 ```
 
@@ -379,6 +385,7 @@ geometry:
 **Equivalent Python:**
 ```python
 import math
+
 value = math.pi
 ```
 
@@ -399,6 +406,7 @@ model_path: ${hya.path:~/models/checkpoint.pth}
 **Equivalent Python:**
 ```python
 from pathlib import Path
+
 value = Path(path).expanduser().resolve()
 ```
 
@@ -420,6 +428,7 @@ url_decoded: ${hya.to_path:/path/with%20spaces}
 ```python
 from pathlib import Path
 from urllib.parse import unquote, urlparse
+
 value = Path(unquote(urlparse(path).path)).expanduser().resolve()
 ```
 
@@ -501,6 +510,7 @@ experiment:
 **Equivalent Python:**
 ```python
 import hashlib
+
 value = hashlib.sha256(bytes(str(obj), "utf-8")).hexdigest()
 ```
 
@@ -568,6 +578,7 @@ data:
 **Equivalent Python:**
 ```python
 import numpy as np
+
 value = np.array(data)
 ```
 
@@ -599,6 +610,7 @@ model:
 **Equivalent Python:**
 ```python
 import torch
+
 value = torch.tensor(data)
 ```
 
@@ -619,7 +631,7 @@ bool_type: ${hya.torch.dtype:bool}
 model:
   compute_dtype: ${hya.torch.dtype:float16}
   parameter_dtype: ${hya.torch.dtype:float32}
-  
+
 training:
   use_mixed_precision: true
   amp_dtype: ${hya.torch.dtype:float16}
@@ -630,6 +642,7 @@ training:
 **Equivalent Python:**
 ```python
 import torch
+
 value = torch.float32  # for dtype_name="float32"
 ```
 

@@ -4,39 +4,58 @@ It is highly recommended to install in
 a [virtual environment](https://packaging.python.org/guides/installing-using-pip-and-virtual-environments/)
 to keep your system in order.
 
-## Installing with `pip` (recommended)
+## Installing with `uv` (recommended)
 
 The following command installs the latest version of the library:
 
 ```shell
-pip install hya
+uv pip install hya
 ```
 
 To make the package as slim as possible, only the packages required to use `hya` are installed.
-It is possible to install all the optional dependencies by running the following command:
+This minimal installation includes only `omegaconf`, which is sufficient for using all the core
+resolvers.
+
+### Installing Optional Dependencies
+
+`hya` provides additional resolvers that require optional dependencies:
 
 ```shell
-pip install 'hya[all]'
+# Install all optional dependencies
+uv pip install 'hya[all]'
+
+# Install specific optional dependencies
+uv pip install hya braceexpand  # For hya.braceexpand resolver
+uv pip install hya numpy        # For hya.np.array resolver
+uv pip install hya torch        # For hya.torch.tensor and hya.torch.dtype resolvers
 ```
 
-This command also installed PyTorch.
-It is also possible to install the optional packages manually or to select the packages to install.
+### Dependency Matrix
 
-```shell
-pip install hya torch
-```
+The following table shows which resolvers require which packages:
+
+| Resolver           | Required Package     | Description                     |
+|--------------------|----------------------|---------------------------------|
+| `hya.braceexpand`  | `braceexpand>=0.1.7` | Brace expansion patterns        |
+| `hya.np.array`     | `numpy>=1.24`        | NumPy array creation            |
+| `hya.torch.tensor` | `torch>=2.0`         | PyTorch tensor creation         |
+| `hya.torch.dtype`  | `torch>=2.0`         | PyTorch data type specification |
+
+All other resolvers work with the base installation (only `omegaconf` required).
+
+If you try to use a resolver that requires an optional package without installing it, you'll receive
+a helpful error message indicating which package needs to be installed.
 
 ## Installing from source
 
 To install `hya` from source, you can follow the steps below. First, you will need to
-install [`poetry`](https://python-poetry.org/docs/master/). `poetry` is used to manage and install
+install [`uv`](https://docs.astral.sh/uv/). `uv` is used to manage and install
 the dependencies.
-If `poetry` is already installed on your machine, you can skip this step. There are several ways to
-install `poetry` so you can use the one that you prefer. You can check the `poetry` installation by
-running the following command:
+If `uv` is already installed on your machine, you can skip this step. You can check the `uv`
+installation by running the following command:
 
 ```shell
-poetry --version
+uv --version
 ```
 
 Then, you can clone the git repository:
@@ -45,7 +64,7 @@ Then, you can clone the git repository:
 git clone git@github.com:durandtibo/hya.git
 ```
 
-It is recommended to create a Python 3.8+ virtual environment. This step is optional so you
+It is recommended to create a Python 3.10+ virtual environment. This step is optional so you
 can skip it. To create a virtual environment, you can use the following command:
 
 ```shell

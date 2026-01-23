@@ -6,7 +6,7 @@ from omegaconf.errors import InterpolationResolutionError
 
 from hya.imports import is_torch_available
 from hya.testing import torch_available
-from hya.torch_ import get_dtypes
+from hya.torch import get_dtypes
 
 if is_torch_available():
     import torch

@@ -4,27 +4,47 @@ It is highly recommended to install in
 a [virtual environment](https://packaging.python.org/guides/installing-using-pip-and-virtual-environments/)
 to keep your system in order.
 
-## Installing with `pip` (recommended)
+## Installing with `uv` (recommended)
 
 The following command installs the latest version of the library:
 
 ```shell
-pip install hya
+uv pip install hya
 ```
 
 To make the package as slim as possible, only the packages required to use `hya` are installed.
-It is possible to install all the optional dependencies by running the following command:
+This minimal installation includes only `omegaconf`, which is sufficient for using all the core
+resolvers.
+
+### Installing Optional Dependencies
+
+`hya` provides additional resolvers that require optional dependencies:
 
 ```shell
-pip install 'hya[all]'
+# Install all optional dependencies
+uv pip install 'hya[all]'
+
+# Install specific optional dependencies
+uv pip install hya braceexpand  # For hya.braceexpand resolver
+uv pip install hya numpy        # For hya.np.array resolver
+uv pip install hya torch        # For hya.torch.tensor and hya.torch.dtype resolvers
 ```
 
-This command also installed PyTorch.
-It is also possible to install the optional packages manually or to select the packages to install.
+### Dependency Matrix
 
-```shell
-pip install hya torch
-```
+The following table shows which resolvers require which packages:
+
+| Resolver           | Required Package     | Description                     |
+|--------------------|----------------------|---------------------------------|
+| `hya.braceexpand`  | `braceexpand>=0.1.7` | Brace expansion patterns        |
+| `hya.np.array`     | `numpy>=1.24`        | NumPy array creation            |
+| `hya.torch.tensor` | `torch>=2.0`         | PyTorch tensor creation         |
+| `hya.torch.dtype`  | `torch>=2.0`         | PyTorch data type specification |
+
+All other resolvers work with the base installation (only `omegaconf` required).
+
+If you try to use a resolver that requires an optional package without installing it, you'll receive
+a helpful error message indicating which package needs to be installed.
 
 ## Installing from source
 

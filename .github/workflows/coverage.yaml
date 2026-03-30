@@ -34,7 +34,7 @@ jobs:
       # Upload coverage report to Codecov (only for main repository)
       - name: Upload coverage to Codecov
         if: github.repository == 'durandtibo/hya' && (github.event_name == 'push' || github.event_name == 'pull_request')
-        uses: codecov/codecov-action@v5
+        uses: codecov/codecov-action@v6
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           files: ./coverage.xml

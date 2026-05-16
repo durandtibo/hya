@@ -1,12 +1,11 @@
 r"""Implement NumPy resolvers for array creation and manipulation.
 
-This module provides OmegaConf resolvers that use NumPy for array operations.
-The resolvers are registered only if the ``numpy`` package is available,
-allowing users to create NumPy arrays directly from configuration files.
-        registry.register_resolvers()
+This module provides OmegaConf resolvers that use NumPy for array
+operations. The resolvers are registered only if the ``numpy`` package
+is available, allowing users to create NumPy arrays directly from
+configuration files.         registry.register_resolvers()
 
-        # Then in your OmegaConf config:
-        # data: ${hya.np.array:[1, 2, 3]}
+# Then in your OmegaConf config: # data: ${hya.np.array:[1, 2, 3]}
 """
 
 from __future__ import annotations

@@ -1,8 +1,9 @@
 r"""Implement a braceexpand resolver for brace expansion patterns.
 
-This module provides OmegaConf resolvers that use the braceexpand library
-to expand string patterns with brace notation (similar to bash brace expansion).
-The resolver is registered only if the ``braceexpand`` package is available.
+This module provides OmegaConf resolvers that use the braceexpand
+library to expand string patterns with brace notation (similar to bash
+brace expansion). The resolver is registered only if the ``braceexpand``
+package is available.
 """
 
 from __future__ import annotations

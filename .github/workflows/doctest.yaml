@@ -18,7 +18,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Setup python environment
         uses: durandtibo/setup-venv-uv-action@v0.0.3
@@ -35,7 +35,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       # Install dependencies including documentation tools (mkdocs, mike, etc.)
       - name: Setup python environment

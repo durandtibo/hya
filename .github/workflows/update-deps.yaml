@@ -22,7 +22,7 @@ jobs:
       - uses: actions/checkout@v7
 
       - name: Setup python environment
-        uses: durandtibo/setup-venv-uv-action@v0.0.3
+        uses: durandtibo/setup-venv-uv-action@v0.0.4
 
       # Update all dependencies to their latest compatible versions
       - name: Update dependencies

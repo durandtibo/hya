@@ -23,7 +23,7 @@ jobs:
         uses: actions/checkout@v7
 
       - name: Setup python environment
-        uses: durandtibo/setup-venv-uv-action@v0.0.3
+        uses: durandtibo/setup-venv-uv-action@v0.0.4
 
       # Generate version configuration for dependency testing
       - name: Generate package versions

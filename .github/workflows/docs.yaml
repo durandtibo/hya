@@ -24,7 +24,7 @@ jobs:
 
       # Install dependencies including documentation tools
       - name: Setup python environment
-        uses: durandtibo/setup-venv-uv-action@v0.0.3
+        uses: durandtibo/setup-venv-uv-action@v0.0.4
         with:
           install-args: '--docs-deps'
 

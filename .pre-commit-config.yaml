@@ -17,7 +17,7 @@ repos:
         types:
           - python
   - repo: https://github.com/pycqa/isort
-    rev: 9.0.0a3
+    rev: 9.0.0b1
     hooks:
       - id: isort
         name: isort (python)
@@ -53,7 +53,7 @@ repos:
         additional_dependencies:
           - black>=25.11
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.15.21
+    rev: v0.15.22
     hooks:
       - id: ruff-check
         types_or: [ python, pyi, jupyter ]

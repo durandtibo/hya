@@ -46,7 +46,7 @@ jobs:
 
       # Install specific version of dependency for compatibility testing
       - name: Install valid package version
-        uses: durandtibo/uv-install-package-action@v0.1.2
+        uses: durandtibo/uv-install-package-action@v0.2.0
         with:
           package-name: ${{ inputs.package-name }}
           package-version: ${{ matrix.package-version }}

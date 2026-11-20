@@ -2,7 +2,7 @@
 # Tests the PyPI package with different versions of optional dependencies.
 # Ensures published package works across supported dependency version ranges.
 
-name: Test Package with Dependency Version
+name: Dependency Compatibility (PyPI Package)
 on:
   workflow_call:
     inputs:
@@ -12,30 +12,35 @@ on:
       package-versions:
         type: string
         required: true
+      test-matrix:
+        description: "JSON test matrix from lib-get-test-matrix.yaml, loaded once by the caller"
+        required: true
+        type: string
 
-permissions:
-  contents: read
+permissions: {}
 
 jobs:
   test:
-    runs-on: ubuntu-latest
-    timeout-minutes: 2
+    permissions:
+      contents: read
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 5
     strategy:
       max-parallel: 8
       fail-fast: false
       matrix:
-        python-version:
-          ["3.14", "3.14t", "3.13", "3.13t", "3.12", "3.11"]
+        os: ${{ fromJson(inputs.test-matrix).os_matrix }}
+        python-version: ${{ fromJson(inputs.test-matrix).python_versions }}
         # Test with each version of the specified package
         package-version: ${{ fromJson(inputs.package-versions) }}
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # ratchet:actions/checkout@v7
 
       # Install uv package manager
       - name: Install uv and set the python version
-        uses: astral-sh/setup-uv@v7
+        uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # ratchet:astral-sh/setup-uv@v10.3.3
         with:
           python-version: ${{ matrix.python-version }}
           activate-environment: true
@@ -47,19 +52,12 @@ jobs:
 
       # Install specific version of dependency for compatibility testing
       - name: Install valid package version
-        uses: durandtibo/uv-install-package-action@v0.2.0
+        uses: durandtibo/uv-install-package-action@fe64eac38f69e851b5e79b74ee255ed95a159bc0 # ratchet:durandtibo/uv-install-package-action@v0.2.0
         with:
           package-name: ${{ inputs.package-name }}
           package-version: ${{ matrix.package-version }}
           python-version: ${{ matrix.python-version }}
 
-      # Display dependency tree
-      - name: Show dependency tree
-        shell: bash
-        run: |
-          uv pip tree --show-version-specifiers
-
-      # Run basic package checks
-      - name: Run some checks
-        run: |
-          python tests/package_checks.py
+      # Display dependency tree and run basic package checks
+      - name: Verify installed package
+        uses: ./.github/actions/verify-installed-package

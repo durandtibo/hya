@@ -156,22 +156,27 @@ failure points at the specific behavior that broke.
 
 ## GitHub Actions workflows
 
-The workflows are in `.github/workflows/`.
+The workflows are in `.github/workflows/`. Read `.github/GUIDELINES.md` first: it lists every
+workflow and the conventions (naming prefixes, action pinning, permissions, timeouts, runners).
+The workflows follow those of [coola](https://github.com/durandtibo/coola).
 
-- Reusable workflows (`workflow_call`, plus `workflow_dispatch` to run one alone) such as
-  `build.yaml`, `coverage.yaml`, `doctest.yaml`, `format.yaml`, `test.yaml`, `type-checking.yaml`
-  are called from `ci.yaml`.
-- `ci.yaml` is the single entry point of the checks (pull request, push to `main`, nightly).
-  To add a check, create a reusable workflow and add a job in `ci.yaml`.
-- Scheduled and release workflows have their own entry points: `nightly-*.yaml` test the
-  _published_ PyPI package (not the source), `pre-commit-autoupdate.yaml`, `update-deps.yaml` and
-  `generate-package-versions.yaml` open pull requests automatically, `pypi.yaml`, `docs.yaml` and
-  `docs-dev.yaml` publish the package and the documentation.
-- Conventions: a header comment that says what the workflow does and when it runs; the minimum
-  `permissions` (per job when a job needs more than read); `timeout-minutes` on every job. Look at
-  an existing workflow and copy its conventions.
-- `verify-workflows.yaml` lints the workflows: check your changes with `actionlint` when
-  available.
+- File names start with a prefix: `ci-` (checks of the source), `lib-` (reusable workflows that
+  only expose outputs), `bot-` (scheduled automation that opens pull requests), `nightly-` (checks
+  of the _published_ PyPI package), `release-` (PyPI and documentation publishing) and `security-`.
+- `ci.yaml` is the single entry point of the checks (pull request, push to `main`, nightly,
+  `workflow_call` for the release). It calls the reusable `ci-*.yaml` workflows. To add a check,
+  create a reusable `ci-<name>.yaml` workflow and add a job in `ci.yaml`.
+- The Python versions and the operating systems to test come from `lib-get-test-matrix.yaml`
+  (`durandtibo/workflow-config-action`), and the optional dependencies from `pyproject.toml`
+  (`lib-get-package-extras.yaml`, `durandtibo/extract-pyproject-metadata-action`). Do not hardcode
+  them in a workflow.
+- Every action is pinned to a commit SHA with a `# ratchet:owner/repo@vX.Y.Z` comment. Copy the pin
+  of an existing workflow; `bot-pin-action.yaml` refreshes them.
+- Conventions: a header comment that says what the workflow does and when it runs; `permissions: {}`
+  at the top and the minimum `permissions` per job; `timeout-minutes` on every job;
+  `workflow_dispatch` when it makes sense. Look at an existing workflow and copy its conventions.
+- `ci-verify-workflows.yaml` lints the workflows: check your changes with `make lint-actions`
+  (`actionlint`) and `make lint` when available.
 
 ## Releases
 

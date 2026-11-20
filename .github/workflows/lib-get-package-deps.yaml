@@ -1,0 +1,48 @@
+name: Get Package Dependencies
+
+# Combines lib-get-package-extras.yaml and lib-get-package-versions.yaml into
+# one reusable workflow, since every caller that tests per-dependency
+# compatibility (ci-test-deps.yaml, nightly-package.yaml) needs both the
+# extra names and their version bounds together, to build a
+# package-name x package-version matrix.
+#
+# Usage:
+#   jobs:
+#     get-deps:
+#       uses: ./.github/workflows/lib-get-package-deps.yaml
+#
+#     test-dep:
+#       needs: get-deps
+#       strategy:
+#         matrix:
+#           package-name: ${{ fromJson(needs.get-deps.outputs.extras) }}
+#       uses: ./.github/workflows/ci-test-code-dep.yaml
+#       with:
+#         package-name: ${{ matrix.package-name }}
+#         package-versions: ${{ toJson(fromJson(needs.get-deps.outputs.package_versions)[matrix.package-name]) }}
+
+on:
+  workflow_call:
+    outputs:
+      extras:
+        description: "JSON array of extra names from pyproject.toml's [project.optional-dependencies]"
+        value: ${{ jobs.get-extras.outputs.extras }}
+      package_versions:
+        description: "JSON string containing all package versions from dev/config/package_versions.json"
+        value: ${{ jobs.get-versions.outputs.package_versions }}
+
+  workflow_dispatch: # Allows manual triggering for testing purposes
+
+permissions: {}
+
+jobs:
+  # Get the extra names from pyproject.toml, and their version bounds from
+  # dev/config/package_versions.json.
+  get-extras:
+    permissions:
+      contents: read
+    uses: ./.github/workflows/lib-get-package-extras.yaml
+  get-versions:
+    permissions:
+      contents: read
+    uses: ./.github/workflows/lib-get-package-versions.yaml

@@ -1,0 +1,111 @@
+# PyPI package publishing workflow.
+# Builds and publishes the package to PyPI when a new version is released.
+# Triggered by version tags or can be run manually.
+
+name: Publish PyPI Package
+on:
+  workflow_dispatch: # Allow manual trigger
+  push:
+    tags:
+      - "v*.*.*" # Trigger on version tags (e.g., v1.0.0)
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
+permissions: {}
+
+jobs:
+  # Nothing is published unless the whole CI passes on the released commit.
+  ci:
+    permissions:
+      contents: read
+    uses: ./.github/workflows/ci.yaml
+    secrets: inherit
+
+  build:
+    permissions:
+      contents: read
+    needs: ci
+    # Manual runs are only allowed from main; tag pushes are always allowed.
+    if: github.event_name != 'workflow_dispatch' || github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # ratchet:actions/checkout@v7
+
+      - name: Build package
+        uses: durandtibo/build-pypi-package-action@3781c7eb97f68448f70e67e386f03aac7f7be384 # ratchet:durandtibo/build-pypi-package-action@v0.0.2
+        with:
+          build-command: inv release.build
+
+  sign-and-release:
+    needs: build
+    if: startsWith(github.ref, 'refs/tags/')
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      # Required to sign artifacts with Sigstore using OIDC keyless signing.
+      id-token: write
+      # Required to attach the artifacts and signatures to the GitHub release.
+      contents: write
+    steps:
+      - name: Sign and release package
+        uses: durandtibo/sign-pypi-package-action@5f8c22801ccd4af3d171e3e395fd44e40018f1f5 # ratchet:durandtibo/sign-pypi-package-action@v0.0.1
+
+  publish:
+    needs: [build, sign-and-release]
+    # Only fail-closed on tag pushes: on a tag, publish must wait for
+    # sign-and-release to succeed; on workflow_dispatch, sign-and-release
+    # is skipped (not failed), so allow publish to proceed.
+    if: |
+      always() &&
+      needs.build.result == 'success' &&
+      (needs.sign-and-release.result == 'success' || needs.sign-and-release.result == 'skipped')
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    environment:
+      name: pypi
+      url: https://pypi.org/project/hya/
+    permissions:
+      # Required for PyPI Trusted Publishing (OIDC) - no API token needed.
+      id-token: write
+    steps:
+      - name: Download distribution artifacts
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # ratchet:actions/download-artifact@v8.0.2
+        with:
+          name: dist
+          path: dist/
+
+      - name: Verify checksums
+        run: |
+          cd dist && sha256sum --check SHA256SUMS && rm SHA256SUMS
+
+      # sigstore verify expects each bundle next to a same-basename copy of
+      # its artifact, so the artifacts are copied into a scratch dir rather
+      # than downloading the bundles into dist/ itself - gh-action-pypi-publish
+      # uploads every file in packages-dir, and it can't handle .sigstore.json
+      # (errors with "Unknown distribution format"), so dist/ must only ever
+      # contain the wheel/sdist that are meant to be published.
+      - name: Download signature bundles
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # ratchet:actions/download-artifact@v8.0.2
+        with:
+          name: signatures
+          path: verify/
+
+      - name: Install uv
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # ratchet:astral-sh/setup-uv@v10.3.3
+
+      - name: Verify Sigstore signatures
+        if: startsWith(github.ref, 'refs/tags/')
+        run: |
+          cp dist/*.tar.gz dist/*.whl verify/
+          uvx sigstore verify identity verify/*.tar.gz verify/*.whl \
+            --cert-identity "https://github.com/${{ github.repository }}/.github/workflows/release-pypi.yaml@${{ github.ref }}" \
+            --cert-oidc-issuer https://token.actions.githubusercontent.com
+
+      - name: Publish package to PyPI
+        uses: pypa/gh-action-pypi-publish@7245906fb61fa33a13554f9d5fb856fe61758086 # ratchet:pypa/gh-action-pypi-publish@v1.14.3

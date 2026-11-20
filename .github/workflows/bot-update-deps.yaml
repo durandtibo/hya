@@ -1,0 +1,75 @@
+# Automated dependency update workflow.
+# Updates all dependencies to their latest compatible versions weekly.
+# Creates a pull request with the updates after running tests.
+
+name: Update Dependencies
+on:
+  schedule:
+    - cron: "0 6 * * 6" # Run every Saturday at 6:00 AM UTC
+  workflow_dispatch: # to trigger manually
+
+permissions: {}
+
+jobs:
+  update-deps:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read # actions/checkout only needs read; the app token grants write
+
+    steps:
+      - name: Generate GitHub App token
+        id: app-token
+        uses: actions/create-github-app-token@64ab729a6294000f5aa4a4bc0b73d1f32bc45510 # ratchet:actions/create-github-app-token@v3.3.0
+        with:
+          client-id: ${{ secrets.TIBOT_CLIENT_ID }}
+          private-key: ${{ secrets.TIBOT_APP_PRIVATE_KEY }}
+
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # ratchet:actions/checkout@v7
+        with:
+          token: ${{ steps.app-token.outputs.token }}
+          persist-credentials: false
+
+      - name: Setup python environment
+        uses: durandtibo/setup-venv-uv-action@4445098aa662d3d72aa0455918bc46a091b2a7f8 # ratchet:durandtibo/setup-venv-uv-action@v0.3.1
+
+      # Update all dependencies to their latest compatible versions
+      - name: Update dependencies
+        run: |
+          inv env.update
+
+      # Install dependencies including documentation dependencies
+      - name: Install dependencies with docs
+        run: |
+          inv env.install --groups dev,docs
+
+      # Display updated dependency tree
+      - name: Show dependency tree
+        shell: bash
+        run: |
+          uv pip tree --show-version-specifiers
+
+      # Run tests to ensure updates don't break functionality
+      # The pull request is created even if the tests fail (to see the update), but
+      # its description says so.
+      - name: Run unit tests
+        id: tests
+        continue-on-error: true
+        run: |
+          inv test.unit --cov
+
+      # Create a pull request with the dependency updates
+      - name: Create pull request
+        uses: peter-evans/create-pull-request@15733dbdfeedb4f7fdb73d13c6f5ac83b710fab8 # ratchet:peter-evans/create-pull-request@v8
+        if: always()
+        with:
+          token: ${{ steps.app-token.outputs.token }}
+          branch: update/dependencies
+          title: Update dependencies
+          commit-message: "Update dependencies"
+          body: |
+            Update dependencies to latest compatible version.
+
+            Unit tests: **${{ steps.tests.outcome == 'success' && 'passed' || 'FAILED or not run: do not merge before checking' }}**
+          author: ci-bot <${{ secrets.CI_BOT_EMAIL }}>

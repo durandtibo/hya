@@ -1,0 +1,59 @@
+# Documentation testing workflow.
+# Runs doctests on code examples in docstrings to ensure they work correctly.
+# Also validates that the documentation can be built without errors.
+
+name: Doctest
+on:
+  workflow_call:
+  workflow_dispatch: # to trigger manually
+
+permissions: {}
+
+jobs:
+  # Run doctests embedded in source code docstrings
+  doctest:
+    permissions:
+      contents: read
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # ratchet:actions/checkout@v7
+
+      - name: Setup python environment
+        uses: durandtibo/setup-venv-uv-action@4445098aa662d3d72aa0455918bc46a091b2a7f8 # ratchet:durandtibo/setup-venv-uv-action@v0.3.1
+
+      # Run doctest to validate code examples in docstrings
+      - name: Run doctest on source code
+        run: |
+          inv test.doctest
+
+  # Verify documentation can be built without errors
+  build:
+    permissions:
+      contents: read
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      # Install dependencies including documentation tools (mkdocs, mike, etc.)
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # ratchet:actions/checkout@v7
+
+      - name: Setup python environment
+        uses: durandtibo/setup-venv-uv-action@4445098aa662d3d72aa0455918bc46a091b2a7f8 # ratchet:durandtibo/setup-venv-uv-action@v0.3.1
+        with:
+          install-args: "--groups dev,docs"
+
+      # Configure git for mike (documentation versioning tool), shared with
+      # release-docs-publish.yaml so the two never drift.
+      - name: Setup doc deploy
+        uses: ./.github/actions/setup-doc-deploy
+        with:
+          ci-bot-email: ${{ secrets.CI_BOT_EMAIL }}
+
+      # Build documentation to a temporary branch to verify no errors
+      - name: Build documentation
+        run: |
+          mike deploy --config-file docs/mkdocs.yml --branch tmp-doc-build-1234 dev

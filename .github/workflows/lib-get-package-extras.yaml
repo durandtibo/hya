@@ -1,0 +1,61 @@
+name: Get Package Extras
+
+# This reusable workflow wraps the extract-pyproject-metadata-action composite
+# action so its output can be used from a job's `strategy.matrix` (a `uses:`
+# composite action alone can't be, since it produces a step output, not a job
+# output).
+#
+# Usage:
+#   jobs:
+#     get-extras:
+#       uses: ./.github/workflows/lib-get-package-extras.yaml
+#       # with:
+#       #   extra-values: '[""]' # or '["all"]', to also test a non-package extra
+#
+#     test:
+#       needs: get-extras
+#       strategy:
+#         matrix:
+#           extra: ${{ fromJson(needs.get-extras.outputs.extras) }}
+
+on:
+  workflow_call:
+    inputs:
+      extra-values:
+        description: >
+          JSON array of additional values to prepend to the extras read from
+          pyproject.toml (e.g. '[""]' or '["all"]').
+        required: false
+        type: string
+        default: "[]"
+    outputs:
+      extras:
+        description: "JSON array of extra names from pyproject.toml's [project.optional-dependencies], plus extra-values"
+        value: ${{ jobs.get-extras.outputs.extras }}
+
+  workflow_dispatch: # Allows manual triggering for testing purposes
+    inputs:
+      extra-values:
+        required: false
+        type: string
+        default: "[]"
+
+permissions: {}
+
+jobs:
+  get-extras:
+    permissions:
+      contents: read
+    runs-on: ubuntu-slim
+    timeout-minutes: 2
+    outputs:
+      extras: ${{ steps.extras.outputs.extras }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # ratchet:actions/checkout@v7
+
+      - name: Get package extras
+        id: extras
+        uses: durandtibo/extract-pyproject-metadata-action@4661b78698e6ceb7e04cf60bbdd52addf85a2889 # ratchet:durandtibo/extract-pyproject-metadata-action@v0.2
+        with:
+          extra-values: ${{ inputs.extra-values }}

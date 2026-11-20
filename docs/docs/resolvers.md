@@ -4,7 +4,8 @@
 
 ## Overview
 
-`hya` provides over 20 built-in resolvers for use in OmegaConf/Hydra configurations. Resolvers are organized into the following categories:
+`hya` provides over 20 built-in resolvers for use in OmegaConf/Hydra configurations. Resolvers are
+organized into the following categories:
 
 - **Arithmetic Operations**: Basic mathematical operations (add, subtract, multiply, divide)
 - **Advanced Math**: Transcendental and special functions (exp, log, sqrt, powers)
@@ -687,7 +688,10 @@ training:
   amp_dtype: ${hya.torch.dtype:float16}
 ```
 
-**Available dtypes:** Common dtype string names include `float`, `float16`, `float32`, `float64`, `bfloat16`, `int`, `int8`, `int16`, `int32`, `int64`, `uint8`, `bool`, `complex64`, `complex128`. The exact available dtypes depend on your PyTorch installation. For a complete list, see the [PyTorch dtype documentation](https://pytorch.org/docs/stable/tensor_attributes.html#torch-dtype).
+**Available dtypes:** Common dtype string names include `float`, `float16`, `float32`, `float64`,
+`bfloat16`, `int`, `int8`, `int16`, `int32`, `int64`, `uint8`, `bool`, `complex64`, `complex128`.
+The exact available dtypes depend on your PyTorch installation. For a complete list, see the
+[PyTorch dtype documentation](https://pytorch.org/docs/stable/tensor_attributes.html#torch-dtype).
 
 **Equivalent Python:**
 

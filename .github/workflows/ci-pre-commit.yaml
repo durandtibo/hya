@@ -1,0 +1,30 @@
+# Pre-commit hooks validation workflow.
+# Runs all configured pre-commit hooks to validate code quality.
+# Checks formatting, linting, and other code quality rules.
+
+name: Pre-commit
+on:
+  workflow_call:
+  workflow_dispatch: # to trigger manually
+
+permissions: {}
+
+jobs:
+  # Run pre-commit hooks to validate code quality
+  pre-commit:
+    permissions:
+      contents: read
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # ratchet:actions/checkout@v7
+
+      - name: Setup python environment
+        uses: durandtibo/setup-venv-uv-action@4445098aa662d3d72aa0455918bc46a091b2a7f8 # ratchet:durandtibo/setup-venv-uv-action@v0.3.1
+        with:
+          install-args: "--groups dev,docs"
+
+      - name: Run pre-commit hooks on all files
+        run: |
+          pre-commit run --show-diff-on-failure --color=always --all-files

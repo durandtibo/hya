@@ -1,0 +1,58 @@
+name: PyPI Package Extras Install Test
+on:
+  workflow_call:
+    inputs:
+      install-args:
+        default: ""
+        description: "Optional arguments to install the package"
+        required: false
+        type: string
+      test-matrix:
+        description: "JSON test matrix from lib-get-test-matrix.yaml, loaded once by the caller"
+        required: true
+        type: string
+
+permissions: {}
+
+jobs:
+  # Load the extras from pyproject.toml's [project.optional-dependencies],
+  # plus "all" to also test installing every extra at once.
+  get-extras:
+    permissions:
+      contents: read
+    uses: ./.github/workflows/lib-get-package-extras.yaml
+    with:
+      extra-values: '["all"]'
+
+  test:
+    permissions:
+      contents: read
+    needs: get-extras
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 5
+    strategy:
+      max-parallel: 8
+      fail-fast: false
+      matrix:
+        os: ${{ fromJson(inputs.test-matrix).os_matrix }}
+        python-version: ${{ fromJson(inputs.test-matrix).python_versions }}
+        extra: ${{ fromJson(needs.get-extras.outputs.extras) }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # ratchet:actions/checkout@v7
+      - name: Install uv and set the python version
+        uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # ratchet:astral-sh/setup-uv@v10.3.3
+        with:
+          python-version: ${{ matrix.python-version }}
+          activate-environment: true
+      - name: Install package
+        env:
+          INSTALL_ARGS: ${{ inputs.install-args }}
+          EXTRA: ${{ matrix.extra }}
+        run: |
+          read -ra install_args <<< "$INSTALL_ARGS"
+          uv pip install "${install_args[@]}" "hya[$EXTRA]"
+      # Display dependency tree and run basic package checks
+      - name: Verify installed package
+        uses: ./.github/actions/verify-installed-package

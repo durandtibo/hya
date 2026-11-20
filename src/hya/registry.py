@@ -3,7 +3,10 @@ r"""Implement the resolver registry to easily register resolvers."""
 from __future__ import annotations
 
 __all__ = ["ResolverRegistry"]
-from collections.abc import Callable
+
+import warnings
+from collections.abc import Callable, Mapping
+from types import MappingProxyType
 from typing import Any, TypeVar
 
 from omegaconf import OmegaConf
@@ -19,7 +22,7 @@ class ResolverRegistry:
 
 
     Args:
-        state: Optional initial state dictionary containing key-resolver pairs.
+        state: Optional initial state mapping containing key-resolver pairs.
             If provided, a copy is made to prevent external modifications.
 
     Example:
@@ -34,13 +37,18 @@ class ResolverRegistry:
         ```
     """
 
-    def __init__(self, state: dict[str, Callable[..., Any]] | None = None) -> None:
-        self._state: dict[str, Callable[..., Any]] = state.copy() if state else {}
+    def __init__(self, state: Mapping[str, Callable[..., Any]] | None = None) -> None:
+        self._state: dict[str, Callable[..., Any]] = dict(state) if state else {}
+        # The resolvers published to OmegaConf by this registry
+        self._published: dict[str, Callable[..., Any]] = {}
 
     @property
-    def state(self) -> dict[str, Callable[..., Any]]:
-        r"""The state of the registry."""
-        return self._state
+    def state(self) -> Mapping[str, Callable[..., Any]]:
+        r"""The state of the registry.
+
+        This is a read-only view: use ``register`` to add a resolver.
+        """
+        return MappingProxyType(self._state)
 
     def has_resolver(self, key: str) -> bool:
         """Check if a resolver is explicitly registered for the given
@@ -70,7 +78,7 @@ class ResolverRegistry:
         """
         return key in self._state
 
-    def register(self, key: str, exist_ok: bool = False) -> Callable[[F], F]:
+    def register(self, key: str, *, exist_ok: bool = False) -> Callable[[F], F]:
         """Register a resolver to registry with the specified key.
 
         This method returns a decorator that can be used to register resolver functions.
@@ -120,11 +128,30 @@ class ResolverRegistry:
 
         return wrap
 
-    def register_resolvers(self) -> None:
+    def register_resolvers(self, *, replace: bool = False) -> None:
         r"""Register the resolvers to OmegaConf.
 
-        This method iterates through all registered resolvers and registers them
-        with OmegaConf if they haven't been registered already.
+        This method publishes the registered resolvers to OmegaConf. It is
+        idempotent: a resolver already published by this registry is not
+        registered again, so calling this method twice changes nothing. A
+        resolver is not published, and a warning is emitted, if OmegaConf
+        already has a resolver for its key (a resolver published before the
+        registry changed, or registered by another source) and ``replace`` is
+        ``False``.
+
+        The resolvers are published with ``annotation_validation="off"``: the
+        annotations of the resolvers are not a runtime contract.
+
+        Args:
+            replace: If ``True``, the resolvers replace the resolvers that
+                OmegaConf already has for the same keys. If ``False``, these
+                keys are skipped with a warning.
+
+        Notes:
+            OmegaConf caches the resolved value of the nodes of a
+            configuration. Replacing a resolver does not clear the cache of
+            the existing configurations: use ``OmegaConf.clear_cache(cfg)``
+            to clear it.
 
         Example:
             ```pycon
@@ -138,6 +165,15 @@ class ResolverRegistry:
 
             ```
         """
-        for key, resolver in self.state.items():
-            if not OmegaConf.has_resolver(key):
-                OmegaConf.register_new_resolver(key, resolver)
+        for key, resolver in self._state.items():
+            if self._published.get(key) is resolver:
+                continue
+            if OmegaConf.has_resolver(key) and not replace:
+                warnings.warn(
+                    f"A resolver is already registered in OmegaConf for '{key}': not replaced. "
+                    "Use register_resolvers(replace=True) to replace it.",
+                    stacklevel=2,
+                )
+                continue
+            OmegaConf.register_resolver(key, resolver, replace=replace, annotation_validation="off")
+            self._published[key] = resolver

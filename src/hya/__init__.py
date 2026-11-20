@@ -2,11 +2,12 @@ r"""Contain the main features of the ``hya`` package."""
 
 from __future__ import annotations
 
-__all__ = ["get_default_registry"]
+__all__ = ["ResolverRegistry", "get_default_registry"]
 
 from importlib.metadata import PackageNotFoundError, version
 
 from hya.default import get_default_registry
+from hya.registry import ResolverRegistry
 
 try:
     __version__ = version(__name__)

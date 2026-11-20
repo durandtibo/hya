@@ -186,7 +186,10 @@ hyperparameters:
 
 ### Overriding Existing Resolvers
 
-You can override existing resolvers using the `exist_ok` parameter:
+You can override a resolver of the registry with the keyword-only `exist_ok` parameter. The
+default resolvers are already published to OmegaConf when `hya` is imported, so
+`register_resolvers()` does not replace them silently: it skips the key and emits a warning. Use
+`replace=True` to replace the resolver of OmegaConf:
 
 ```python
 from hya import get_default_registry
@@ -195,15 +198,26 @@ registry = get_default_registry()
 
 
 @registry.register("hya.add", exist_ok=True)
-def custom_add(*args):
+def custom_add(first, *others):
     """Custom add that also prints the result."""
-    result = sum(args)
-    print(f"Adding {args} = {result}")
+    result = first + sum(others)
+    print(f"Adding {(first, *others)} = {result}")
     return result
 
 
-registry.register_resolvers()
+# Without replace=True, the old resolver is kept and a warning is emitted
+registry.register_resolvers(replace=True)
 ```
+
+`register_resolvers` is idempotent: calling it twice changes nothing, and a resolver that is already
+published is not registered again. A key that another source registered in OmegaConf is not
+overwritten unless `replace=True`.
+
+OmegaConf caches the value of the nodes it has already resolved. Replacing a resolver does not clear
+this cache for existing configurations: call `OmegaConf.clear_cache(cfg)` to clear it.
+
+The resolvers are published with `annotation_validation="off"`: the type annotations of a resolver
+are documentation for readers and type checkers, OmegaConf does not check them at call time.
 
 ### Creating Isolated Registries
 
@@ -224,6 +238,8 @@ def multiply(x, y):
 # Register only these custom resolvers
 custom_registry.register_resolvers()
 ```
+
+`ResolverRegistry` is also available from the top-level package: `from hya import ResolverRegistry`.
 
 ## Common Use Cases
 
@@ -356,7 +372,7 @@ from hya import get_default_registry
 
 registry = get_default_registry()
 
-# Get all registered resolvers
+# Get all registered resolvers: a read-only mapping (use registry.register to add one)
 resolvers_dict = registry.state
 
 # Count resolvers
@@ -477,13 +493,19 @@ pip install braceexpand  # or numpy, or torch
 
 **Error:** `RuntimeError: A resolver is already registered for 'my_key'`
 
-**Solution:** Use `exist_ok=True` to override:
+**Solution:** Use `exist_ok=True` to override the resolver of the registry:
 
 ```python
 @registry.register("my_key", exist_ok=True)
 def my_resolver(x):
     return x
 ```
+
+**Warning:** `A resolver is already registered in OmegaConf for 'my_key': not replaced.`
+
+OmegaConf already has a resolver for this key and `register_resolvers()` did not replace it.
+
+**Solution:** Use `registry.register_resolvers(replace=True)` to replace it.
 
 ### Type Errors in Resolvers
 

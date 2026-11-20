@@ -38,7 +38,6 @@ _BUILTINS: dict[str, Callable[..., Any]] = {
     "hya.sinh": math.sinh,
     "hya.sqrt": math.sqrt,
     "hya.sub": operator.sub,
-    "hya.to_path": resolvers.to_path_resolver,
     "hya.truediv": operator.truediv,
 }
 

@@ -178,7 +178,7 @@ value = math.pi
 
 #### `hya.path`
 
-Converts a string to a resolved `pathlib.Path` object with user expansion.
+Converts a string, or a `file:` URL, to a resolved `pathlib.Path` object with user expansion.
 
 **Syntax:** `${hya.path:path_string}`
 
@@ -186,30 +186,9 @@ Converts a string to a resolved `pathlib.Path` object with user expansion.
 
 ```yaml
 data_dir: ${hya.path:/data/datasets}
-model_path: ${hya.path:~/models/checkpoint.pth}
-```
-
-**Equivalent Python:**
-
-```python
-from pathlib import Path
-
-value = Path(path).expanduser().resolve()
-```
-
-**Note:** Returns a `pathlib.Path` object, which is useful for path operations in Python.
-
-#### `hya.to_path`
-
-Converts a string (including file:// URLs) to a `pathlib.Path` with URL decoding.
-
-**Syntax:** `${hya.to_path:path_string}`
-
-**Example:**
-
-```yaml
-local_file: ${hya.to_path:file:///data/file.txt}
-url_decoded: ${hya.to_path:/path/with%20spaces}
+model_path: ${hya.path:"~/models/checkpoint.pth"}
+local_file: ${hya.path:file:///data/file.txt}
+url_decoded: ${hya.path:file:///data/my%20file.txt} # /data/my file.txt
 ```
 
 **Equivalent Python:**
@@ -218,10 +197,20 @@ url_decoded: ${hya.to_path:/path/with%20spaces}
 from pathlib import Path
 from urllib.parse import unquote, urlparse
 
-value = Path(unquote(urlparse(path).path)).expanduser().resolve()
+if path.startswith("file:"):
+    path = unquote(urlparse(path).path)
+value = Path(path).expanduser().resolve()
 ```
 
-**Use Case:** Handling file URLs and paths with URL encoding.
+**Notes:**
+
+- Returns a `pathlib.Path` object, which is useful for path operations in Python.
+- Only a string that starts with `file:` is read as a URL (its percent-encoding is decoded and its
+  query is dropped). Any other string is a plain path, written as is: `/data/a?b` and `/data/a%20b`
+  keep the `?` and the `%20`.
+- A path with a tilde must be quoted in an interpolation: `${hya.path:"~/data"}`. Unquoted, it is a
+  grammar error.
+- `hya.to_path` was merged into `hya.path` in 0.5.0.
 
 #### `hya.iter_join`
 
@@ -437,7 +426,7 @@ value = torch.float32  # for dtype_name="float32"
 | **Math Functions** | `pow`, `sqrt`, `exp`, `log`, `log10`, `sinh`, `asinh`        |
 | **Comparison**     | `max`, `min`                                                 |
 | **Constants**      | `pi`                                                         |
-| **Paths**          | `path`, `to_path`, `iter_join`                               |
+| **Paths**          | `path`, `iter_join`                                          |
 | **Utilities**      | `len`, `sha256`                                              |
 | **Optional**       | `braceexpand`, `np.array`, `torch.tensor`, `torch.dtype`     |
 

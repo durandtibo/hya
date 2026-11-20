@@ -5,7 +5,9 @@ from pathlib import Path
 
 import pytest
 from omegaconf import OmegaConf
-from omegaconf.errors import InterpolationResolutionError
+from omegaconf.errors import GrammarParseError, InterpolationResolutionError
+
+from hya.resolvers import path_resolver
 
 
 def test_add_resolver_int2() -> None:
@@ -77,6 +79,80 @@ def test_path_resolver() -> None:
     assert OmegaConf.create({"key": "${hya.path:/my/path}"}).key == Path("/my/path")
 
 
+def test_path_resolver_returns_a_path() -> None:
+    assert isinstance(OmegaConf.create({"key": "${hya.path:/my/path}"}).key, Path)
+
+
+def test_path_resolver_absolute_path() -> None:
+    assert path_resolver("/my/path") == Path("/my/path")
+
+
+def test_path_resolver_relative_path() -> None:
+    assert path_resolver("my/path") == Path.cwd() / "my" / "path"
+
+
+def test_path_resolver_parent_directory() -> None:
+    assert path_resolver("/my/path/../other") == Path("/my/other")
+
+
+def test_path_resolver_trailing_slash() -> None:
+    assert path_resolver("/my/path/") == Path("/my/path")
+
+
+def test_path_resolver_tilde() -> None:
+    assert path_resolver("~/my/path") == Path.home() / "my" / "path"
+
+
+def test_path_resolver_tilde_quoted_in_an_interpolation() -> None:
+    conf = OmegaConf.create({"key": '${hya.path:"~/my/path"}'})
+    assert conf.key == Path.home() / "my" / "path"
+
+
+def test_path_resolver_tilde_unquoted_in_an_interpolation() -> None:
+    with pytest.raises(GrammarParseError, match=r"token recognition error"):
+        OmegaConf.create({"key": "${hya.path:~/my/path}"})
+
+
+def test_path_resolver_file_url() -> None:
+    assert path_resolver("file:///my/path") == Path("/my/path")
+
+
+def test_path_resolver_file_url_with_host() -> None:
+    assert path_resolver("file://localhost/my/path") == Path("/my/path")
+
+
+def test_path_resolver_file_url_decodes_percent_encoding() -> None:
+    assert path_resolver("file:///my/path%20to/a%25b") == Path("/my/path to/a%b")
+
+
+def test_path_resolver_file_url_without_slashes() -> None:
+    assert path_resolver("file:/my/path") == Path("/my/path")
+
+
+def test_path_resolver_file_url_in_an_interpolation() -> None:
+    assert OmegaConf.create({"key": "${hya.path:file:///my/path%20to}"}).key == Path("/my/path to")
+
+
+def test_path_resolver_plain_path_keeps_percent_encoding() -> None:
+    assert path_resolver("/my/a%20b") == Path("/my/a%20b")
+
+
+def test_path_resolver_plain_path_keeps_question_mark() -> None:
+    assert path_resolver("/my/a?b") == Path("/my/a?b")
+
+
+def test_path_resolver_plain_path_keeps_fragment_character() -> None:
+    assert path_resolver("/my/a#b") == Path("/my/a#b")
+
+
+def test_path_resolver_url_is_not_parsed_when_it_is_not_a_file_url() -> None:
+    assert path_resolver("http://host/path") == Path.cwd() / "http:" / "host" / "path"
+
+
+def test_path_resolver_file_prefix_is_case_sensitive() -> None:
+    assert path_resolver("File:/my/path") == Path.cwd() / "File:" / "my" / "path"
+
+
 def test_pi_resolver() -> None:
     assert OmegaConf.create({"key": "${hya.pi:}"}).key == math.pi
 
@@ -85,7 +161,3 @@ def test_sha256_resolver() -> None:
     assert isinstance(
         OmegaConf.create({"key": "${hya.sha256:${value}}", "value": "blabla"}).key, str
     )
-
-
-def test_to_path_resolver() -> None:
-    assert OmegaConf.create({"key": "${hya.to_path:/my/path/to}"}).key == Path("/my/path/to")

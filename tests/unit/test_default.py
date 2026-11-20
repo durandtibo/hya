@@ -76,7 +76,6 @@ def test_get_default_registry_modifications_persist() -> None:
         "hya.sha256",
         "hya.sinh",
         "hya.sub",
-        "hya.to_path",
         "hya.truediv",
     ],
 )
@@ -146,7 +145,6 @@ BUILTIN_KEYS = {
     "hya.sinh",
     "hya.sqrt",
     "hya.sub",
-    "hya.to_path",
     "hya.truediv",
 }
 

@@ -1,0 +1,90 @@
+# Comprehensive test suite workflow.
+# Runs unit and integration tests across multiple Python versions and operating systems.
+# Tests both with all dependencies and with minimal dependencies.
+# The ubuntu-latest/3.14 cell of the "all" matrix also uploads coverage to Codecov,
+# so coverage tracking rides on an existing run instead of a separate full test pass.
+
+name: Unit & Integration Tests
+on:
+  workflow_call:
+    inputs:
+      test-matrix:
+        description: "JSON test matrix from lib-get-test-matrix.yaml, loaded once by the caller"
+        required: true
+        type: string
+
+permissions: {}
+
+jobs:
+  # Test with all dependencies across multiple Python versions and operating systems
+  all:
+    permissions:
+      contents: read
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 10 # free-threaded and macOS cells are slow
+    strategy:
+      max-parallel: 8
+      fail-fast: false
+      matrix:
+        os: ${{ fromJson(inputs.test-matrix).os_matrix }}
+        # Test all supported Python versions including free-threaded builds (t suffix)
+        python-version: ${{ fromJson(inputs.test-matrix).python_versions }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # ratchet:actions/checkout@v7
+
+      - name: Setup python environment
+        uses: durandtibo/setup-venv-uv-action@4445098aa662d3d72aa0455918bc46a091b2a7f8 # ratchet:durandtibo/setup-venv-uv-action@v0.3.1
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Run unit tests
+        run: |
+          inv test.unit --cov
+      # Upload the coverage of the unit tests only (the integration tests below
+      # replace coverage.xml) from a single representative cell of the matrix (only
+      # for the main repository, to avoid spam from forks).
+      - name: Upload coverage to Codecov
+        if: |
+          matrix.os == 'ubuntu-latest' && matrix.python-version == '3.14' &&
+          github.repository == 'durandtibo/hya' && (github.event_name == 'push' || github.event_name == 'pull_request')
+        uses: codecov/codecov-action@303a32d7a59b442fa8d48b6a1cc6825c09c847a5 # ratchet:codecov/codecov-action@v7
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: ./coverage.xml
+          # Ignore codecov failures as the codecov server is not
+          # very reliable but we don't want to report a failure
+          # in the github UI just because the coverage report failed to
+          # be published.
+          fail_ci_if_error: false
+      - name: Run integration tests
+        run: |
+          inv test.integration --cov
+
+  # Test with minimal dependencies to ensure optional dependencies are truly optional
+  min:
+    permissions:
+      contents: read
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 10 # free-threaded and macOS cells are slow
+    strategy:
+      max-parallel: 8
+      fail-fast: false
+      matrix:
+        os: ${{ fromJson(inputs.test-matrix).os_matrix }}
+        python-version: ${{ fromJson(inputs.test-matrix).python_versions }}
+    steps:
+      # Install only required dependencies, not optional ones
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # ratchet:actions/checkout@v7
+
+      - name: Setup python environment
+        uses: durandtibo/setup-venv-uv-action@4445098aa662d3d72aa0455918bc46a091b2a7f8 # ratchet:durandtibo/setup-venv-uv-action@v0.3.1
+        with:
+          python-version: ${{ matrix.python-version }}
+          install-args: "--no-optional-deps"
+      - name: Run unit tests
+        run: |
+          inv test.unit
+      - name: Run integration tests
+        run: |
+          inv test.integration

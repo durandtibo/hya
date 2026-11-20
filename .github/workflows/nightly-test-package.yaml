@@ -1,0 +1,51 @@
+# Reusable workflow for testing the installed package.
+# Tests package installation from PyPI and validates basic functionality.
+# Used to test stable releases, pre-releases, and different installation configurations.
+
+name: PyPI Package Install Test
+on:
+  workflow_call:
+    inputs:
+      install-cmd:
+        default: "uv pip install hya"
+        description: "Command to install the package"
+        required: false
+        type: string
+      test-matrix:
+        description: "JSON test matrix from lib-get-test-matrix.yaml, loaded once by the caller"
+        required: true
+        type: string
+
+permissions: {}
+
+jobs:
+  test:
+    permissions:
+      contents: read
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 5
+    strategy:
+      max-parallel: 8
+      fail-fast: false
+      matrix:
+        os: ${{ fromJson(inputs.test-matrix).os_matrix }}
+        python-version: ${{ fromJson(inputs.test-matrix).python_versions }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # ratchet:actions/checkout@v7
+      # Install uv package manager
+      - name: Install uv and set the python version
+        uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # ratchet:astral-sh/setup-uv@v10.3.3
+        with:
+          python-version: ${{ matrix.python-version }}
+          activate-environment: true
+      # Install package from PyPI using custom install command
+      - name: Install package
+        env:
+          INSTALL_CMD: ${{ inputs.install-cmd }}
+        run: |
+          $INSTALL_CMD
+      # Display dependency tree and run basic package checks (imports, version, etc.)
+      - name: Verify installed package
+        uses: ./.github/actions/verify-installed-package

@@ -1,0 +1,57 @@
+# Pre-commit hooks auto-update workflow.
+# Automatically updates pre-commit hook versions weekly.
+# Creates a pull request with updated hook versions after validation.
+
+name: Pre-commit Auto-update
+
+on:
+  schedule:
+    - cron: "0 8 * * 2" # Run every Tuesday at 8:00 AM UTC
+  workflow_dispatch: # to trigger manually
+
+permissions: {}
+
+jobs:
+  auto-update:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read # actions/checkout only needs read; the app token grants write
+    steps:
+      - name: Generate GitHub App token
+        id: app-token
+        uses: actions/create-github-app-token@64ab729a6294000f5aa4a4bc0b73d1f32bc45510 # ratchet:actions/create-github-app-token@v3.3.0
+        with:
+          client-id: ${{ secrets.TIBOT_CLIENT_ID }}
+          private-key: ${{ secrets.TIBOT_APP_PRIVATE_KEY }}
+
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # ratchet:actions/checkout@v7
+        with:
+          token: ${{ steps.app-token.outputs.token }}
+          persist-credentials: false
+
+      - name: Setup python environment
+        uses: durandtibo/setup-venv-uv-action@4445098aa662d3d72aa0455918bc46a091b2a7f8 # ratchet:durandtibo/setup-venv-uv-action@v0.3.1
+
+      # Update pre-commit hooks to their latest versions
+      - name: Autoupdate pre-commit hooks
+        run: |
+          pre-commit autoupdate
+
+      # Run pre-commit on all files to test updated hooks
+      - name: Run pre-commit hooks
+        run: |
+          pre-commit run --all-files
+
+      # Create a pull request with the updates
+      - name: Create pull request
+        uses: peter-evans/create-pull-request@15733dbdfeedb4f7fdb73d13c6f5ac83b710fab8 # ratchet:peter-evans/create-pull-request@v8
+        if: always()
+        with:
+          token: ${{ steps.app-token.outputs.token }}
+          branch: update/pre-commit-hooks
+          title: Update pre-commit hooks
+          commit-message: "Update pre-commit hooks"
+          body: Update versions of pre-commit hooks to latest version.
+          author: ci-bot <${{ secrets.CI_BOT_EMAIL }}>

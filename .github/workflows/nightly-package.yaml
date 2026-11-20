@@ -4,73 +4,110 @@ on:
     - cron: "30 10 * * *" # run at 10:30 AM UTC
   workflow_dispatch: # to trigger manually
 
-permissions:
-  contents: read
+permissions: {}
 
 jobs:
-  get-versions:
-    uses: ./.github/workflows/get-versions.yaml
+  # Get the extra names from pyproject.toml, and their version bounds from
+  # dev/config/package_versions.json.
+  get-deps:
+    permissions:
+      contents: read
+    uses: ./.github/workflows/lib-get-package-deps.yaml
+  # Load the shared python-version/OS matrix from the default config of
+  # durandtibo/workflow-config-action
+  # once, and pass it down to every job below that needs it.
+  get-matrix:
+    permissions:
+      contents: read
+    uses: ./.github/workflows/lib-get-test-matrix.yaml
 
   stable:
-    uses: ./.github/workflows/test-package.yaml
+    permissions:
+      contents: read
+    needs: get-matrix
+    uses: ./.github/workflows/nightly-test-package.yaml
     with:
       install-cmd: "uv pip install hya"
+      test-matrix: ${{ needs.get-matrix.outputs.test_matrix }}
 
   stable-all:
-    uses: ./.github/workflows/test-package.yaml
+    permissions:
+      contents: read
+    needs: get-matrix
+    uses: ./.github/workflows/nightly-test-package.yaml
     with:
-      install-cmd: 'uv pip install "hya[all]"'
+      install-cmd: 'uv pip install "hya[all]"' # "all" installs everything
+      test-matrix: ${{ needs.get-matrix.outputs.test_matrix }}
 
   stable-extras:
-    uses: ./.github/workflows/test-package-extras.yaml
+    permissions:
+      contents: read
+    needs: get-matrix
+    uses: ./.github/workflows/nightly-test-package-extras.yaml
+    with:
+      test-matrix: ${{ needs.get-matrix.outputs.test_matrix }}
 
   latest:
-    uses: ./.github/workflows/test-package.yaml
+    permissions:
+      contents: read
+    needs: get-matrix
+    uses: ./.github/workflows/nightly-test-package.yaml
     with:
       install-cmd: "uv pip install --pre hya"
+      test-matrix: ${{ needs.get-matrix.outputs.test_matrix }}
 
   latest-all:
-    uses: ./.github/workflows/test-package.yaml
+    permissions:
+      contents: read
+    needs: get-matrix
+    uses: ./.github/workflows/nightly-test-package.yaml
     with:
-      install-cmd: 'uv pip install --pre "hya[all]"'
+      install-cmd: 'uv pip install --pre "hya[all]"' # "all" installs everything
+      test-matrix: ${{ needs.get-matrix.outputs.test_matrix }}
 
   latest-extras:
-    uses: ./.github/workflows/test-package-extras.yaml
+    permissions:
+      contents: read
+    needs: get-matrix
+    uses: ./.github/workflows/nightly-test-package-extras.yaml
     with:
       install-args: "--pre"
+      test-matrix: ${{ needs.get-matrix.outputs.test_matrix }}
 
   ########################
   #     Dependencies     #
   ########################
 
-  omegaconf:
-    needs: get-versions
-    uses: ./.github/workflows/test-package-dep.yaml
+  # The required dependency (omegaconf) is not an extra, so it is not listed by
+  # get-deps and has its own job.
+  test-omegaconf:
+    permissions:
+      contents: read
+    needs: [get-deps, get-matrix]
+    uses: ./.github/workflows/nightly-test-package-dep.yaml
     with:
       package-name: omegaconf
-      package-versions: ${{ toJson(fromJson(needs.get-versions.outputs.package_versions).omegaconf) }}
+      package-versions: ${{ toJson(fromJson(needs.get-deps.outputs.package_versions).omegaconf) }}
+      test-matrix: ${{ needs.get-matrix.outputs.test_matrix }}
 
   #################################
   #     Optional dependencies     #
   #################################
 
-  braceexpand:
-    needs: get-versions
-    uses: ./.github/workflows/test-package-dep.yaml
+  # One job per optional dependency, driven by get-deps instead of a
+  # hardcoded list, so a new optional dependency only needs to be added to
+  # pyproject.toml (and dev/config/package_versions.json, kept up to date by
+  # bot-generate-package-versions.yaml).
+  test-dep:
+    permissions:
+      contents: read
+    needs: [get-deps, get-matrix]
+    strategy:
+      fail-fast: false
+      matrix:
+        package-name: ${{ fromJson(needs.get-deps.outputs.extras) }}
+    uses: ./.github/workflows/nightly-test-package-dep.yaml
     with:
-      package-name: braceexpand
-      package-versions: ${{ toJson(fromJson(needs.get-versions.outputs.package_versions).braceexpand) }}
-
-  numpy:
-    needs: get-versions
-    uses: ./.github/workflows/test-package-dep.yaml
-    with:
-      package-name: numpy
-      package-versions: ${{ toJson(fromJson(needs.get-versions.outputs.package_versions).numpy) }}
-
-  torch:
-    needs: get-versions
-    uses: ./.github/workflows/test-package-dep.yaml
-    with:
-      package-name: torch
-      package-versions: ${{ toJson(fromJson(needs.get-versions.outputs.package_versions).torch) }}
+      package-name: ${{ matrix.package-name }}
+      package-versions: ${{ toJson(fromJson(needs.get-deps.outputs.package_versions)[matrix.package-name]) }}
+      test-matrix: ${{ needs.get-matrix.outputs.test_matrix }}

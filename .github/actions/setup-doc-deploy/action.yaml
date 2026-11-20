@@ -1,0 +1,23 @@
+# Composite action shared by release-docs-publish.yaml and ci-doctest.yaml.
+# Configures git for the ci-docs-bot identity and fetches the gh-pages
+# branch so mike can deploy documentation on top of it.
+
+name: Setup doc deploy
+description: Configure git and fetch gh-pages branch for mike
+
+inputs:
+  ci-bot-email:
+    description: Email address used for the ci-docs-bot git identity
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - name: Setup doc deploy
+      shell: bash
+      env:
+        CI_BOT_EMAIL: ${{ inputs.ci-bot-email }}
+      run: |
+        git config --global user.name ci-docs-bot
+        git config --global user.email "$CI_BOT_EMAIL"
+        git fetch origin gh-pages --depth=1 --tags

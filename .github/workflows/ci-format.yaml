@@ -1,0 +1,60 @@
+# Code formatting and linting workflow.
+# Checks code formatting and code quality with ruff.
+# Ensures code follows project style guidelines.
+
+name: Format
+on:
+  workflow_call:
+  workflow_dispatch: # to trigger manually
+
+permissions: {}
+
+jobs:
+  format:
+    permissions:
+      contents: read
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # ratchet:actions/checkout@v7
+      - name: Format
+        run: |
+          make format
+      - name: Check for changes
+        run: |
+          git diff --exit-code
+
+  lint:
+    permissions:
+      contents: read
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # ratchet:actions/checkout@v7
+      - name: Lint
+        run: |
+          make lint
+
+  python:
+    permissions:
+      contents: read
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # ratchet:actions/checkout@v7
+
+      - name: Set up python environment
+        uses: durandtibo/setup-venv-uv-action@4445098aa662d3d72aa0455918bc46a091b2a7f8 # ratchet:durandtibo/setup-venv-uv-action@v0.3.1
+
+      - name: Check python formatting
+        run: |
+          inv format.check-python
+
+      - name: Lint python scripts
+        run: |
+          inv lint.check-python

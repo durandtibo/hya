@@ -4,9 +4,6 @@
     <a href="https://github.com/durandtibo/hya/actions/workflows/ci.yaml">
         <img alt="CI" src="https://github.com/durandtibo/hya/actions/workflows/ci.yaml/badge.svg">
     </a>
-    <a href="https://github.com/durandtibo/hya/actions/workflows/nightly-tests.yaml">
-        <img alt="Nightly Tests" src="https://github.com/durandtibo/hya/actions/workflows/nightly-tests.yaml/badge.svg">
-    </a>
     <a href="https://github.com/durandtibo/hya/actions/workflows/nightly-package.yaml">
         <img alt="Nightly Package Tests" src="https://github.com/durandtibo/hya/actions/workflows/nightly-package.yaml/badge.svg">
     </a>
@@ -15,10 +12,10 @@
     </a>
     <br/>
     <a href="https://durandtibo.github.io/hya/">
-        <img alt="Documentation" src="https://github.com/durandtibo/hya/actions/workflows/docs.yaml/badge.svg">
+        <img alt="Documentation" src="https://github.com/durandtibo/hya/actions/workflows/release-docs.yaml/badge.svg">
     </a>
     <a href="https://durandtibo.github.io/hya/dev/">
-        <img alt="Documentation" src="https://github.com/durandtibo/hya/actions/workflows/docs-dev.yaml/badge.svg">
+        <img alt="Documentation" src="https://github.com/durandtibo/hya/actions/workflows/release-docs-dev.yaml/badge.svg">
     </a>
     <br/>
     <a href="https://github.com/psf/black">
@@ -28,7 +25,7 @@
         <img  alt="Doc style: google" src="https://img.shields.io/badge/%20style-google-3666d6.svg">
     </a>
     <a href="https://github.com/astral-sh/ruff">
-        <img src="https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json" alt="Ruff" style="max-width:100%;">
+        <img alt="Ruff" src="https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json">
     </a>
     <a href="https://github.com/guilatrova/tryceratops">
         <img  alt="Doc style: google" src="https://img.shields.io/badge/try%2Fexcept%20style-tryceratops%20%F0%9F%A6%96%E2%9C%A8-black">

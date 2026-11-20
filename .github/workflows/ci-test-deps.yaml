@@ -1,0 +1,53 @@
+# Dependency compatibility testing workflow.
+# Tests the package with different versions of optional dependencies.
+# Ensures compatibility across supported dependency version ranges.
+
+name: Dependency Compatibility (Source)
+on:
+  workflow_call:
+    inputs:
+      test-matrix:
+        description: "JSON test matrix from lib-get-test-matrix.yaml, loaded once by the caller"
+        required: true
+        type: string
+
+permissions: {}
+
+jobs:
+  # Get the extra names from pyproject.toml, and their version bounds from
+  # dev/config/package_versions.json.
+  get-deps:
+    permissions:
+      contents: read
+    uses: ./.github/workflows/lib-get-package-deps.yaml
+
+  # The required dependency (omegaconf) is not an extra, so it is not listed by
+  # get-deps and has its own job. Its versions are read from the same
+  # dev/config/package_versions.json.
+  test-omegaconf:
+    permissions:
+      contents: read
+    needs: get-deps
+    uses: ./.github/workflows/ci-test-code-dep.yaml
+    with:
+      package-name: omegaconf
+      package-versions: ${{ toJson(fromJson(needs.get-deps.outputs.package_versions).omegaconf) }}
+      test-matrix: ${{ inputs.test-matrix }}
+
+  # One job per optional dependency, driven by get-deps instead of a
+  # hardcoded list, so a new optional dependency only needs to be added to
+  # pyproject.toml (and dev/config/package_versions.json, kept up to date by
+  # bot-generate-package-versions.yaml).
+  test-dep:
+    permissions:
+      contents: read
+    needs: get-deps
+    strategy:
+      fail-fast: false
+      matrix:
+        package-name: ${{ fromJson(needs.get-deps.outputs.extras) }}
+    uses: ./.github/workflows/ci-test-code-dep.yaml
+    with:
+      package-name: ${{ matrix.package-name }}
+      package-versions: ${{ toJson(fromJson(needs.get-deps.outputs.package_versions)[matrix.package-name]) }}
+      test-matrix: ${{ inputs.test-matrix }}

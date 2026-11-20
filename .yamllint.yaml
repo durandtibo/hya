@@ -1,0 +1,16 @@
+extends: default
+
+rules:
+  comments:
+    min-spaces-from-content: 1 # Prettier-compatible
+  line-length:
+    max: 100
+    level: warning
+    ignore: |
+      .github/
+      .pre-commit-config.yaml
+  indentation:
+    indent-sequences: consistent
+  document-start: disable
+  truthy:
+    check-keys: false

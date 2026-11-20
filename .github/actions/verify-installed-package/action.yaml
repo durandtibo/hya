@@ -1,0 +1,24 @@
+# Composite action shared by every workflow that verifies an already-installed
+# hya package (nightly-test-package.yaml, nightly-test-package-dep.yaml,
+# nightly-test-package-extras.yaml).
+# Prints the resolved dependency tree for debugging, then runs the same
+# package-level sanity checks (imports, resolvers, ...) used everywhere else, so
+# the three callers can't drift on what "verify the package" means.
+# Requires uv and the package to already be installed, and the repository to
+# already be checked out (tests/package_checks.py must be present).
+
+name: Verify installed package
+description: Show the dependency tree and run tests/package_checks.py against an installed package
+
+runs:
+  using: composite
+  steps:
+    - name: Show dependency tree
+      shell: bash
+      run: |
+        uv pip tree --show-version-specifiers
+
+    - name: Run some checks
+      shell: bash
+      run: |
+        python tests/package_checks.py

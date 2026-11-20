@@ -15,6 +15,8 @@ __all__ = [
 import hashlib
 import logging
 import math
+import operator
+from functools import reduce
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 from urllib.parse import unquote, urlparse
@@ -26,14 +28,18 @@ if TYPE_CHECKING:
 logger: logging.Logger = logging.getLogger(__name__)
 
 
-def add_resolver(*args: Any) -> Any:
+def add_resolver(first: Any, *others: Any) -> Any:
     r"""Return the addition of several objects.
 
+    The arguments are not modified: ``first`` is never extended in place,
+    so interpolating a list of the configuration does not change it.
+
     Args:
-        *args: The values to add.
+        first: The first value to add.
+        *others: The other values to add.
 
     Returns:
-        ``arg1 + arg2 + arg3 + ... + argN``
+        ``first + other1 + other2 + ... + otherN``
 
     Example:
         ```pycon
@@ -45,13 +51,15 @@ def add_resolver(*args: Any) -> Any:
         >>> conf = OmegaConf.create({"key": "${hya.add:1,2,3,4}"})
         >>> conf.key
         10
+        >>> conf = OmegaConf.create({"x": [1, 2], "key": "${hya.add:${x},[3]}"})
+        >>> conf.key
+        [1, 2, 3]
+        >>> conf.x
+        [1, 2]
 
         ```
     """
-    output = args[0]
-    for arg in args[1:]:
-        output += arg
-    return output
+    return reduce(operator.add, others, first)
 
 
 def ceildiv_resolver(dividend: float, divisor: float) -> float:
@@ -119,14 +127,19 @@ def iter_join_resolver(iterable: Iterable[Any], separator: str) -> str:
     return separator.join(map(str, iterable))
 
 
-def mul_resolver(*args: Any) -> Any:
+def mul_resolver(first: Any, *others: Any) -> Any:
     r"""Return the multiplication of several objects.
 
+    The arguments are not modified. The values are meant to be numbers: the
+    repetition of a list of the configuration (``[1, 2] * 2``) is not
+    supported.
+
     Args:
-        *args: The values to multiply.
+        first: The first value to multiply.
+        *others: The other values to multiply.
 
     Returns:
-        ``arg1 * arg2 * arg3 * ... * argN``
+        ``first * other1 * other2 * ... * otherN``
 
     Example:
         ```pycon
@@ -141,10 +154,7 @@ def mul_resolver(*args: Any) -> Any:
 
         ```
     """
-    output = args[0]
-    for arg in args[1:]:
-        output *= arg
-    return output
+    return reduce(operator.mul, others, first)
 
 
 def path_resolver(path: str) -> Path:

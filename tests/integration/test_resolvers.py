@@ -115,3 +115,9 @@ def test_stdlib_resolver_error_is_the_error_of_the_stdlib(expression: str, messa
 def test_stdlib_resolver_does_not_warn_on_int_arguments(recwarn: pytest.WarningsRecorder) -> None:
     assert OmegaConf.create({"key": "${hya.log:1}"}).key == 0.0
     assert len(recwarn) == 0
+
+
+def test_add_resolver_does_not_modify_config_list() -> None:
+    conf = OmegaConf.create({"x": [1, 2], "key": "${hya.add:${x},[3]}"})
+    assert conf.key == [1, 2, 3]
+    assert conf.x == [1, 2]

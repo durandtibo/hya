@@ -1019,11 +1019,11 @@ with keys and later used with OmegaConf.</p>
                 <code>state</code>
             </td>
             <td>
-                  <code><span title="dict">dict</span>[<span title="str">str</span>, <span title="collections.abc.Callable">Callable</span>[..., <span title="typing.Any">Any</span>]] | None</code>
+                  <code><span title="collections.abc.Mapping">Mapping</span>[<span title="str">str</span>, <span title="collections.abc.Callable">Callable</span>[..., <span title="typing.Any">Any</span>]] | None</code>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>Optional initial state dictionary containing key-resolver pairs.
+                <p>Optional initial state mapping containing key-resolver pairs.
 If provided, a copy is made to prevent external modifications.</p>
               </div>
             </td>
@@ -1076,12 +1076,13 @@ If provided, a copy is made to prevent external modifications.</p>
   </span>
 
 <a href="#hya.registry.ResolverRegistry.state" class="headerlink" title="Permanent link">&para;</a></h4>
-<div class="doc-signature highlight"><pre><span></span><code><span class="n">state</span><span class="p">:</span> <span class="n"><span title="dict">dict</span></span><span class="p">[</span><span class="n"><span title="str">str</span></span><span class="p">,</span> <span class="n"><span title="collections.abc.Callable">Callable</span></span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n"><span title="typing.Any">Any</span></span><span class="p">]]</span>
+<div class="doc-signature highlight"><pre><span></span><code><span class="n">state</span><span class="p">:</span> <span class="n"><span title="collections.abc.Mapping">Mapping</span></span><span class="p">[</span><span class="n"><span title="str">str</span></span><span class="p">,</span> <span class="n"><span title="collections.abc.Callable">Callable</span></span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n"><span title="typing.Any">Any</span></span><span class="p">]]</span>
 </code></pre></div>
 
     <div class="doc doc-contents ">
 
         <p>The state of the registry.</p>
+<p>This is a read-only view: use <code>register</code> to add a resolver.</p>
 
     </div>
 
@@ -1199,7 +1200,7 @@ key.</p>
 
 <a href="#hya.registry.ResolverRegistry.register" class="headerlink" title="Permanent link">&para;</a></h4>
 <div class="doc-signature highlight"><pre><span></span><code><span class="nf">register</span><span class="p">(</span>
-    <span class="n">key</span><span class="p">:</span> <span class="n"><span title="str">str</span></span><span class="p">,</span> <span class="n">exist_ok</span><span class="p">:</span> <span class="n"><span title="bool">bool</span></span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">key</span><span class="p">:</span> <span class="n"><span title="str">str</span></span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">exist_ok</span><span class="p">:</span> <span class="n"><span title="bool">bool</span></span> <span class="o">=</span> <span class="kc">False</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n"><span title="collections.abc.Callable">Callable</span></span><span class="p">[[</span><span class="n"><span title="hya.registry.F">F</span></span><span class="p">],</span> <span class="n"><span title="hya.registry.F">F</span></span><span class="p">]</span>
 </code></pre></div>
 
@@ -1340,15 +1341,63 @@ resolver will be overridden.</p>
 
 
 <a href="#hya.registry.ResolverRegistry.register_resolvers" class="headerlink" title="Permanent link">&para;</a></h4>
-<div class="doc-signature highlight"><pre><span></span><code><span class="nf">register_resolvers</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="kc">None</span>
+<div class="doc-signature highlight"><pre><span></span><code><span class="nf">register_resolvers</span><span class="p">(</span><span class="o">*</span><span class="p">,</span> <span class="n">replace</span><span class="p">:</span> <span class="n"><span title="bool">bool</span></span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span>
 </code></pre></div>
 
     <div class="doc doc-contents ">
 
         <p>Register the resolvers to OmegaConf.</p>
-<p>This method iterates through all registered resolvers and registers them
-with OmegaConf if they haven't been registered already.</p>
+<p>This method publishes the registered resolvers to OmegaConf. It is
+idempotent: a resolver already published by this registry is not
+registered again, so calling this method twice changes nothing. A
+resolver is not published, and a warning is emitted, if OmegaConf
+already has a resolver for its key (a resolver published before the
+registry changed, or registered by another source) and <code>replace</code> is
+<code>False</code>.</p>
+<p>The resolvers are published with <code>annotation_validation="off"</code>: the
+annotations of the resolvers are not a runtime contract.</p>
 
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>replace</code>
+            </td>
+            <td>
+                  <code><span title="bool">bool</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>If <code>True</code>, the resolvers replace the resolvers that
+OmegaConf already has for the same keys. If <code>False</code>, these
+keys are skipped with a warning.</p>
+              </div>
+            </td>
+            <td>
+                  <code>False</code>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<details class="notes" open>
+  <summary>Notes</summary>
+  <p>OmegaConf caches the resolved value of the nodes of a
+configuration. Replacing a resolver does not clear the cache of
+the existing configurations: use <code>OmegaConf.clear_cache(cfg)</code>
+to clear it.</p>
+</details>
 
 <details class="example" open>
   <summary>Example</summary>

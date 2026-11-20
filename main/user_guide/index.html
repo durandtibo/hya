@@ -1809,22 +1809,33 @@
 <span class="w">  </span><span class="nt">clipped_dropout</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">${clip:${hyperparameters.dropout},0.0,0.5}</span>
 </code></pre></div>
 <h3 id="overriding-existing-resolvers">Overriding Existing Resolvers<a class="headerlink" href="#overriding-existing-resolvers" title="Permanent link">&para;</a></h3>
-<p>You can override existing resolvers using the <code>exist_ok</code> parameter:</p>
+<p>You can override a resolver of the registry with the keyword-only <code>exist_ok</code> parameter. The
+default resolvers are already published to OmegaConf when <code>hya</code> is imported, so
+<code>register_resolvers()</code> does not replace them silently: it skips the key and emits a warning. Use
+<code>replace=True</code> to replace the resolver of OmegaConf:</p>
 <div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">hya</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_default_registry</span>
 
 <span class="n">registry</span> <span class="o">=</span> <span class="n">get_default_registry</span><span class="p">()</span>
 
 
 <span class="nd">@registry</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="s2">"hya.add"</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">custom_add</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">custom_add</span><span class="p">(</span><span class="n">first</span><span class="p">,</span> <span class="o">*</span><span class="n">others</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Custom add that also prints the result."""</span>
-    <span class="n">result</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">args</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Adding </span><span class="si">{</span><span class="n">args</span><span class="si">}</span><span class="s2"> = </span><span class="si">{</span><span class="n">result</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">first</span> <span class="o">+</span> <span class="nb">sum</span><span class="p">(</span><span class="n">others</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Adding </span><span class="si">{</span><span class="p">(</span><span class="n">first</span><span class="p">,</span><span class="w"> </span><span class="o">*</span><span class="n">others</span><span class="p">)</span><span class="si">}</span><span class="s2"> = </span><span class="si">{</span><span class="n">result</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">result</span>
 
 
-<span class="n">registry</span><span class="o">.</span><span class="n">register_resolvers</span><span class="p">()</span>
+<span class="c1"># Without replace=True, the old resolver is kept and a warning is emitted</span>
+<span class="n">registry</span><span class="o">.</span><span class="n">register_resolvers</span><span class="p">(</span><span class="n">replace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 </code></pre></div>
+<p><code>register_resolvers</code> is idempotent: calling it twice changes nothing, and a resolver that is already
+published is not registered again. A key that another source registered in OmegaConf is not
+overwritten unless <code>replace=True</code>.</p>
+<p>OmegaConf caches the value of the nodes it has already resolved. Replacing a resolver does not clear
+this cache for existing configurations: call <code>OmegaConf.clear_cache(cfg)</code> to clear it.</p>
+<p>The resolvers are published with <code>annotation_validation="off"</code>: the type annotations of a resolver
+are documentation for readers and type checkers, OmegaConf does not check them at call time.</p>
 <h3 id="creating-isolated-registries">Creating Isolated Registries<a class="headerlink" href="#creating-isolated-registries" title="Permanent link">&para;</a></h3>
 <p>For advanced use cases, you can create independent registries:</p>
 <div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">hya.registry</span><span class="w"> </span><span class="kn">import</span> <span class="n">ResolverRegistry</span>
@@ -1841,6 +1852,7 @@
 <span class="c1"># Register only these custom resolvers</span>
 <span class="n">custom_registry</span><span class="o">.</span><span class="n">register_resolvers</span><span class="p">()</span>
 </code></pre></div>
+<p><code>ResolverRegistry</code> is also available from the top-level package: <code>from hya import ResolverRegistry</code>.</p>
 <h2 id="common-use-cases">Common Use Cases<a class="headerlink" href="#common-use-cases" title="Permanent link">&para;</a></h2>
 <h3 id="path-construction">Path Construction<a class="headerlink" href="#path-construction" title="Permanent link">&para;</a></h3>
 <p>Build file paths dynamically:</p>
@@ -1940,7 +1952,7 @@
 
 <span class="n">registry</span> <span class="o">=</span> <span class="n">get_default_registry</span><span class="p">()</span>
 
-<span class="c1"># Get all registered resolvers</span>
+<span class="c1"># Get all registered resolvers: a read-only mapping (use registry.register to add one)</span>
 <span class="n">resolvers_dict</span> <span class="o">=</span> <span class="n">registry</span><span class="o">.</span><span class="n">state</span>
 
 <span class="c1"># Count resolvers</span>
@@ -2026,11 +2038,14 @@ their package is installed. Calling the resolver function directly without the p
 </code></pre></div>
 <h3 id="resolver-already-registered">Resolver Already Registered<a class="headerlink" href="#resolver-already-registered" title="Permanent link">&para;</a></h3>
 <p><strong>Error:</strong> <code>RuntimeError: A resolver is already registered for 'my_key'</code></p>
-<p><strong>Solution:</strong> Use <code>exist_ok=True</code> to override:</p>
+<p><strong>Solution:</strong> Use <code>exist_ok=True</code> to override the resolver of the registry:</p>
 <div class="highlight"><pre><span></span><code><span class="nd">@registry</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="s2">"my_key"</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">my_resolver</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
     <span class="k">return</span> <span class="n">x</span>
 </code></pre></div>
+<p><strong>Warning:</strong> <code>A resolver is already registered in OmegaConf for 'my_key': not replaced.</code></p>
+<p>OmegaConf already has a resolver for this key and <code>register_resolvers()</code> did not replace it.</p>
+<p><strong>Solution:</strong> Use <code>registry.register_resolvers(replace=True)</code> to replace it.</p>
 <h3 id="type-errors-in-resolvers">Type Errors in Resolvers<a class="headerlink" href="#type-errors-in-resolvers" title="Permanent link">&para;</a></h3>
 <p><strong>Error:</strong> <code>TypeError: unsupported operand type(s) for +: 'int' and 'str'</code></p>
 <p><strong>Solution:</strong> Ensure your configuration passes correct types:</p>

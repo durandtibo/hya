@@ -45,7 +45,9 @@ repository.
 
 - Thread-safety of registering resolvers while OmegaConf resolves interpolations (the registry of
   OmegaConf is a global dictionary).
-- Detection of a resolver that another source registers after `hya` published the same key (it needs the private `BaseContainer._resolvers` of OmegaConf, which changes between releases).
-- The textual form of `hya.sha256` for an input whose `str()` OmegaConf changes: the hash is of `str(obj)`, so two mappings with the same items in another order have different hashes.
+- Detection of a resolver that another source registers after `hya` published the same key (it
+  needs the private `BaseContainer._resolvers` of OmegaConf, which changes between releases).
+- The textual form of `hya.sha256` for an input whose `str()` OmegaConf changes: the hash is of
+  `str(obj)`, so two mappings with the same items in another order have different hashes.
 - Caching of the output of the resolvers (OmegaConf default: no cache).
 - Support of `OmegaConf.to_yaml(resolve=True)` for resolvers that return objects (P11).

@@ -71,7 +71,9 @@ mappings with the same items in another order have different hashes).
 | `hya.int`, `hya.float`, `hya.sum`                                | done (#773)                                                      |
 | Override example of the user guide                               | done (#774)                                                      |
 
-Gates on `main` **[verified]**: 283 tests pass, 6 are skipped (the tests of the missing-package case: all three optional packages are installed), coverage of `src` is 100 %, `ruff check` and `ty` pass, 25 doctests pass. `import hya`
+Gates on `main` **[verified]**: 283 tests pass, 6 are skipped (the tests of the missing-package
+case: all three optional packages are installed), coverage of `src` is 100 %, `ruff check` and `ty`
+pass, 25 doctests pass. `import hya`
 takes 66 ms in total (27 ms of it is OmegaConf) and imports no optional package. `src` is 1,058
 lines, about 200 of them executable; the rest is docstrings. `hya` works with OmegaConf 2.2.3,
 2.3.0 and 2.4.0 and with Python 3.11, 3.12 and 3.14 under `python -W error` **[verified]**.

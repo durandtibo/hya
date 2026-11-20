@@ -195,7 +195,8 @@ value = math.pi
 
 #### `hya.path`
 
-Converts a string, a path-like object, or a `file:` URL, to a resolved `pathlib.Path` object with user expansion.
+Converts a string, a path-like object, or a `file:` URL, to a resolved `pathlib.Path` object with
+user expansion.
 
 **Syntax:** `${hya.path:path_string}`
 

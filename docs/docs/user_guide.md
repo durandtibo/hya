@@ -219,8 +219,8 @@ registry.register_resolvers(replace=True)
 
 `register_resolvers` is idempotent: calling it twice changes nothing, and a resolver that is already
 published is not registered again. A resolver removed from OmegaConf (for example by
-`OmegaConf.clear_resolvers()`) is published again. A key that another source registered in OmegaConf is not
-overwritten unless `replace=True`.
+`OmegaConf.clear_resolvers()`) is published again. A key that another source registered in OmegaConf
+is not overwritten unless `replace=True`.
 
 OmegaConf caches the value of the nodes it has already resolved. Replacing a resolver does not clear
 this cache for existing configurations: call `OmegaConf.clear_cache(cfg)` to clear it.
@@ -514,7 +514,11 @@ from omegaconf import OmegaConf
 
 ### Optional Dependency Missing
 
-**Error:** `omegaconf.errors.InterpolationResolutionError: RuntimeError raised while resolving interpolation: 'braceexpand' package is required but not installed`
+**Error:**
+
+```text
+omegaconf.errors.InterpolationResolutionError: RuntimeError raised while resolving interpolation: 'braceexpand' package is required but not installed
+```
 
 The optional resolvers (`hya.braceexpand`, `hya.np.array`, `hya.torch.*`) are always registered, and
 need their package when they are called.

@@ -66,17 +66,19 @@ def add_resolver(first: Any, *others: Any) -> Any:
 def ceildiv_resolver(dividend: float, divisor: float) -> float:
     r"""Compute the ceiling division of two numbers.
 
-    Ceiling division rounds the result up to the nearest integer,
-    which is useful for calculating the minimum number of chunks
-    needed to accommodate a given total.
+    Ceiling division rounds the result up, which is useful for
+    calculating the minimum number of chunks needed to accommodate a
+    given total. The type of the result follows ``//``: an ``int`` for
+    two integers (exact, whatever their size) and a ``float`` if one of
+    them is a float (``11.0, 4`` gives ``3.0``).
 
     Args:
         dividend: The dividend (numerator).
         divisor: The divisor (denominator).
 
     Returns:
-        The ceiling of dividend / divisor. Equivalent to
-        math.ceil(dividend / divisor).
+        The ceiling of dividend / divisor, computed as
+        ``-(dividend // -divisor)``.
 
     Example:
         ```pycon
@@ -89,6 +91,9 @@ def ceildiv_resolver(dividend: float, divisor: float) -> float:
         >>> conf = OmegaConf.create({"batches": "${hya.ceildiv:100,32}"})
         >>> conf.batches
         4
+        >>> # The type of the result follows ``//``
+        >>> OmegaConf.create({"key": "${hya.ceildiv:11.0,4}"}).key
+        3.0
 
         ```
     """

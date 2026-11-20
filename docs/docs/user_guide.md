@@ -435,7 +435,9 @@ model:
 
 An optional resolver is always registered. When its package is missing, the call raises a
 `RuntimeError` that says how to install the package. An error raised by a resolver is reported by
-OmegaConf as an `InterpolationResolutionError` with the original error as cause:
+OmegaConf as an `InterpolationResolutionError`. The message names the original exception (for
+example `ZeroDivisionError raised while resolving interpolation`) and the original exception is in
+the `__context__` chain of the error (`__cause__` is `None`):
 
 ```python
 import hya

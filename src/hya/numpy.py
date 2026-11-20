@@ -12,7 +12,7 @@ __all__ = ["to_array_resolver"]
 
 from typing import TYPE_CHECKING
 
-from hya.imports import check_numpy, is_numpy_available
+from hya.imports import is_numpy_available, validate_numpy
 
 if TYPE_CHECKING or is_numpy_available():
     import numpy as np
@@ -44,5 +44,5 @@ def to_array_resolver(data: ArrayLike) -> np.ndarray:
 
         ```
     """
-    check_numpy()
+    validate_numpy()
     return np.array(data)

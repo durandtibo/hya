@@ -3,12 +3,12 @@ r"""Implement some utility functions to manage optional dependencies."""
 from __future__ import annotations
 
 __all__ = [
-    "check_braceexpand",
-    "check_numpy",
-    "check_torch",
     "is_braceexpand_available",
     "is_numpy_available",
     "is_torch_available",
+    "validate_braceexpand",
+    "validate_numpy",
+    "validate_torch",
 ]
 
 from importlib.util import find_spec
@@ -18,7 +18,7 @@ from importlib.util import find_spec
 #######################
 
 
-def check_braceexpand() -> None:
+def validate_braceexpand() -> None:
     r"""Check if the ``braceexpand`` package is installed.
 
     Raises:
@@ -26,8 +26,8 @@ def check_braceexpand() -> None:
 
     Example:
         ```pycon
-        >>> from hya.imports import check_braceexpand
-        >>> check_braceexpand()
+        >>> from hya.imports import validate_braceexpand
+        >>> validate_braceexpand()
 
         ```
     """
@@ -61,7 +61,7 @@ def is_braceexpand_available() -> bool:
 #################
 
 
-def check_numpy() -> None:
+def validate_numpy() -> None:
     r"""Check if the ``numpy`` package is installed.
 
     Raises:
@@ -69,8 +69,8 @@ def check_numpy() -> None:
 
     Example:
         ```pycon
-        >>> from hya.imports import check_numpy
-        >>> check_numpy()
+        >>> from hya.imports import validate_numpy
+        >>> validate_numpy()
 
         ```
     """
@@ -104,7 +104,7 @@ def is_numpy_available() -> bool:
 #################
 
 
-def check_torch() -> None:
+def validate_torch() -> None:
     r"""Check if the ``torch`` package is installed.
 
     Raises:
@@ -112,8 +112,8 @@ def check_torch() -> None:
 
     Example:
         ```pycon
-        >>> from hya.imports import check_torch
-        >>> check_torch()
+        >>> from hya.imports import validate_torch
+        >>> validate_torch()
 
         ```
     """

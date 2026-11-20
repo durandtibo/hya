@@ -14,7 +14,7 @@ from typing import TYPE_CHECKING, Any
 
 from omegaconf.errors import InterpolationResolutionError
 
-from hya.imports import check_torch, is_torch_available
+from hya.imports import is_torch_available, validate_torch
 
 if TYPE_CHECKING or is_torch_available():
     import torch
@@ -43,7 +43,7 @@ def to_tensor_resolver(data: Any) -> torch.Tensor:
 
         ```
     """
-    check_torch()
+    validate_torch()
     return torch.tensor(data)
 
 
@@ -82,7 +82,7 @@ def torch_dtype_resolver(target: str) -> torch.dtype:
 
         ```
     """
-    check_torch()
+    validate_torch()
     if not hasattr(torch, target) or not isinstance(getattr(torch, target), torch.dtype):
         msg = f"Incorrect dtype {target}. The available dtypes are {_dtype_names()}"
         raise InterpolationResolutionError(msg)

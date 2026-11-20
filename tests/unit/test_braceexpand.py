@@ -90,7 +90,7 @@ def test_braceexpand_resolver_direct_call() -> None:
 
 def test_braceexpand_resolver_missing_package() -> None:
     with (
-        patch("hya.braceexpand.check_braceexpand", side_effect=RuntimeError("missing package")),
+        patch("hya.braceexpand.validate_braceexpand", side_effect=RuntimeError("missing package")),
         pytest.raises(RuntimeError, match=r"missing package"),
     ):
         braceexpand_resolver("a{1,2}")

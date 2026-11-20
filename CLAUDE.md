@@ -55,7 +55,7 @@
 - Every module starts with `from __future__ import annotations` and defines `__all__`.
 - Shared helpers belong in `hya.utils` as public functions (no leading underscore) with their
   own tests, not as private functions imported across modules.
-- Check optional packages with the functions of `hya.imports` (`check_numpy`,
+- Check optional packages with the functions of `hya.imports` (`validate_numpy`,
   `is_torch_available`, ...); do not write a custom `try`/`except ImportError` or a
   `raise RuntimeError` for a missing package.
 - Do not add a validator that is one `isinstance` or one comparison; raise the error inline with

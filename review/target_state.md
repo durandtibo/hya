@@ -103,7 +103,7 @@ informative locally; check it in CI (decision D6).
   `default.py`, `docs/docs/user_guide.md`].** The optional keys are registered only if
   `is_*_available()`. Without `torch`, `${hya.torch.tensor:[1]}` raises
   `UnsupportedInterpolationType: Unsupported interpolation type hya.torch.tensor`, which does not
-  say that `torch` is missing. `check_torch()` (with the `pip install torch` hint) is reached only
+  say that `torch` is missing. `validate_torch()` (with the `pip install torch` hint) is reached only
   by calling the function directly. `docs/docs/get_started.md` promises "a helpful error message
   indicating which package needs to be installed" and the property P10 promises the same; the
   troubleshooting section of the user guide documents the opposite. Violates P10.
@@ -231,7 +231,7 @@ or function raises on the first call.
 
 The optional resolvers are **always registered**, lazily. Registering costs nothing (a string and a
 closure); the module (and the package) is imported on the first call. Without the package the call
-reaches `check_torch()`, which raises
+reaches `validate_torch()`, which raises
 `RuntimeError("'torch' package is required but not installed. ... pip install torch")`; OmegaConf
 reports it as
 `InterpolationResolutionError: RuntimeError raised while resolving interpolation: 'torch' package is required...`
@@ -316,7 +316,7 @@ Any other string is still a plain path: `/a?b` and `/a%20b` stay as written (`ur
 empty scheme for them). `file:rel` stays a relative path.
 
 **Optional resolvers:** unchanged (`hya.braceexpand` returns a list, `hya.torch.dtype` lists the
-sorted dtype names). `_dtype_names` drops its second `check_torch()`: it is called only by
+sorted dtype names). `_dtype_names` drops its second `validate_torch()`: it is called only by
 `torch_dtype_resolver`, which already checks.
 
 ### 3.5 Dependencies and CI (I1, I2, P14)
@@ -352,7 +352,7 @@ hya.ResolverRegistry
 
 from hya.registry import ResolverRegistry          # unchanged
 from hya.resolvers import path_resolver            # accepts os.PathLike
-from hya.imports import check_numpy, is_numpy_available   # unchanged (and torch, braceexpand)
+from hya.imports import validate_numpy, is_numpy_available   # unchanged (and torch, braceexpand)
 from hya.testing import numpy_available, ...        # unchanged
 ```
 

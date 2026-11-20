@@ -1947,8 +1947,6 @@ organized into the following categories:</p>
 <p><strong>Equivalent Python:</strong></p>
 <div class="highlight"><pre><span></span><code><span class="n">value</span> <span class="o">=</span> <span class="n">value1</span> <span class="o">+</span> <span class="n">value2</span> <span class="o">+</span> <span class="n">value3</span> <span class="o">+</span> <span class="o">...</span>
 </code></pre></div>
-<p><strong>Note:</strong> The arguments are never modified: <code>${hya.add:${x},[3]}</code> returns a new list and leaves
-<code>x</code> unchanged. At least one argument is required.</p>
 <h4 id="hyasub"><code>hya.sub</code><a class="headerlink" href="#hyasub" title="Permanent link">&para;</a></h4>
 <p>Subtracts the second value from the first.</p>
 <p><strong>Syntax:</strong> <code>${hya.sub:value1,value2}</code></p>
@@ -1982,9 +1980,6 @@ organized into the following categories:</p>
 <p><strong>Equivalent Python:</strong></p>
 <div class="highlight"><pre><span></span><code><span class="n">value</span> <span class="o">=</span> <span class="n">object1</span> <span class="o">*</span> <span class="n">object2</span> <span class="o">*</span> <span class="n">object3</span> <span class="o">*</span> <span class="o">...</span>
 </code></pre></div>
-<p><strong>Note:</strong> The arguments are never modified and are meant to be numbers. Repeating a list of the
-configuration (<code>${hya.mul:${x},2}</code> with <code>x: [1, 2]</code>) is not supported and raises an error. At least
-one argument is required.</p>
 <h4 id="hyatruediv"><code>hya.truediv</code><a class="headerlink" href="#hyatruediv" title="Permanent link">&para;</a></h4>
 <p>Performs "true" division (floating-point division).</p>
 <p><strong>Syntax:</strong> <code>${hya.truediv:dividend,divisor}</code></p>

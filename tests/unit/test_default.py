@@ -59,7 +59,9 @@ def test_get_default_registry_modifications_persist() -> None:
         "hya.asinh",
         "hya.ceildiv",
         "hya.exp",
+        "hya.float",
         "hya.floordiv",
+        "hya.int",
         "hya.len",
         "hya.iter_join",
         "hya.log",
@@ -75,6 +77,7 @@ def test_get_default_registry_modifications_persist() -> None:
         "hya.sha256",
         "hya.sinh",
         "hya.sub",
+        "hya.sum",
         "hya.truediv",
     ],
 )
@@ -106,7 +109,9 @@ BUILTIN_KEYS = {
     "hya.asinh",
     "hya.ceildiv",
     "hya.exp",
+    "hya.float",
     "hya.floordiv",
+    "hya.int",
     "hya.iter_join",
     "hya.len",
     "hya.log",
@@ -122,6 +127,7 @@ BUILTIN_KEYS = {
     "hya.sinh",
     "hya.sqrt",
     "hya.sub",
+    "hya.sum",
     "hya.truediv",
 }
 

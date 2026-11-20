@@ -299,8 +299,8 @@ model:
 training:
   total_steps: 100000
   warmup_ratio: 0.1
-  # 100000 * 0.1 is the float 10000.0: use ceildiv to get an integer
-  warmup_steps: ${hya.ceildiv:${training.total_steps},10} # 10000
+  # 100000 * 0.1 is the float 10000.0: cast it back to an integer with hya.int
+  warmup_steps: ${hya.int:${hya.mul:${training.total_steps},${training.warmup_ratio}}} # 10000
 
   # Calculate batch size for distributed training
   per_device_batch_size: 16

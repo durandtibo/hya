@@ -27,22 +27,25 @@ These resolvers are registered as the standard library callable itself, with no 
 behaviour, the accepted arguments and the error messages are the ones of the callable. See the
 documentation of the callable for the details.
 
-| Key            | Callable            | Example                  | Result  |
-| -------------- | ------------------- | ------------------------ | ------- |
-| `hya.sub`      | `operator.sub`      | `${hya.sub:100,30}`      | `70`    |
-| `hya.truediv`  | `operator.truediv`  | `${hya.truediv:10,4}`    | `2.5`   |
-| `hya.floordiv` | `operator.floordiv` | `${hya.floordiv:100,32}` | `3`     |
-| `hya.neg`      | `operator.neg`      | `${hya.neg:5}`           | `-5`    |
-| `hya.pow`      | `operator.pow`      | `${hya.pow:10,-3}`       | `0.001` |
-| `hya.sqrt`     | `math.sqrt`         | `${hya.sqrt:64}`         | `8.0`   |
-| `hya.exp`      | `math.exp`          | `${hya.exp:0}`           | `1.0`   |
-| `hya.log`      | `math.log`          | `${hya.log:8,2}`         | `3.0`   |
-| `hya.log10`    | `math.log10`        | `${hya.log10:1000}`      | `3.0`   |
-| `hya.sinh`     | `math.sinh`         | `${hya.sinh:0}`          | `0.0`   |
-| `hya.asinh`    | `math.asinh`        | `${hya.asinh:0}`         | `0.0`   |
-| `hya.max`      | `max`               | `${hya.max:10,25,15}`    | `25`    |
-| `hya.min`      | `min`               | `${hya.min:10,25,15}`    | `10`    |
-| `hya.len`      | `len`               | `${hya.len:[1,2,3]}`     | `3`     |
+| Key            | Callable            | Example                            | Result  |
+| -------------- | ------------------- | ---------------------------------- | ------- |
+| `hya.sub`      | `operator.sub`      | `${hya.sub:100,30}`                | `70`    |
+| `hya.truediv`  | `operator.truediv`  | `${hya.truediv:10,4}`              | `2.5`   |
+| `hya.floordiv` | `operator.floordiv` | `${hya.floordiv:100,32}`           | `3`     |
+| `hya.neg`      | `operator.neg`      | `${hya.neg:5}`                     | `-5`    |
+| `hya.pow`      | `operator.pow`      | `${hya.pow:10,-3}`                 | `0.001` |
+| `hya.sqrt`     | `math.sqrt`         | `${hya.sqrt:64}`                   | `8.0`   |
+| `hya.exp`      | `math.exp`          | `${hya.exp:0}`                     | `1.0`   |
+| `hya.log`      | `math.log`          | `${hya.log:8,2}`                   | `3.0`   |
+| `hya.log10`    | `math.log10`        | `${hya.log10:1000}`                | `3.0`   |
+| `hya.sinh`     | `math.sinh`         | `${hya.sinh:0}`                    | `0.0`   |
+| `hya.asinh`    | `math.asinh`        | `${hya.asinh:0}`                   | `0.0`   |
+| `hya.max`      | `max`               | `${hya.max:10,25,15}`              | `25`    |
+| `hya.min`      | `min`               | `${hya.min:10,25,15}`              | `10`    |
+| `hya.len`      | `len`               | `${hya.len:[1,2,3]}`               | `3`     |
+| `hya.sum`      | `sum`               | `${hya.sum:[1,2,3]}`               | `6`     |
+| `hya.int`      | `int`               | `${hya.int:${hya.mul:100000,0.1}}` | `10000` |
+| `hya.float`    | `float`             | `${hya.float:3}`                   | `3.0`   |
 
 Examples with interpolations:
 
@@ -60,7 +63,12 @@ model:
   layer_sizes: [128, 256, 512, 1024]
   num_layers: ${hya.len:${model.layer_sizes}} # 4
   actual_layers: ${hya.max:${model.num_layers},8} # 8
+  total_units: ${hya.sum:${model.layer_sizes}} # 1920
 ```
+
+`hya.int` casts the float of a computation back to an integer, and `hya.sum` adds the elements of a
+list (`hya.add` takes values: `${hya.add:${model.layer_sizes}}` returns the list). `bool` and `str`
+have no resolver: `bool("false")` is `True`, and `str` is what an interpolation already does.
 
 ### Arithmetic Operations
 

@@ -149,7 +149,8 @@ print(conf.result)  # Output: 15
 `hya` provides over 20 built-in resolvers organized into categories:
 
 - **Mathematical operations**: `add`, `sub`, `mul`, `truediv`, `floordiv`, `ceildiv`, `pow`, `sqrt`,
-  `neg`, `max`, `min`, `exp`, `log`, `log10`, `sinh`, `asinh`
+  `neg`, `max`, `min`, `exp`, `log`, `log10`, `sinh`, `asinh`, `sum`
+- **Casts**: `int`, `float`
 - **Constants**: `pi`
 - **Path utilities**: `path`, `iter_join`
 - **Utilities**: `len`, `sha256`

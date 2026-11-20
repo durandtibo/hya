@@ -5,6 +5,7 @@ import sys
 
 import pytest
 
+from hya import get_default_registry
 from hya.testing import braceexpand_available, numpy_available, torch_available
 
 
@@ -121,10 +122,10 @@ import sys
 for name in ("braceexpand", "numpy", "torch"):
     sys.modules[name] = None
 import hya
-print(len(hya.get_default_registry().state))
+print(*sorted(hya.get_default_registry().state))
 """
     result = run_python(code)
-    assert result.stdout.strip() == "25", result.stderr
+    assert result.stdout.split() == sorted(get_default_registry().state), result.stderr
 
 
 ################################

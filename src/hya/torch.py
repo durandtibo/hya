@@ -24,13 +24,16 @@ else:  # pragma: no cover
     from hya.utils.fallback.torch import torch
 
 
-def to_tensor_resolver(data: Any) -> torch.Tensor:
+def to_tensor_resolver(data: Any, dtype: torch.dtype | None = None) -> torch.Tensor:
     r"""Implement a resolver to transform the input to a
     ``torch.Tensor``.
 
     Args:
         data: Specifies the data to transform in ``torch.Tensor``.
             This value should be compatible with ``torch.tensor``
+        dtype: The data type of the tensor, for example the output of
+            the ``hya.torch.dtype`` resolver. ``None`` lets PyTorch
+            infer the data type from the data.
 
     Returns:
         The input in a ``torch.Tensor`` object.
@@ -42,11 +45,14 @@ def to_tensor_resolver(data: Any) -> torch.Tensor:
         >>> conf = OmegaConf.create({"key": "${hya.torch.tensor:[1,2,3,4,5]}"})
         >>> conf.key
         tensor([1, 2, 3, 4, 5])
+        >>> conf = OmegaConf.create({"key": "${hya.torch.tensor:[1,2,3],${hya.torch.dtype:float32}}"})
+        >>> conf.key
+        tensor([1., 2., 3.])
 
         ```
     """
     validate_torch()
-    return torch.tensor(data)
+    return torch.tensor(data, dtype=dtype)
 
 
 def torch_dtype_resolver(target: str) -> torch.dtype:

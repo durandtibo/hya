@@ -138,3 +138,78 @@ def test_add_resolver_does_not_modify_config_list() -> None:
     conf = OmegaConf.create({"x": [1, 2], "key": "${hya.add:${x},[3]}"})
     assert conf.key == [1, 2, 3]
     assert conf.x == [1, 2]
+
+
+def test_mul_resolver_does_not_modify_config_list() -> None:
+    conf = OmegaConf.create({"x": [1, 2], "key": "${hya.mul:${x},2}"})
+    with pytest.raises(InterpolationResolutionError, match=r"TypeError"):
+        _ = conf.key
+    assert conf.x == [1, 2]
+
+
+def test_iter_join_resolver_does_not_modify_config_list() -> None:
+    conf = OmegaConf.create({"x": [1, 2], "key": "${hya.iter_join:${x},-}"})
+    assert conf.key == "1-2"
+    assert conf.x == [1, 2]
+
+
+def test_sha256_resolver_does_not_modify_config_list() -> None:
+    conf = OmegaConf.create({"x": [1, 2], "key": "${hya.sha256:${x}}"})
+    assert len(conf.key) == 64
+    assert conf.x == [1, 2]
+
+
+def test_sha256_resolver_does_not_modify_config_dict() -> None:
+    conf = OmegaConf.create({"x": {"a": 1}, "key": "${hya.sha256:${x}}"})
+    assert len(conf.key) == 64
+    assert conf.x == {"a": 1}
+
+
+#############################################
+#     Tests for the errors of OmegaConf     #
+#############################################
+
+
+def test_resolver_error_has_no_cause() -> None:
+    conf = OmegaConf.create({"key": "${hya.ceildiv:1,0}"})
+    with pytest.raises(InterpolationResolutionError, match="ZeroDivisionError") as exc_info:
+        _ = conf.key
+    assert exc_info.value.__cause__ is None
+
+
+def test_resolver_error_has_the_original_exception_in_the_context_chain() -> None:
+    conf = OmegaConf.create({"key": "${hya.ceildiv:1,0}"})
+    with pytest.raises(InterpolationResolutionError, match="ZeroDivisionError") as exc_info:
+        _ = conf.key
+    chain = []
+    error: BaseException | None = exc_info.value
+    while error is not None:
+        chain.append(type(error))
+        error = error.__context__
+    assert ZeroDivisionError in chain
+
+
+########################################
+#     Tests for composed resolvers     #
+########################################
+
+
+def test_add_resolver_of_two_config_lists() -> None:
+    conf = OmegaConf.create({"x": [1, 2], "y": [3], "key": "${hya.add:${x},${y}}"})
+    assert conf.key == [1, 2, 3]
+
+
+def test_add_resolver_of_two_config_lists_does_not_modify_the_lists() -> None:
+    conf = OmegaConf.create({"x": [1, 2], "y": [3], "key": "${hya.add:${x},${y}}"})
+    assert conf.key == [1, 2, 3]
+    assert (conf.x, conf.y) == ([1, 2], [3])
+
+
+def test_resolver_of_the_output_of_another_resolver() -> None:
+    conf = OmegaConf.create({"key": "${hya.int:${hya.ceildiv:11.0,4}}"})
+    assert conf.key == 3
+
+
+def test_iter_join_resolver_of_the_output_of_another_resolver() -> None:
+    conf = OmegaConf.create({"key": "${hya.iter_join:[${hya.add:1,2},${hya.len:[1,2]}],-}"})
+    assert conf.key == "3-2"

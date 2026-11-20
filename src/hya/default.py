@@ -91,7 +91,3 @@ def get_default_registry() -> ResolverRegistry:
     for key, target in _OPTIONAL.items():
         registry.register_lazy(key, target)
     return registry
-
-
-# Register the available resolvers
-get_default_registry().register_resolvers()

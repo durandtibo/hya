@@ -136,6 +136,28 @@ def test_resolver_registry_register_lazy() -> None:
     assert registry.has_resolver("key")
 
 
+def test_resolver_registry_register_lazy_resolver_has_the_name_of_the_function() -> None:
+    registry = ResolverRegistry()
+    registry.register_lazy("key", "package.module:function")
+    resolver: Any = registry.state["key"]
+    assert resolver.__name__ == "function"
+
+
+def test_resolver_registry_register_lazy_resolver_has_the_qualified_name_of_the_function() -> None:
+    registry = ResolverRegistry()
+    registry.register_lazy("key", "package.module:function")
+    resolver: Any = registry.state["key"]
+    assert resolver.__qualname__ == "function"
+
+
+def test_resolver_registry_register_lazy_resolver_documents_the_target() -> None:
+    registry = ResolverRegistry()
+    registry.register_lazy("key", "package.module:function")
+    assert registry.state["key"].__doc__ == (
+        "Resolver package.module:function, imported on its first call."
+    )
+
+
 def test_resolver_registry_register_lazy_does_not_import_the_module() -> None:
     registry = ResolverRegistry()
     with patch("hya.registry.import_module") as import_module:

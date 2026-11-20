@@ -64,7 +64,7 @@ Then, you can clone the git repository:
 git clone git@github.com:durandtibo/hya.git
 ```
 
-It is recommended to create a Python 3.10+ virtual environment. This step is optional so you
+It is recommended to create a Python 3.11+ virtual environment. This step is optional so you
 can skip it. To create a virtual environment, you can use the following command:
 
 ```shell

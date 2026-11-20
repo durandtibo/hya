@@ -84,3 +84,7 @@ def get_default_registry() -> ResolverRegistry:
         registry.register_lazy("hya.torch.tensor", "hya.torch:to_tensor_resolver")
         registry.register_lazy("hya.torch.dtype", "hya.torch:torch_dtype_resolver")
     return registry
+
+
+# Register the available resolvers
+get_default_registry().register_resolvers()

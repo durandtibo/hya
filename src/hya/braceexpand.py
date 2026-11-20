@@ -12,7 +12,7 @@ __all__ = ["braceexpand_resolver"]
 
 from typing import TYPE_CHECKING
 
-from hya.imports import check_braceexpand, is_braceexpand_available
+from hya.imports import is_braceexpand_available, validate_braceexpand
 
 if TYPE_CHECKING or is_braceexpand_available():
     import braceexpand
@@ -61,5 +61,5 @@ def braceexpand_resolver(pattern: str) -> list[str]:
 
         ```
     """
-    check_braceexpand()
+    validate_braceexpand()
     return list(braceexpand.braceexpand(pattern))

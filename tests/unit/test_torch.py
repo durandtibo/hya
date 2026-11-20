@@ -84,7 +84,7 @@ def test_torch_dtype_resolver_direct_call() -> None:
 
 def test_torch_dtype_resolver_missing_package() -> None:
     with (
-        patch("hya.torch.check_torch", side_effect=RuntimeError("missing package")),
+        patch("hya.torch.validate_torch", side_effect=RuntimeError("missing package")),
         pytest.raises(RuntimeError, match=r"missing package"),
     ):
         torch_dtype_resolver("float32")

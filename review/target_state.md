@@ -235,13 +235,13 @@ current behaviour, so the change is not breaking.
 ```python
 # hya/numpy.py
 def to_array_resolver(data: ArrayLike, dtype: str | None = None) -> np.ndarray:
-    check_numpy()
+    validate_numpy()
     return np.array(data, dtype=dtype)
 
 
 # hya/torch.py
 def to_tensor_resolver(data: Any, dtype: torch.dtype | None = None) -> torch.Tensor:
-    check_torch()
+    validate_torch()
     return torch.tensor(data, dtype=dtype)
 ```
 

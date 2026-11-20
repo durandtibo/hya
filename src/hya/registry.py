@@ -212,8 +212,10 @@ class ResolverRegistry:
         r"""Register the resolvers to OmegaConf.
 
         This method publishes the registered resolvers to OmegaConf. It is
-        idempotent: a resolver already published by this registry is not
-        registered again, so calling this method twice changes nothing. A
+        idempotent: a resolver already published by this registry, and still
+        known by OmegaConf, is not registered again, so calling this method
+        twice changes nothing. A resolver removed from OmegaConf (for example
+        with ``OmegaConf.clear_resolvers()``) is published again. A
         resolver is not published, and a warning is emitted, if OmegaConf
         already has a resolver for its key (a resolver published before the
         registry changed, or registered by another source) and ``replace`` is
@@ -247,9 +249,10 @@ class ResolverRegistry:
             ```
         """
         for key, resolver in self._state.items():
-            if self._published.get(key) is resolver:
-                continue
-            if OmegaConf.has_resolver(key) and not replace:
+            has_resolver = OmegaConf.has_resolver(key)
+            if self._published.get(key) is resolver and has_resolver:
+                continue  # published by this registry and still there: nothing to do
+            if has_resolver and not replace:
                 warnings.warn(
                     f"A resolver is already registered in OmegaConf for '{key}': not replaced. "
                     "Use register_resolvers(replace=True) to replace it.",

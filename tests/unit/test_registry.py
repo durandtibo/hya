@@ -304,6 +304,7 @@ def test_resolver_registry_register_resolvers_idempotent() -> None:
     with patch("hya.registry.OmegaConf") as omegaconf:
         omegaconf.has_resolver.return_value = False
         registry.register_resolvers()
+        omegaconf.has_resolver.return_value = True
         registry.register_resolvers()
     assert omegaconf.register_resolver.call_count == 1
 
@@ -430,6 +431,26 @@ def test_resolver_registry_register_resolvers_new_key_after_first_call() -> None
     assert omegaconf.register_resolver.call_args_list[-1] == call(
         "second", second, replace=False, annotation_validation="off"
     )
+
+
+def test_resolver_registry_register_resolvers_republishes_a_cleared_resolver() -> None:
+    registry = ResolverRegistry({"key": Mock()})
+    with patch("hya.registry.OmegaConf") as omegaconf:
+        omegaconf.has_resolver.return_value = False
+        registry.register_resolvers()
+        registry.register_resolvers()
+    assert omegaconf.register_resolver.call_count == 2
+
+
+def test_resolver_registry_register_resolvers_republishes_a_cleared_resolver_silently(
+    recwarn: pytest.WarningsRecorder,
+) -> None:
+    registry = ResolverRegistry({"key": Mock()})
+    with patch("hya.registry.OmegaConf") as omegaconf:
+        omegaconf.has_resolver.return_value = False
+        registry.register_resolvers()
+        registry.register_resolvers()
+    assert len(recwarn) == 0
 
 
 def test_resolver_registry_register_resolvers_registries_are_independent() -> None:

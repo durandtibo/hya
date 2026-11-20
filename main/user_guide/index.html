@@ -19,7 +19,7 @@
       
       
       <link rel="icon" href="../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.8.1">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.8.2">
     
     
       
@@ -1690,7 +1690,7 @@
 <span class="w">  </span><span class="nt">total_samples</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10000</span>
 <span class="w">  </span><span class="nt">batch_size</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">32</span>
 <span class="w">  </span><span class="nt">num_batches</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">${hya.ceildiv:${training.total_samples},${training.batch_size}}</span>
-<span class="w">  </span><span class="nt">learning_rate</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">${hya.pow:10,-3}</span><span class="w">  </span><span class="c1"># 10^-3 = 0.001</span>
+<span class="w">  </span><span class="nt">learning_rate</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">${hya.pow:10,-3}</span><span class="w"> </span><span class="c1"># 10^-3 = 0.001</span>
 </code></pre></div>
 <p>Load and use the configuration:</p>
 <div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">hya</span>
@@ -1704,7 +1704,7 @@
 <h2 id="integration-with-hydra">Integration with Hydra<a class="headerlink" href="#integration-with-hydra" title="Permanent link">&para;</a></h2>
 <p><code>hya</code> is designed to work seamlessly with <a href="https://github.com/facebookresearch/hydra">Hydra</a>.</p>
 <h3 id="basic-hydra-example">Basic Hydra Example<a class="headerlink" href="#basic-hydra-example" title="Permanent link">&para;</a></h3>
-<p><strong>config.yaml:</strong>
+<p><strong>config.yaml:</strong></p>
 <div class="highlight"><pre><span></span><code><span class="nt">dataset</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">mnist</span>
 <span class="w">  </span><span class="nt">train_samples</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">60000</span>
@@ -1729,8 +1729,8 @@
 <span class="nt">experiment</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">${dataset.name}_${model.type}</span>
 <span class="w">  </span><span class="nt">version</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">${hya.sha256:${experiment.name}}</span>
-</code></pre></div></p>
-<p><strong>train.py:</strong>
+</code></pre></div>
+<p><strong>train.py:</strong></p>
 <div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">hya</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">hydra</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">omegaconf</span><span class="w"> </span><span class="kn">import</span> <span class="n">DictConfig</span>
@@ -1748,10 +1748,10 @@
 
 <span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">"__main__"</span><span class="p">:</span>
     <span class="n">train</span><span class="p">()</span>
-</code></pre></div></p>
+</code></pre></div>
 <h3 id="multi-config-with-hydra">Multi-Config with Hydra<a class="headerlink" href="#multi-config-with-hydra" title="Permanent link">&para;</a></h3>
 <p>You can use <code>hya</code> resolvers across multiple configuration files:</p>
-<p><strong>config.yaml:</strong>
+<p><strong>config.yaml:</strong></p>
 <div class="highlight"><pre><span></span><code><span class="nt">defaults</span><span class="p">:</span>
 <span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">model</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">resnet</span>
 <span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">optimizer</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">adam</span>
@@ -1760,18 +1760,18 @@
 <span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">${model.name}_${optimizer.name}</span>
 <span class="w">  </span><span class="nt">seed</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">42</span>
 <span class="w">  </span><span class="nt">version</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">${hya.sha256:${experiment.name}_${experiment.seed}}</span>
-</code></pre></div></p>
-<p><strong>model/resnet.yaml:</strong>
+</code></pre></div>
+<p><strong>model/resnet.yaml:</strong></p>
 <div class="highlight"><pre><span></span><code><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">resnet</span>
 <span class="nt">depth</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">50</span>
 <span class="nt">width_multiplier</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1.0</span>
 <span class="nt">effective_depth</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">${hya.mul:${model.depth},${model.width_multiplier}}</span>
-</code></pre></div></p>
-<p><strong>optimizer/adam.yaml:</strong>
+</code></pre></div>
+<p><strong>optimizer/adam.yaml:</strong></p>
 <div class="highlight"><pre><span></span><code><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">adam</span>
-<span class="nt">lr</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">${hya.pow:10,-4}</span><span class="w">  </span><span class="c1"># 0.0001</span>
+<span class="nt">lr</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">${hya.pow:10,-4}</span><span class="w"> </span><span class="c1"># 0.0001</span>
 <span class="nt">betas</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">0.9</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">0.999</span><span class="p p-Indicator">]</span>
-</code></pre></div></p>
+</code></pre></div>
 <h2 id="custom-resolvers">Custom Resolvers<a class="headerlink" href="#custom-resolvers" title="Permanent link">&para;</a></h2>
 <h3 id="creating-and-registering-custom-resolvers">Creating and Registering Custom Resolvers<a class="headerlink" href="#creating-and-registering-custom-resolvers" title="Permanent link">&para;</a></h3>
 <p>You can extend <code>hya</code> with your own custom resolvers:</p>
@@ -1861,12 +1861,12 @@
 <div class="highlight"><pre><span></span><code><span class="nt">model</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">embedding_dim</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">512</span>
 <span class="w">  </span><span class="nt">num_heads</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">8</span>
-<span class="w">  </span><span class="nt">head_dim</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">${hya.floordiv:${model.embedding_dim},${model.num_heads}}</span><span class="w">  </span><span class="c1"># 64</span>
+<span class="w">  </span><span class="nt">head_dim</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">${hya.floordiv:${model.embedding_dim},${model.num_heads}}</span><span class="w"> </span><span class="c1"># 64</span>
 
 <span class="nt">training</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">total_steps</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">100000</span>
 <span class="w">  </span><span class="nt">warmup_ratio</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.1</span>
-<span class="w">  </span><span class="nt">warmup_steps</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">${hya.mul:${training.total_steps},${training.warmup_ratio}}</span><span class="w">  </span><span class="c1"># 10000</span>
+<span class="w">  </span><span class="nt">warmup_steps</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">${hya.mul:${training.total_steps},${training.warmup_ratio}}</span><span class="w"> </span><span class="c1"># 10000</span>
 
 <span class="w">  </span><span class="c1"># Calculate batch size for distributed training</span>
 <span class="w">  </span><span class="nt">per_device_batch_size</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">16</span>
@@ -1905,7 +1905,7 @@
 <span class="w">  </span><span class="nt">num_datasets</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">${hya.len:${datasets.train}}</span>
 
 <span class="w">  </span><span class="c1"># Join dataset names</span>
-<span class="w">  </span><span class="nt">combined_name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">${hya.iter_join:${datasets.train},_}</span><span class="w">  </span><span class="c1"># mnist_cifar10_imagenet</span>
+<span class="w">  </span><span class="nt">combined_name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">${hya.iter_join:${datasets.train},_}</span><span class="w"> </span><span class="c1"># mnist_cifar10_imagenet</span>
 </code></pre></div>
 <h3 id="brace-expansion-requires-braceexpand">Brace Expansion (requires braceexpand)<a class="headerlink" href="#brace-expansion-requires-braceexpand" title="Permanent link">&para;</a></h3>
 <p>Generate multiple values from patterns:</p>
@@ -1974,7 +1974,7 @@
 <div class="highlight"><pre><span></span><code><span class="c1"># Good: Use correct division operators</span>
 <span class="nt">samples</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1000</span>
 <span class="nt">batch_size</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">32</span>
-<span class="nt">num_batches</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">${hya.ceildiv:${samples},${batch_size}}</span><span class="w">  </span><span class="c1"># Integer result: 32</span>
+<span class="nt">num_batches</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">${hya.ceildiv:${samples},${batch_size}}</span><span class="w"> </span><span class="c1"># Integer result: 32</span>
 
 <span class="c1"># Avoid: Using wrong division type</span>
 <span class="c1"># num_batches: ${hya.truediv:${samples},${batch_size}}  # Float result: 31.25</span>
@@ -1996,10 +1996,10 @@
 <span class="w">  </span><span class="nt">total_embeddings</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">${hya.mul:${model.vocab_size},${model.embedding_dim}}</span>
 
 <span class="nt">layer1</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">input_size</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">${model.total_embeddings}</span><span class="w">  </span><span class="c1"># Reuses cached computation</span>
+<span class="w">  </span><span class="nt">input_size</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">${model.total_embeddings}</span><span class="w"> </span><span class="c1"># Reuses cached computation</span>
 
 <span class="nt">layer2</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">input_size</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">${model.total_embeddings}</span><span class="w">  </span><span class="c1"># Reuses cached computation</span>
+<span class="w">  </span><span class="nt">input_size</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">${model.total_embeddings}</span><span class="w"> </span><span class="c1"># Reuses cached computation</span>
 </code></pre></div>
 <h2 id="troubleshooting">Troubleshooting<a class="headerlink" href="#troubleshooting" title="Permanent link">&para;</a></h2>
 <h3 id="resolver-not-found">Resolver Not Found<a class="headerlink" href="#resolver-not-found" title="Permanent link">&para;</a></h3>
@@ -2082,7 +2082,7 @@
 
 <span class="c1"># Use resolvers with optional values</span>
 <span class="nt">model</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">size</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">${size:512}</span><span class="w">  </span><span class="c1"># Can be overridden via command line</span>
+<span class="w">  </span><span class="nt">size</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">${size:512}</span><span class="w"> </span><span class="c1"># Can be overridden via command line</span>
 <span class="w">  </span><span class="nt">doubled_size</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">${hya.mul:${model.size},2}</span>
 </code></pre></div>
 

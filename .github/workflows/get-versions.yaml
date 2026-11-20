@@ -22,7 +22,7 @@ on:
         description: "JSON string containing all package versions from dev/config/package_versions.json"
         value: ${{ jobs.get-versions.outputs.package_versions }}
 
-  workflow_dispatch:  # Allows manual triggering for testing purposes
+  workflow_dispatch: # Allows manual triggering for testing purposes
 
 permissions:
   contents: read

@@ -5,7 +5,7 @@
 name: Documentation Tests
 on:
   workflow_call:
-  workflow_dispatch:  # to trigger manually
+  workflow_dispatch: # to trigger manually
 
 permissions:
   contents: read
@@ -41,7 +41,7 @@ jobs:
       - name: Setup python environment
         uses: durandtibo/setup-venv-uv-action@v0.3.0
         with:
-          install-args: '--docs-deps'
+          install-args: "--docs-deps"
 
       # Configure git for mike (documentation versioning tool)
       - name: Setup doc deploy

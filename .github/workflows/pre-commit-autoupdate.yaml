@@ -8,10 +8,10 @@ on:
   schedule:
     - cron: "0 8 * * 2" # Run every Tuesday at 8:00 AM UTC
   workflow_call:
-  workflow_dispatch:  # to trigger manually
+  workflow_dispatch: # to trigger manually
 
 permissions:
-  contents: write      # Required to push changes
+  contents: write # Required to push changes
   pull-requests: write # Required to create pull requests
 
 jobs:

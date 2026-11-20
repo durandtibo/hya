@@ -5,13 +5,13 @@
 name: Documentation (unstable)
 on:
   workflow_call:
-  workflow_dispatch:  # to trigger manually
+  workflow_dispatch: # to trigger manually
   push:
     branches:
-      - main  # Trigger on pushes to main branch
+      - main # Trigger on pushes to main branch
 
 permissions:
-  contents: write  # Required to push to gh-pages branch
+  contents: write # Required to push to gh-pages branch
 
 jobs:
   build:
@@ -26,7 +26,7 @@ jobs:
       - name: Setup python environment
         uses: durandtibo/setup-venv-uv-action@v0.3.0
         with:
-          install-args: '--docs-deps'
+          install-args: "--docs-deps"
 
       # Configure git and fetch gh-pages branch for mike
       - name: Setup doc deploy

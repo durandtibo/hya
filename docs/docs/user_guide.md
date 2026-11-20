@@ -34,7 +34,7 @@ training:
   total_samples: 10000
   batch_size: 32
   num_batches: ${hya.ceildiv:${training.total_samples},${training.batch_size}}
-  learning_rate: ${hya.pow:10,-3}  # 10^-3 = 0.001
+  learning_rate: ${hya.pow:10,-3} # 10^-3 = 0.001
 ```
 
 Load and use the configuration:
@@ -56,6 +56,7 @@ print(conf.training.learning_rate)  # Output: 0.001
 ### Basic Hydra Example
 
 **config.yaml:**
+
 ```yaml
 dataset:
   name: mnist
@@ -84,6 +85,7 @@ experiment:
 ```
 
 **train.py:**
+
 ```python
 import hya
 import hydra
@@ -109,6 +111,7 @@ if __name__ == "__main__":
 You can use `hya` resolvers across multiple configuration files:
 
 **config.yaml:**
+
 ```yaml
 defaults:
   - model: resnet
@@ -121,6 +124,7 @@ experiment:
 ```
 
 **model/resnet.yaml:**
+
 ```yaml
 name: resnet
 depth: 50
@@ -129,9 +133,10 @@ effective_depth: ${hya.mul:${model.depth},${model.width_multiplier}}
 ```
 
 **optimizer/adam.yaml:**
+
 ```yaml
 name: adam
-lr: ${hya.pow:10,-4}  # 0.0001
+lr: ${hya.pow:10,-4} # 0.0001
 betas: [0.9, 0.999]
 ```
 
@@ -248,12 +253,12 @@ Perform calculations in your configuration:
 model:
   embedding_dim: 512
   num_heads: 8
-  head_dim: ${hya.floordiv:${model.embedding_dim},${model.num_heads}}  # 64
+  head_dim: ${hya.floordiv:${model.embedding_dim},${model.num_heads}} # 64
 
 training:
   total_steps: 100000
   warmup_ratio: 0.1
-  warmup_steps: ${hya.mul:${training.total_steps},${training.warmup_ratio}}  # 10000
+  warmup_steps: ${hya.mul:${training.total_steps},${training.warmup_ratio}} # 10000
 
   # Calculate batch size for distributed training
   per_device_batch_size: 16
@@ -304,7 +309,7 @@ datasets:
   num_datasets: ${hya.len:${datasets.train}}
 
   # Join dataset names
-  combined_name: ${hya.iter_join:${datasets.train},_}  # mnist_cifar10_imagenet
+  combined_name: ${hya.iter_join:${datasets.train},_} # mnist_cifar10_imagenet
 ```
 
 ### Brace Expansion (requires braceexpand)
@@ -398,7 +403,7 @@ Use appropriate resolvers for type safety:
 # Good: Use correct division operators
 samples: 1000
 batch_size: 32
-num_batches: ${hya.ceildiv:${samples},${batch_size}}  # Integer result: 32
+num_batches: ${hya.ceildiv:${samples},${batch_size}} # Integer result: 32
 
 # Avoid: Using wrong division type
 # num_batches: ${hya.truediv:${samples},${batch_size}}  # Float result: 31.25
@@ -427,10 +432,10 @@ model:
   total_embeddings: ${hya.mul:${model.vocab_size},${model.embedding_dim}}
 
 layer1:
-  input_size: ${model.total_embeddings}  # Reuses cached computation
+  input_size: ${model.total_embeddings} # Reuses cached computation
 
 layer2:
-  input_size: ${model.total_embeddings}  # Reuses cached computation
+  input_size: ${model.total_embeddings} # Reuses cached computation
 ```
 
 ## Troubleshooting
@@ -552,6 +557,6 @@ paths:
 
 # Use resolvers with optional values
 model:
-  size: ${size:512}  # Can be overridden via command line
+  size: ${size:512} # Can be overridden via command line
   doubled_size: ${hya.mul:${model.size},2}
 ```

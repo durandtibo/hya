@@ -5,7 +5,7 @@
 name: pre-commit
 on:
   workflow_call:
-  workflow_dispatch:  # to trigger manually
+  workflow_dispatch: # to trigger manually
 
 permissions:
   contents: read
@@ -23,7 +23,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v7
         with:
-          python-version: '3.13'
+          python-version: "3.13"
 
       # Run all pre-commit hooks on changed files
       - name: Run pre-commit

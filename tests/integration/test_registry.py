@@ -44,6 +44,27 @@ def resolve(value: int = 5) -> int:
     return OmegaConf.create({"key": f"${{{KEY}:{value}}}"}).key
 
 
+####################################################
+#     Tests for ResolverRegistry.register_lazy     #
+####################################################
+
+
+def test_register_lazy_resolves_with_omegaconf() -> None:
+    registry = ResolverRegistry()
+    registry.register_lazy(KEY, "json:dumps")
+    registry.register_resolvers()
+    assert OmegaConf.create({"key": f"${{{KEY}:[1,2]}}"}).key == "[1, 2]"
+
+
+def test_register_lazy_error_is_raised_by_omegaconf() -> None:
+    registry = ResolverRegistry()
+    registry.register_lazy(KEY, "hya_missing_module:function")
+    registry.register_resolvers()
+    conf = OmegaConf.create({"key": f"${{{KEY}:1}}"})
+    with pytest.raises(InterpolationResolutionError, match=r"No module named 'hya_missing_module'"):
+        _ = conf.key
+
+
 #########################################################
 #     Tests for ResolverRegistry.register_resolvers     #
 #########################################################

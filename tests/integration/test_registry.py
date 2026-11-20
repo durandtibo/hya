@@ -130,14 +130,14 @@ def test_register_resolvers_replace_twice_with_different_resolvers() -> None:
 
 
 def test_register_resolvers_key_of_another_source_is_not_replaced() -> None:
-    OmegaConf.register_resolver(KEY, triple)
+    ResolverRegistry({KEY: triple}).register_resolvers()
     with pytest.warns(UserWarning, match=r"not replaced"):
         ResolverRegistry({KEY: double}).register_resolvers()
     assert resolve() == 15
 
 
 def test_register_resolvers_key_of_another_source_is_replaced() -> None:
-    OmegaConf.register_resolver(KEY, triple)
+    ResolverRegistry({KEY: triple}).register_resolvers()
     ResolverRegistry({KEY: double}).register_resolvers(replace=True)
     assert resolve() == 10
 

@@ -221,7 +221,7 @@ overwritten unless `replace=True`.
 OmegaConf caches the value of the nodes it has already resolved. Replacing a resolver does not clear
 this cache for existing configurations: call `OmegaConf.clear_cache(cfg)` to clear it.
 
-The resolvers are published with `annotation_validation="off"`: the type annotations of a resolver
+With OmegaConf 2.4 and later, the resolvers are published with `annotation_validation="off"`: the type annotations of a resolver
 are documentation for readers and type checkers, OmegaConf does not check them at call time.
 
 ### Registering a Resolver Lazily

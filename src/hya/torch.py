@@ -94,7 +94,8 @@ def _dtype_names() -> list[str]:
 
     This function introspects the torch module to find the names of the
     attributes that are a ``torch.dtype``. It is used in the error
-    message of the dtype resolver. The names are sorted, so the message
+    message of the dtype resolver, which has already checked that
+    ``torch`` is installed. The names are sorted, so the message
     does not depend on the order of a set.
 
     Returns:
@@ -109,5 +110,4 @@ def _dtype_names() -> list[str]:
 
         ```
     """
-    check_torch()
     return sorted(name for name in dir(torch) if isinstance(getattr(torch, name), torch.dtype))

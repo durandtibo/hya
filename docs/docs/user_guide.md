@@ -18,9 +18,9 @@ print(conf.result)  # Output: 5
 ```
 
 The optional resolvers (`hya.braceexpand`, `hya.np.array`, `hya.torch.tensor`, `hya.torch.dtype`)
-are registered only if their package is installed. `import hya` does not import `numpy`, `torch`
-or `braceexpand`: the module of an optional resolver is imported on the first call of that
-resolver.
+are always registered, so the registry has the same keys on every machine. `import hya` does not
+import `numpy`, `torch` or `braceexpand`: the module of an optional resolver is imported on the first
+call of that resolver, which raises an error that says how to install the package if it is missing.
 
 ### Using Resolvers in YAML Configurations
 
@@ -428,10 +428,9 @@ model:
 
 ### Error Handling
 
-An optional resolver is registered only when its package is installed. When the package is
-missing, the key is unknown to OmegaConf and the access raises
-`UnsupportedInterpolationType`. An error raised by a resolver is reported by OmegaConf as an
-`InterpolationResolutionError`:
+An optional resolver is always registered. When its package is missing, the call raises a
+`RuntimeError` that says how to install the package. An error raised by a resolver is reported by
+OmegaConf as an `InterpolationResolutionError` with the original error as cause:
 
 ```python
 import hya
@@ -440,8 +439,9 @@ from omegaconf import OmegaConf, errors
 try:
     conf = OmegaConf.create({"tensor": "${hya.torch.tensor:[1,2,3]}"})
     print(conf.tensor)
-except errors.UnsupportedInterpolationType:
-    print("Error: PyTorch is required. Install with: pip install torch")
+except errors.InterpolationResolutionError as error:
+    # Without torch: 'torch' package is required but not installed. ... pip install torch
+    print(error)
 ```
 
 ### Type Safety
@@ -503,11 +503,10 @@ from omegaconf import OmegaConf
 
 ### Optional Dependency Missing
 
-**Error:** `omegaconf.errors.UnsupportedInterpolationType: Unsupported interpolation type hya.braceexpand`
+**Error:** `omegaconf.errors.InterpolationResolutionError: RuntimeError raised while resolving interpolation: 'braceexpand' package is required but not installed`
 
-The optional resolvers (`hya.braceexpand`, `hya.np.array`, `hya.torch.*`) are registered only if
-their package is installed. Calling the resolver function directly without the package raises
-`RuntimeError: 'braceexpand' package is required but not installed`.
+The optional resolvers (`hya.braceexpand`, `hya.np.array`, `hya.torch.*`) are always registered, and
+need their package when they are called.
 
 **Solution:** Install the required package:
 

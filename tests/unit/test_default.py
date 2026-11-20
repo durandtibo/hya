@@ -7,7 +7,6 @@ import pytest
 
 from hya import get_default_registry
 from hya.registry import ResolverRegistry
-from hya.testing import braceexpand_available, numpy_available, torch_available
 
 if TYPE_CHECKING:
     from collections.abc import Generator
@@ -85,25 +84,12 @@ def test_get_default_registry_default_resolvers(name: str) -> None:
     assert get_default_registry().has_resolver(name)
 
 
-@braceexpand_available
-def test_get_default_registry_default_braceexpand_resolvers() -> None:
-    """Test that get_default_registry returns a registry with default
-    resolvers."""
-    assert get_default_registry().has_resolver("hya.braceexpand")
-
-
-@numpy_available
-def test_get_default_registry_default_numpy_resolvers() -> None:
-    """Test that get_default_registry returns a registry with default
-    resolvers."""
-    assert get_default_registry().has_resolver("hya.np.array")
-
-
-@torch_available
-@pytest.mark.parametrize("name", ["hya.torch.tensor", "hya.torch.dtype"])
-def test_get_default_registry_default_torch_resolvers(name: str) -> None:
-    """Test that get_default_registry returns a registry with default
-    resolvers."""
+@pytest.mark.parametrize(
+    "name", ["hya.braceexpand", "hya.np.array", "hya.torch.tensor", "hya.torch.dtype"]
+)
+def test_get_default_registry_default_optional_resolvers(name: str) -> None:
+    """Test that the optional resolvers are registered, whether or not
+    their package is installed."""
     assert get_default_registry().has_resolver(name)
 
 
@@ -113,15 +99,6 @@ OPTIONAL_KEYS = {
     "hya.torch.tensor",
     "hya.torch.dtype",
 }
-
-
-def get_keys(*, braceexpand: bool, numpy: bool, torch: bool) -> set[str]:
-    with (
-        patch("hya.default.is_braceexpand_available", return_value=braceexpand),
-        patch("hya.default.is_numpy_available", return_value=numpy),
-        patch("hya.default.is_torch_available", return_value=torch),
-    ):
-        return set(get_default_registry().state)
 
 
 BUILTIN_KEYS = {
@@ -149,34 +126,32 @@ BUILTIN_KEYS = {
 }
 
 
-def test_get_default_registry_keys_all_packages() -> None:
-    assert get_keys(braceexpand=True, numpy=True, torch=True) == BUILTIN_KEYS | OPTIONAL_KEYS
+def test_get_default_registry_keys() -> None:
+    assert set(get_default_registry().state) == BUILTIN_KEYS | OPTIONAL_KEYS
 
 
-def test_get_default_registry_keys_no_optional_package() -> None:
-    assert get_keys(braceexpand=False, numpy=False, torch=False) == BUILTIN_KEYS
+def test_get_default_registry_keys_do_not_depend_on_the_installed_packages() -> None:
+    with (
+        patch("hya.imports.is_braceexpand_available", return_value=False),
+        patch("hya.imports.is_numpy_available", return_value=False),
+        patch("hya.imports.is_torch_available", return_value=False),
+    ):
+        keys = set(get_default_registry().state)
+    assert keys == BUILTIN_KEYS | OPTIONAL_KEYS
 
 
-def test_get_default_registry_keys_braceexpand_only() -> None:
-    assert get_keys(braceexpand=True, numpy=False, torch=False) == BUILTIN_KEYS | {
-        "hya.braceexpand"
-    }
-
-
-def test_get_default_registry_keys_numpy_only() -> None:
-    assert get_keys(braceexpand=False, numpy=True, torch=False) == BUILTIN_KEYS | {"hya.np.array"}
-
-
-def test_get_default_registry_keys_torch_only() -> None:
-    assert get_keys(braceexpand=False, numpy=False, torch=True) == BUILTIN_KEYS | {
-        "hya.torch.tensor",
-        "hya.torch.dtype",
-    }
+def test_get_default_registry_does_not_look_for_the_optional_packages() -> None:
+    with (
+        patch("hya.imports.is_braceexpand_available") as braceexpand,
+        patch("hya.imports.is_numpy_available") as numpy,
+        patch("hya.imports.is_torch_available") as torch,
+    ):
+        get_default_registry()
+    assert (braceexpand.call_count, numpy.call_count, torch.call_count) == (0, 0, 0)
 
 
 def test_get_default_registry_keys_are_in_the_hya_namespace() -> None:
-    keys = get_keys(braceexpand=True, numpy=True, torch=True)
-    assert all(key.startswith("hya.") for key in keys)
+    assert all(key.startswith("hya.") for key in get_default_registry().state)
 
 
 def test_get_default_registry_does_not_modify_the_builtins() -> None:

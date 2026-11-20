@@ -11,7 +11,6 @@ from functools import cache
 from typing import TYPE_CHECKING, Any
 
 from hya import resolvers
-from hya.imports import is_braceexpand_available, is_numpy_available, is_torch_available
 from hya.registry import ResolverRegistry
 
 if TYPE_CHECKING:
@@ -41,6 +40,16 @@ _BUILTINS: dict[str, Callable[..., Any]] = {
     "hya.truediv": operator.truediv,
 }
 
+# key -> "module:function". The resolvers are always registered: the module (and its package) is
+# imported on the first call, and the resolver raises a RuntimeError that says how to install the
+# package if it is missing.
+_OPTIONAL: dict[str, str] = {
+    "hya.braceexpand": "hya.braceexpand:braceexpand_resolver",
+    "hya.np.array": "hya.numpy:to_array_resolver",
+    "hya.torch.dtype": "hya.torch:torch_dtype_resolver",
+    "hya.torch.tensor": "hya.torch:to_tensor_resolver",
+}
+
 
 @cache
 def get_default_registry() -> ResolverRegistry:
@@ -48,10 +57,12 @@ def get_default_registry() -> ResolverRegistry:
 
     Returns a singleton registry instance using a simple singleton pattern.
     The registry initially contains the default resolvers and can be
-    extended with custom resolvers. The resolvers that need an optional
-    package (``braceexpand``, ``numpy`` or ``torch``) are in the registry only
-    if the package is installed, and the module of such a resolver is
-    imported on its first call, not when ``hya`` is imported.
+    extended with custom resolvers. The registry has the same keys on every
+    machine: the resolvers that need an optional package (``braceexpand``,
+    ``numpy`` or ``torch``) are always registered. The module of such a
+    resolver is imported on its first call, not when ``hya`` is imported, and
+    the call raises an error that says how to install the package if it is
+    missing.
 
     This function uses a singleton pattern to ensure the same registry instance
     is returned on subsequent calls, which is efficient and maintains consistency
@@ -77,13 +88,8 @@ def get_default_registry() -> ResolverRegistry:
         ```
     """
     registry = ResolverRegistry(_BUILTINS)
-    if is_braceexpand_available():
-        registry.register_lazy("hya.braceexpand", "hya.braceexpand:braceexpand_resolver")
-    if is_numpy_available():
-        registry.register_lazy("hya.np.array", "hya.numpy:to_array_resolver")
-    if is_torch_available():
-        registry.register_lazy("hya.torch.tensor", "hya.torch:to_tensor_resolver")
-        registry.register_lazy("hya.torch.dtype", "hya.torch:torch_dtype_resolver")
+    for key, target in _OPTIONAL.items():
+        registry.register_lazy(key, target)
     return registry
 
 

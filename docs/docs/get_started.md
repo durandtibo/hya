@@ -44,7 +44,8 @@ The following table shows which resolvers require which packages:
 All other resolvers work with the base installation (only `omegaconf` required).
 
 If you try to use a resolver that requires an optional package without installing it, you'll receive
-a helpful error message indicating which package needs to be installed.
+a helpful error message indicating which package needs to be installed, for example
+`'torch' package is required but not installed. ... pip install torch`.
 
 ## Installing from source
 

@@ -77,3 +77,51 @@ assert "braceexpand" in sys.modules
 """
     result = run_python(code)
     assert result.returncode == 0, result.stderr
+
+
+##################################################
+#     Tests for the missing optional package     #
+##################################################
+
+
+@pytest.mark.parametrize(
+    ("package", "expression"),
+    [
+        ("braceexpand", '${hya.braceexpand:"a{1,2}"}'),
+        ("numpy", "${hya.np.array:[1,2]}"),
+        ("torch", "${hya.torch.tensor:[1,2]}"),
+        ("torch", "${hya.torch.dtype:float32}"),
+    ],
+)
+def test_missing_package_error_says_how_to_install_it(package: str, expression: str) -> None:
+    code = f"""
+import sys
+sys.modules["{package}"] = None
+import hya
+from omegaconf import OmegaConf
+from omegaconf.errors import InterpolationResolutionError
+
+conf = OmegaConf.create({{"k": {expression!r}}})
+try:
+    conf.k
+except InterpolationResolutionError as error:
+    message = str(error)
+    assert "'{package}' package is required but not installed" in message, message
+    assert "pip install {package}" in message, message
+else:
+    raise AssertionError("no error")
+"""
+    result = run_python(code)
+    assert result.returncode == 0, result.stderr
+
+
+def test_default_registry_keys_do_not_depend_on_the_installed_packages() -> None:
+    code = """
+import sys
+for name in ("braceexpand", "numpy", "torch"):
+    sys.modules[name] = None
+import hya
+print(len(hya.get_default_registry().state))
+"""
+    result = run_python(code)
+    assert result.stdout.strip() == "25", result.stderr

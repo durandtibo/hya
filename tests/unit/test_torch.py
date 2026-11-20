@@ -121,11 +121,3 @@ def test_dtype_names_does_not_contain_other_attributes() -> None:
 @torch_available
 def test_dtype_names_is_deterministic() -> None:
     assert _dtype_names() == _dtype_names()
-
-
-def test_dtype_names_missing_package() -> None:
-    with (
-        patch("hya.torch.check_torch", side_effect=RuntimeError("missing package")),
-        pytest.raises(RuntimeError, match=r"missing package"),
-    ):
-        _dtype_names()

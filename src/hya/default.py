@@ -21,7 +21,9 @@ _BUILTINS: dict[str, Callable[..., Any]] = {
     "hya.asinh": math.asinh,
     "hya.ceildiv": resolvers.ceildiv_resolver,
     "hya.exp": math.exp,
+    "hya.float": float,
     "hya.floordiv": operator.floordiv,
+    "hya.int": int,
     "hya.iter_join": resolvers.iter_join_resolver,
     "hya.len": len,
     "hya.log": math.log,
@@ -37,6 +39,7 @@ _BUILTINS: dict[str, Callable[..., Any]] = {
     "hya.sinh": math.sinh,
     "hya.sqrt": math.sqrt,
     "hya.sub": operator.sub,
+    "hya.sum": sum,
     "hya.truediv": operator.truediv,
 }
 

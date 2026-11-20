@@ -1,5 +1,6 @@
 # Type checking workflow.
 # Validates type annotations using ty and pyright to ensure type safety.
+# Also checks with pyright --verifytypes that the public API of the package is fully typed.
 # Helps catch type-related bugs before runtime.
 
 name: Type Checking
@@ -28,3 +29,9 @@ jobs:
       - name: Check types
         run: |
           inv types.check --complete
+
+      # The public API must be fully typed (score of 100 %). pyright finds the installed package only
+      # with an activated environment, so VIRTUAL_ENV is set from the python of the environment.
+      - name: Verify the types of the public API
+        run: |
+          VIRTUAL_ENV="$(dirname "$(dirname "$(command -v python)")")" pyright --verifytypes hya --ignoreexternal

@@ -124,7 +124,9 @@ Values that would otherwise be duplicated across workflows are centralized in
   `lib-get-test-matrix.yaml`.
 - `../dev/config/package_versions.json` — version ranges to test optional
   dependencies against, read by `lib-get-package-versions.yaml` and kept
-  current by `bot-generate-package-versions.yaml`.
+  current by `bot-generate-package-versions.yaml`. `../dev/generate_versions.py` derives the
+  packages and their lower bounds from `../pyproject.toml` (dependencies and optional
+  dependencies), so a new dependency is picked up without editing the script.
 
 Optional-dependency _names_ are never duplicated in config: they're read
 directly from `../pyproject.toml`'s `[project.optional-dependencies]` by the

@@ -5,7 +5,7 @@ repository.
 
 | #   | Property                   | Statement                                                                                                                                                                                                      |
 | --- | -------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| P1  | **Import is enough**       | `import hya` registers every available default resolver with OmegaConf. No other call is needed.                                                                                                               |
+| P1  | **Import is enough**       | `import hya` registers every available default resolver with OmegaConf. No other call is needed, and `register_resolvers()` publishes them again after `OmegaConf.clear_resolvers()`.                          |
 | P2  | **Cheap import**           | `import hya` imports neither `numpy`, `torch` nor `braceexpand`, and emits no warning. The module of an optional resolver is imported on the first call of that resolver.                                      |
 | P3  | **Namespaced**             | Every built-in key starts with `hya.`. Optional ones are grouped (`hya.np.*`, `hya.torch.*`). Nothing is registered outside this namespace.                                                                    |
 | P4  | **Thin resolvers**         | A resolver is a standard library callable or a function of a few lines with one documented behaviour. No hidden state, no I/O beyond what its name says (`hya.path` touches the file system).                  |

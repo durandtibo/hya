@@ -65,7 +65,6 @@ The resolvers can be easily registered in your python project by adding the foll
 >>> @registry.register("multiply")
 ... def multiply_resolver(x, y):
 ...     return x * y
-...
 >>> registry.register_resolvers()
 
 ```
@@ -100,7 +99,7 @@ The following is the corresponding `hya` versions and tested dependencies.
 
 | `hya`   | `omegaconf`  | `braceexpand`<sup>*</sup> | `numpy`<sup>*</sup> | `torch`<sup>*</sup> | `python`       |
 | ------- | ------------ | ------------------------- | ------------------- | ------------------- | -------------- |
-| `main`  | `>=2.2,<3.0` | `>=0.1.7,<0.2.0`          | `>=1.24,<3.0`       | `>=2.0,<3.0`        | `>=3.10`       |
+| `main`  | `>=2.2,<3.0` | `>=0.1.7,<0.2.0`          | `>=1.24,<3.0`       | `>=2.0,<3.0`        | `>=3.11`       |
 | `0.4.0` | `>=2.2,<3.0` | `>=0.1.7,<0.2.0`          | `>=1.24,<3.0`       | `>=2.0,<3.0`        | `>=3.10`       |
 | `0.3.1` | `>=2.2,<3.0` | `>=0.1.7,<0.2.0`          | `>=1.24,<3.0`       | `>=2.0,<3.0`        | `>=3.10,<3.15` |
 | `0.3.0` | `>=2.2,<3.0` | `>=0.1.7,<0.2.0`          | `>=1.24,<3.0`       | `>=2.0,<3.0`        | `>=3.9,<3.14`  |

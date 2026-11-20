@@ -5,6 +5,7 @@ from __future__ import annotations
 
 __all__ = ["get_default_registry"]
 
+from functools import cache
 from typing import TYPE_CHECKING, Any
 
 from hya import resolvers
@@ -15,6 +16,7 @@ if TYPE_CHECKING:
     from collections.abc import Callable
 
 
+@cache
 def get_default_registry() -> ResolverRegistry:
     """Get or create the default global resolver registry.
 
@@ -44,10 +46,9 @@ def get_default_registry() -> ResolverRegistry:
 
         ```
     """
-    if not hasattr(get_default_registry, "_registry"):
-        get_default_registry._registry = ResolverRegistry()
-        _register_default_resolvers(get_default_registry._registry)
-    return get_default_registry._registry
+    registry = ResolverRegistry()
+    _register_default_resolvers(registry)
+    return registry
 
 
 def _register_default_resolvers(registry: ResolverRegistry) -> None:
@@ -60,7 +61,7 @@ def _register_default_resolvers(registry: ResolverRegistry) -> None:
         This function is called internally by get_default_registry() and should
         not typically be called directly by users.
     """
-    res = {
+    res: dict[str, Callable[..., Any]] = {
         "hya.add": resolvers.add_resolver,
         "hya.asinh": resolvers.asinh_resolver,
         "hya.ceildiv": resolvers.ceildiv_resolver,
@@ -91,7 +92,7 @@ def _register_default_resolvers(registry: ResolverRegistry) -> None:
         registry.register(key)(resolver)
 
 
-def _add_braceexpand_resolvers(resolvers: dict[str, Callable[[...], Any]]) -> None:
+def _add_braceexpand_resolvers(resolvers: dict[str, Callable[..., Any]]) -> None:
     r"""Add the default braceexpand resolvers.
 
     Args:
@@ -111,7 +112,7 @@ def _add_braceexpand_resolvers(resolvers: dict[str, Callable[[...], Any]]) -> No
     resolvers["hya.braceexpand"] = braceexpand_resolver
 
 
-def _add_numpy_resolvers(resolvers: dict[str, Callable[[...], Any]]) -> None:
+def _add_numpy_resolvers(resolvers: dict[str, Callable[..., Any]]) -> None:
     r"""Add the default numpy resolvers.
 
     Args:
@@ -131,7 +132,7 @@ def _add_numpy_resolvers(resolvers: dict[str, Callable[[...], Any]]) -> None:
     resolvers["hya.np.array"] = to_array_resolver
 
 
-def _add_torch_resolvers(resolvers: dict[str, Callable[[...], Any]]) -> None:
+def _add_torch_resolvers(resolvers: dict[str, Callable[..., Any]]) -> None:
     r"""Add the default torch resolvers.
 
     Args:

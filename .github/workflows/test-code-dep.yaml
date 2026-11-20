@@ -47,4 +47,4 @@ jobs:
       # Run unit tests to verify compatibility
       - name: Run unit tests
         run: |
-          inv unit-test
+          inv test.unit

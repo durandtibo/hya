@@ -1,0 +1,6 @@
+tasklib:
+  package:
+    name: hya
+  groups:
+    install: dev,docs
+    update: dev,docs

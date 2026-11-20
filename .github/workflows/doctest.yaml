@@ -26,7 +26,7 @@ jobs:
       # Run doctest to validate code examples in docstrings
       - name: Run doctest on source code
         run: |
-          inv doctest-src
+          inv test.doctest
 
   # Verify documentation can be built without errors
   build:

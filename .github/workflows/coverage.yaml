@@ -24,12 +24,12 @@ jobs:
       # Run unit tests with coverage tracking
       - name: Run unit tests
         run: |
-          inv unit-test --cov
+          inv test.unit --cov
 
       # Run integration tests with coverage tracking
       - name: Run integration tests
         run: |
-          inv integration-test --cov
+          inv test.integration --cov --append
 
       # Upload coverage report to Codecov (only for main repository)
       - name: Upload coverage to Codecov

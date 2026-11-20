@@ -40,4 +40,4 @@ jobs:
       # Build and deploy documentation for the latest stable version
       - name: Build and deploy documentation
         run: |
-          inv publish-doc-latest
+          inv doc.publish-latest

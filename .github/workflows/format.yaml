@@ -1,5 +1,5 @@
 # Code formatting and linting workflow.
-# Checks code formatting with black and code quality with ruff.
+# Checks code formatting and code quality with ruff.
 # Ensures code follows project style guidelines.
 
 name: Format
@@ -21,15 +21,15 @@ jobs:
       - name: Setup python environment
         uses: durandtibo/setup-venv-uv-action@v0.3.0
 
-      # Check code formatting with black
+      # Check code formatting with ruff
       - name: Check format
         run: |
-          inv check-format
+          inv format.check-python
 
       # Check code quality with ruff
       - name: Check lint
         run: |
-          inv check-lint
+          inv lint.check-python
 
   shell:
     runs-on: ubuntu-latest

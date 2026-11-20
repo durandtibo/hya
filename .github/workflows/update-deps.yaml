@@ -27,12 +27,12 @@ jobs:
       # Update all dependencies to their latest compatible versions
       - name: Update dependencies
         run: |
-          inv update
+          inv env.update
 
       # Install dependencies including documentation dependencies
       - name: Install dependencies with docs
         run: |
-          inv install --docs-deps
+          inv env.install
 
       # Display updated dependency tree
       - name: Show dependency tree
@@ -43,7 +43,7 @@ jobs:
       # Run tests to ensure updates don't break functionality
       - name: Run unit tests
         run: |
-          inv unit-test --cov
+          inv test.unit --cov
 
       # Create a pull request with the dependency updates
       - uses: peter-evans/create-pull-request@v8

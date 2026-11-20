@@ -9,6 +9,8 @@ from importlib.metadata import PackageNotFoundError, version
 from hya.default import get_default_registry
 from hya.registry import ResolverRegistry
 
+get_default_registry().register_resolvers()
+
 try:
     __version__ = version(__name__)
 except PackageNotFoundError:  # pragma: no cover

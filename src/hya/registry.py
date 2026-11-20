@@ -6,6 +6,7 @@ __all__ = ["ResolverRegistry"]
 
 import warnings
 from collections.abc import Callable, Mapping
+from importlib import import_module
 from types import MappingProxyType
 from typing import Any, TypeVar
 
@@ -127,6 +128,48 @@ class ResolverRegistry:
             return resolver
 
         return wrap
+
+    def register_lazy(self, key: str, target: str, *, exist_ok: bool = False) -> None:
+        r"""Register a resolver that is imported on its first call.
+
+        The module of the resolver is not imported when the resolver is
+        registered, but the first time OmegaConf calls the resolver. It
+        is useful for the resolvers that need a heavy package, because
+        the package is not imported if the resolver is never used.
+
+        Args:
+            key: The key used to register the resolver. Must be unique unless
+                ``exist_ok`` is ``True``.
+            target: The resolver to import, as ``"module:function"``, for
+                example ``"hya.numpy:to_array_resolver"``.
+            exist_ok: If ``False``, a ``RuntimeError`` is raised if you try to
+                register a new resolver with an existing key. If ``True``,
+                the existing resolver will be overridden.
+
+        Raises:
+            ValueError: If ``target`` is not formatted as ``"module:function"``.
+            RuntimeError: If the key already exists and ``exist_ok`` is
+                ``False``.
+
+        Example:
+            ```pycon
+            >>> from hya.registry import ResolverRegistry
+            >>> registry = ResolverRegistry()
+            >>> registry.register_lazy("hya.np.array", "hya.numpy:to_array_resolver")
+            >>> registry.has_resolver("hya.np.array")
+            True
+
+            ```
+        """
+        module_name, _, function_name = target.partition(":")
+        if not module_name or not function_name:
+            msg = f"The target must be formatted as 'module:function', but received '{target}'"
+            raise ValueError(msg)
+
+        def resolver(*args: Any) -> Any:
+            return getattr(import_module(module_name), function_name)(*args)
+
+        self.register(key, exist_ok=exist_ok)(resolver)
 
     def register_resolvers(self, *, replace: bool = False) -> None:
         r"""Register the resolvers to OmegaConf.

@@ -15,13 +15,42 @@ from hya.registry import ResolverRegistry
 if TYPE_CHECKING:
     from collections.abc import Callable
 
+_BUILTINS: dict[str, Callable[..., Any]] = {
+    "hya.add": resolvers.add_resolver,
+    "hya.asinh": resolvers.asinh_resolver,
+    "hya.ceildiv": resolvers.ceildiv_resolver,
+    "hya.exp": resolvers.exp_resolver,
+    "hya.floordiv": resolvers.floordiv_resolver,
+    "hya.len": resolvers.len_resolver,
+    "hya.iter_join": resolvers.iter_join_resolver,
+    "hya.log": resolvers.log_resolver,
+    "hya.log10": resolvers.log10_resolver,
+    "hya.max": resolvers.max_resolver,
+    "hya.min": resolvers.min_resolver,
+    "hya.mul": resolvers.mul_resolver,
+    "hya.neg": resolvers.neg_resolver,
+    "hya.path": resolvers.path_resolver,
+    "hya.pi": resolvers.pi_resolver,
+    "hya.pow": resolvers.pow_resolver,
+    "hya.sqrt": resolvers.sqrt_resolver,
+    "hya.sha256": resolvers.sha256_resolver,
+    "hya.sinh": resolvers.sinh_resolver,
+    "hya.sub": resolvers.sub_resolver,
+    "hya.to_path": resolvers.to_path_resolver,
+    "hya.truediv": resolvers.truediv_resolver,
+}
+
 
 @cache
 def get_default_registry() -> ResolverRegistry:
     """Get or create the default global resolver registry.
 
     Returns a singleton registry instance using a simple singleton pattern.
-    The registry is initially empty and can be populated with custom resolvers.
+    The registry initially contains the default resolvers and can be
+    extended with custom resolvers. The resolvers that need an optional
+    package (``braceexpand``, ``numpy`` or ``torch``) are in the registry only
+    if the package is installed, and the module of such a resolver is
+    imported on its first call, not when ``hya`` is imported.
 
     This function uses a singleton pattern to ensure the same registry instance
     is returned on subsequent calls, which is efficient and maintains consistency
@@ -46,112 +75,12 @@ def get_default_registry() -> ResolverRegistry:
 
         ```
     """
-    registry = ResolverRegistry()
-    _register_default_resolvers(registry)
+    registry = ResolverRegistry(_BUILTINS)
+    if is_braceexpand_available():
+        registry.register_lazy("hya.braceexpand", "hya.braceexpand:braceexpand_resolver")
+    if is_numpy_available():
+        registry.register_lazy("hya.np.array", "hya.numpy:to_array_resolver")
+    if is_torch_available():
+        registry.register_lazy("hya.torch.tensor", "hya.torch:to_tensor_resolver")
+        registry.register_lazy("hya.torch.dtype", "hya.torch:torch_dtype_resolver")
     return registry
-
-
-def _register_default_resolvers(registry: ResolverRegistry) -> None:
-    """Register default resolvers.
-
-    Args:
-        registry: The registry to populate with default resolvers
-
-    Notes:
-        This function is called internally by get_default_registry() and should
-        not typically be called directly by users.
-    """
-    res: dict[str, Callable[..., Any]] = {
-        "hya.add": resolvers.add_resolver,
-        "hya.asinh": resolvers.asinh_resolver,
-        "hya.ceildiv": resolvers.ceildiv_resolver,
-        "hya.exp": resolvers.exp_resolver,
-        "hya.floordiv": resolvers.floordiv_resolver,
-        "hya.len": resolvers.len_resolver,
-        "hya.iter_join": resolvers.iter_join_resolver,
-        "hya.log": resolvers.log_resolver,
-        "hya.log10": resolvers.log10_resolver,
-        "hya.max": resolvers.max_resolver,
-        "hya.min": resolvers.min_resolver,
-        "hya.mul": resolvers.mul_resolver,
-        "hya.neg": resolvers.neg_resolver,
-        "hya.path": resolvers.path_resolver,
-        "hya.pi": resolvers.pi_resolver,
-        "hya.pow": resolvers.pow_resolver,
-        "hya.sqrt": resolvers.sqrt_resolver,
-        "hya.sha256": resolvers.sha256_resolver,
-        "hya.sinh": resolvers.sinh_resolver,
-        "hya.sub": resolvers.sub_resolver,
-        "hya.to_path": resolvers.to_path_resolver,
-        "hya.truediv": resolvers.truediv_resolver,
-    }
-    _add_braceexpand_resolvers(res)
-    _add_numpy_resolvers(res)
-    _add_torch_resolvers(res)
-    for key, resolver in res.items():
-        registry.register(key)(resolver)
-
-
-def _add_braceexpand_resolvers(resolvers: dict[str, Callable[..., Any]]) -> None:
-    r"""Add the default braceexpand resolvers.
-
-    Args:
-        resolvers: The dictionary to populate with default
-            braceexpand resolvers if braceexpand is installed.
-
-    Notes:
-        This function is called internally by get_default_registry() and should
-        not typically be called directly by users.
-    """
-    if not is_braceexpand_available():  # pragma: no cover
-        return
-
-    # Local import because it is an optional resolver
-    from hya.braceexpand import braceexpand_resolver  # noqa: PLC0415
-
-    resolvers["hya.braceexpand"] = braceexpand_resolver
-
-
-def _add_numpy_resolvers(resolvers: dict[str, Callable[..., Any]]) -> None:
-    r"""Add the default numpy resolvers.
-
-    Args:
-        resolvers: The dictionary to populate with default
-            numpy resolvers if numpy is installed.
-
-    Notes:
-        This function is called internally by get_default_registry() and should
-        not typically be called directly by users.
-    """
-    if not is_numpy_available():  # pragma: no cover
-        return
-
-    # Local import because it is an optional resolver
-    from hya.numpy import to_array_resolver  # noqa: PLC0415
-
-    resolvers["hya.np.array"] = to_array_resolver
-
-
-def _add_torch_resolvers(resolvers: dict[str, Callable[..., Any]]) -> None:
-    r"""Add the default torch resolvers.
-
-    Args:
-        resolvers: The dictionary to populate with default
-            torch resolvers if torch is installed.
-
-    Notes:
-        This function is called internally by get_default_registry() and should
-        not typically be called directly by users.
-    """
-    if not is_torch_available():  # pragma: no cover
-        return
-
-    # Local import because it is an optional resolver
-    from hya.torch import to_tensor_resolver, torch_dtype_resolver  # noqa: PLC0415
-
-    resolvers["hya.torch.tensor"] = to_tensor_resolver
-    resolvers["hya.torch.dtype"] = torch_dtype_resolver
-
-
-# Register the available resolvers
-get_default_registry().register_resolvers()

@@ -17,6 +17,11 @@ conf = OmegaConf.create({"result": "${hya.add:2,3}"})
 print(conf.result)  # Output: 5
 ```
 
+The optional resolvers (`hya.braceexpand`, `hya.np.array`, `hya.torch.tensor`, `hya.torch.dtype`)
+are registered only if their package is installed. `import hya` does not import `numpy`, `torch`
+or `braceexpand`: the module of an optional resolver is imported on the first call of that
+resolver.
+
 ### Using Resolvers in YAML Configurations
 
 You can use resolvers directly in YAML configuration files:
@@ -218,6 +223,23 @@ this cache for existing configurations: call `OmegaConf.clear_cache(cfg)` to cle
 
 The resolvers are published with `annotation_validation="off"`: the type annotations of a resolver
 are documentation for readers and type checkers, OmegaConf does not check them at call time.
+
+### Registering a Resolver Lazily
+
+`register_lazy` registers a resolver as a `"module:function"` string. The module is imported the
+first time OmegaConf calls the resolver, not when the resolver is registered. This is how `hya`
+registers the resolvers that need a heavy optional package:
+
+```python
+from hya import get_default_registry
+
+registry = get_default_registry()
+registry.register_lazy("my.array", "hya.numpy:to_array_resolver")
+registry.register_resolvers()
+```
+
+A target that is not formatted as `"module:function"` raises a `ValueError` when it is registered.
+An unknown module or function raises an error on the first call of the resolver.
 
 ### Creating Isolated Registries
 

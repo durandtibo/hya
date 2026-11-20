@@ -120,6 +120,123 @@ def test_resolver_registry_register_does_not_modify_state_on_duplicate() -> None
     assert registry.state == {"key": resolver}
 
 
+####################################################
+#     Tests for ResolverRegistry.register_lazy     #
+####################################################
+
+
+def test_resolver_registry_register_lazy() -> None:
+    registry = ResolverRegistry()
+    registry.register_lazy("key", "package.module:function")
+    assert registry.has_resolver("key")
+
+
+def test_resolver_registry_register_lazy_does_not_import_the_module() -> None:
+    registry = ResolverRegistry()
+    with patch("hya.registry.import_module") as import_module:
+        registry.register_lazy("key", "package.module:function")
+    assert import_module.call_count == 0
+
+
+def test_resolver_registry_register_lazy_imports_the_module_on_the_first_call() -> None:
+    registry = ResolverRegistry()
+    registry.register_lazy("key", "package.module:function")
+    with patch("hya.registry.import_module") as import_module:
+        registry.state["key"](1, 2)
+    assert import_module.call_args_list == [call("package.module")]
+
+
+def test_resolver_registry_register_lazy_calls_the_function_with_the_arguments() -> None:
+    registry = ResolverRegistry()
+    registry.register_lazy("key", "package.module:function")
+    with patch("hya.registry.import_module") as import_module:
+        registry.state["key"](1, 2)
+    assert import_module.return_value.function.call_args_list == [call(1, 2)]
+
+
+def test_resolver_registry_register_lazy_returns_the_output_of_the_function() -> None:
+    registry = ResolverRegistry()
+    registry.register_lazy("key", "package.module:function")
+    with patch("hya.registry.import_module") as import_module:
+        import_module.return_value.function.return_value = 42
+        assert registry.state["key"]() == 42
+
+
+def test_resolver_registry_register_lazy_imports_the_module_at_each_call() -> None:
+    registry = ResolverRegistry()
+    registry.register_lazy("key", "package.module:function")
+    with patch("hya.registry.import_module") as import_module:
+        registry.state["key"]()
+        registry.state["key"]()
+    assert import_module.call_count == 2
+
+
+def test_resolver_registry_register_lazy_target_with_nested_module() -> None:
+    registry = ResolverRegistry()
+    registry.register_lazy("key", "a.b.c:f")
+    with patch("hya.registry.import_module") as import_module:
+        registry.state["key"]()
+    assert import_module.call_args_list == [call("a.b.c")]
+
+
+def test_resolver_registry_register_lazy_module_not_found() -> None:
+    registry = ResolverRegistry()
+    registry.register_lazy("key", "hya_missing_module:function")
+    with pytest.raises(ModuleNotFoundError, match=r"No module named 'hya_missing_module'"):
+        registry.state["key"]()
+
+
+def test_resolver_registry_register_lazy_function_not_found() -> None:
+    registry = ResolverRegistry()
+    registry.register_lazy("key", "json:missing_function")
+    with pytest.raises(AttributeError, match=r"missing_function"):
+        registry.state["key"]()
+
+
+@pytest.mark.parametrize("target", ["", "module", "module:", ":function", ":"])
+def test_resolver_registry_register_lazy_invalid_target(target: str) -> None:
+    registry = ResolverRegistry()
+    with pytest.raises(ValueError, match=r"The target must be formatted as 'module:function'"):
+        registry.register_lazy("key", target)
+
+
+def test_resolver_registry_register_lazy_invalid_target_does_not_register() -> None:
+    registry = ResolverRegistry()
+    with pytest.raises(ValueError, match=r"must be formatted as"):
+        registry.register_lazy("key", "module")
+    assert registry.state == {}
+
+
+def test_resolver_registry_register_lazy_duplicate_exist_ok_false() -> None:
+    registry = ResolverRegistry({"key": Mock()})
+    with pytest.raises(RuntimeError, match=r"A resolver is already registered for 'key'."):
+        registry.register_lazy("key", "package.module:function")
+
+
+def test_resolver_registry_register_lazy_duplicate_exist_ok_true() -> None:
+    old_resolver = Mock()
+    registry = ResolverRegistry({"key": old_resolver})
+    registry.register_lazy("key", "package.module:function", exist_ok=True)
+    assert registry.state["key"] is not old_resolver
+
+
+def test_resolver_registry_register_lazy_exist_ok_is_keyword_only() -> None:
+    register_lazy: Any = ResolverRegistry().register_lazy
+    with pytest.raises(TypeError, match=r"takes 3 positional arguments but 4 were given"):
+        register_lazy("key", "package.module:function", True)
+
+
+def test_resolver_registry_register_lazy_register_resolvers() -> None:
+    registry = ResolverRegistry()
+    registry.register_lazy("key", "package.module:function")
+    with patch("hya.registry.OmegaConf") as omegaconf:
+        omegaconf.has_resolver.return_value = False
+        registry.register_resolvers()
+    assert omegaconf.register_resolver.call_args_list == [
+        call("key", registry.state["key"], replace=False, annotation_validation="off")
+    ]
+
+
 #########################################################
 #     Tests for ResolverRegistry.register_resolvers     #
 #########################################################

@@ -1,12 +1,15 @@
 from __future__ import annotations
 
+import re
+from unittest.mock import patch
+
 import pytest
 from omegaconf import OmegaConf
 from omegaconf.errors import InterpolationResolutionError
 
 from hya.imports import is_torch_available
 from hya.testing import torch_available
-from hya.torch import get_dtypes
+from hya.torch import _dtype_names, torch_dtype_resolver
 
 if is_torch_available():
     import torch
@@ -51,9 +54,78 @@ def test_torch_dtype_resolver_incorrect_dtype() -> None:
         OmegaConf.create({"key": "${hya.torch.dtype:ones}"}).key  # noqa: B018
 
 
+def get_incorrect_dtype_message() -> str:
+    with pytest.raises(InterpolationResolutionError) as exc_info:
+        OmegaConf.create({"key": "${hya.torch.dtype:ones}"}).key  # noqa: B018
+    return str(exc_info.value)
+
+
 @torch_available
-def test_get_dtypes() -> None:
-    dtypes = get_dtypes()
-    assert len(dtypes) > 1
-    assert torch.float in dtypes
-    assert torch.long in dtypes
+def test_torch_dtype_resolver_incorrect_dtype_message_lists_the_names() -> None:
+    with (
+        patch("hya.torch._dtype_names", return_value=["float32", "int64"]),
+        pytest.raises(
+            InterpolationResolutionError,
+            match=re.escape("Incorrect dtype ones. The available dtypes are ['float32', 'int64']"),
+        ),
+    ):
+        OmegaConf.create({"key": "${hya.torch.dtype:ones}"}).key  # noqa: B018
+
+
+@torch_available
+def test_torch_dtype_resolver_incorrect_dtype_message_is_deterministic() -> None:
+    assert get_incorrect_dtype_message() == get_incorrect_dtype_message()
+
+
+@torch_available
+def test_torch_dtype_resolver_direct_call() -> None:
+    assert torch_dtype_resolver("float32") == torch.float32
+
+
+def test_torch_dtype_resolver_missing_package() -> None:
+    with (
+        patch("hya.torch.check_torch", side_effect=RuntimeError("missing package")),
+        pytest.raises(RuntimeError, match=r"missing package"),
+    ):
+        torch_dtype_resolver("float32")
+
+
+@torch_available
+def test_dtype_names_is_sorted() -> None:
+    names = _dtype_names()
+    assert names == sorted(names)
+
+
+@torch_available
+def test_dtype_names_contains_dtypes() -> None:
+    names = _dtype_names()
+    assert {"bool", "float", "float32", "int64", "long"} <= set(names)
+
+
+@torch_available
+def test_dtype_names_has_no_duplicate() -> None:
+    names = _dtype_names()
+    assert len(names) == len(set(names))
+
+
+@torch_available
+def test_dtype_names_are_dtypes() -> None:
+    assert all(isinstance(getattr(torch, name), torch.dtype) for name in _dtype_names())
+
+
+@torch_available
+def test_dtype_names_does_not_contain_other_attributes() -> None:
+    assert "ones" not in _dtype_names()
+
+
+@torch_available
+def test_dtype_names_is_deterministic() -> None:
+    assert _dtype_names() == _dtype_names()
+
+
+def test_dtype_names_missing_package() -> None:
+    with (
+        patch("hya.torch.check_torch", side_effect=RuntimeError("missing package")),
+        pytest.raises(RuntimeError, match=r"missing package"),
+    ):
+        _dtype_names()

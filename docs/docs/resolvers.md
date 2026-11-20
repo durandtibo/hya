@@ -305,17 +305,27 @@ Expands brace patterns similar to bash brace expansion.
 
 ```yaml
 # Numeric range
-files: ${hya.braceexpand:file_{1..5}.txt}
-# Returns iterator: file_1.txt, file_2.txt, ..., file_5.txt
+files: ${hya.braceexpand:"file_{1..5}.txt"}
+# Returns a list: [file_1.txt, file_2.txt, ..., file_5.txt]
 
 # Choice expansion
-configs: ${hya.braceexpand:config_{train,val,test}.yaml}
-# Returns iterator: config_train.yaml, config_val.yaml, config_test.yaml
+configs: ${hya.braceexpand:"config_{train,val,test}.yaml"}
+# Returns a list: [config_train.yaml, config_val.yaml, config_test.yaml]
 
 # Nested patterns
-paths: ${hya.braceexpand:data/{2020..2022}/{jan,feb,mar}}
-# Returns: data/2020/jan, data/2020/feb, ..., data/2022/mar
+paths: ${hya.braceexpand:"data/{2020..2022}/{jan,feb,mar}"}
+# Returns a list: [data/2020/jan, data/2020/feb, ..., data/2022/mar]
+
+# The list can be used by another resolver
+names: ${hya.iter_join:${hya.braceexpand:"a{1..3}"},-} # Result: "a1-a2-a3"
 ```
+
+**Notes:**
+
+- The pattern must be quoted (or its braces escaped) in an interpolation: unquoted, the braces are
+  a grammar error of OmegaConf.
+- The resolver returns a `list`, not an iterator: it has a length, can be indexed and can be read
+  several times. The whole expansion is built at once.
 
 **Reference:** [braceexpand documentation](https://github.com/trendels/braceexpand)
 
@@ -424,6 +434,9 @@ import torch
 
 value = torch.float32  # for dtype_name="float32"
 ```
+
+**Note:** An unknown name raises an `InterpolationResolutionError` whose message lists the
+available dtype names, sorted.
 
 ## Resolver Categories Summary
 

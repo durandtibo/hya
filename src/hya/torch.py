@@ -8,6 +8,8 @@ PyTorch tensors and specify dtypes directly from configuration files.
 
 from __future__ import annotations
 
+__all__ = ["to_tensor_resolver", "torch_dtype_resolver"]
+
 from typing import TYPE_CHECKING, Any
 
 from omegaconf.errors import InterpolationResolutionError
@@ -64,7 +66,8 @@ def torch_dtype_resolver(target: str) -> torch.dtype:
 
     Raises:
         InterpolationResolutionError: If the target string doesn't
-            correspond to a valid torch dtype.
+            correspond to a valid torch dtype. The message lists the
+            available dtype names, sorted.
 
     Example:
         ```pycon
@@ -81,37 +84,30 @@ def torch_dtype_resolver(target: str) -> torch.dtype:
     """
     check_torch()
     if not hasattr(torch, target) or not isinstance(getattr(torch, target), torch.dtype):
-        msg = f"Incorrect dtype {target}. The available dtypes are {get_dtypes()}"
+        msg = f"Incorrect dtype {target}. The available dtypes are {_dtype_names()}"
         raise InterpolationResolutionError(msg)
     return getattr(torch, target)
 
 
-def get_dtypes() -> set[torch.dtype]:
-    r"""Get all available PyTorch data types.
+def _dtype_names() -> list[str]:
+    r"""Get the sorted names of the available PyTorch data types.
 
-    This function introspects the torch module to find all available
-    dtype objects. It's useful for validation and error messages when
-    working with torch dtype resolvers.
+    This function introspects the torch module to find the names of the
+    attributes that are a ``torch.dtype``. It is used in the error
+    message of the dtype resolver. The names are sorted, so the message
+    does not depend on the order of a set.
 
     Returns:
-        A set containing all PyTorch dtype objects available in the
-        current torch installation (e.g., torch.float32, torch.int64,
-        torch.bool, etc.).
+        The sorted names of the attributes of ``torch`` that are a
+        ``torch.dtype`` (e.g., ``"float32"``, ``"int64"``, ``"bool"``).
 
     Example:
         ```pycon
-        >>> import hya
-        >>> from hya.torch import get_dtypes
-        >>> dtypes = get_dtypes()
-        >>> torch.float32 in dtypes
+        >>> from hya.torch import _dtype_names
+        >>> "float32" in _dtype_names()
         True
 
         ```
     """
     check_torch()
-    dtypes = set()
-    for attr in dir(torch):
-        dt = getattr(torch, attr)
-        if isinstance(dt, torch.dtype):
-            dtypes.add(dt)
-    return dtypes
+    return sorted(name for name in dir(torch) if isinstance(getattr(torch, name), torch.dtype))

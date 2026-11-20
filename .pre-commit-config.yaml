@@ -3,60 +3,98 @@ default_language_version:
 
 default_stages: [pre-commit]
 
+exclude: ^\.make/
+
 repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v6.0.0
+    hooks:
+      # Ensures files end with exactly one newline.
+      - id: end-of-file-fixer
+      # Strips trailing whitespace from lines.
+      - id: trailing-whitespace
+      # Validates that TOML files parse correctly.
+      - id: check-toml
+      # Validates that YAML files parse correctly (--unsafe allows custom tags).
+      - id: check-yaml
+        args: [--unsafe]
+      # Blocks accidentally committing large files.
+      - id: check-added-large-files
+      # Catches filenames that only differ by case (breaks on case-insensitive filesystems).
+      - id: check-case-conflict
+      # Blocks committing leftover merge conflict markers.
+      - id: check-merge-conflict
+      # Detects symlinks that were replaced by their target's plain-text content.
+      - id: destroyed-symlinks
+      # Scans for accidentally committed private key material.
+      - id: detect-private-key
+      # Normalizes/flags inconsistent line endings (CRLF vs LF).
+      - id: mixed-line-ending
+      # Flags leftover pdb/ipdb/breakpoint() debugging statements.
+      - id: debug-statements
+  - repo: https://github.com/pre-commit/pygrep-hooks
+    rev: v1.10.0 # Use the ref you want to point at
+    hooks:
+      # Disallows bare `# noqa` so lint suppressions stay traceable to a specific rule.
+      - id: python-check-blanket-noqa
+      # Flags old-style type comments in favor of real annotations.
+      - id: python-use-type-annotations
+  - repo: https://github.com/astral-sh/uv-pre-commit
+    rev: 0.13.9
+    hooks:
+      # Fails if uv.lock is out of sync with pyproject.toml.
+      - id: uv-lock
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.17.6
+    hooks:
+      # Lints and autofixes Python/pyi/Jupyter files (includes import sorting).
+      - id: ruff-check
+        types_or: [python, pyi, jupyter]
+        args: [--fix]
+      # Formats Python/pyi/Jupyter source code and Python code blocks in Markdown docs.
+      - id: ruff-format
+        types_or: [python, pyi, jupyter, markdown]
   - repo: local
     hooks:
+      # Reformats docstrings (wrapping, spacing) per the config in pyproject.toml.
       - id: docformatter
         name: docformatter
         entry: python -Im docformatter
         additional_dependencies:
           - docformatter >= 1.7.5
-          - tomli >= 2.0.0
         args: ["--in-place", "--config", "./pyproject.toml"]
         language: python
         types:
           - python
-  - repo: https://github.com/pycqa/isort
-    rev: 10.0.0b3
+  - repo: https://github.com/scop/pre-commit-shfmt
+    rev: v3.14.1-1
     hooks:
-      - id: isort
-        name: isort (python)
-      - id: isort
-        name: isort (cython)
-        types: [cython]
-      - id: isort
-        name: isort (pyi)
-        types: [pyi]
-  - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v6.0.0
+      # Enforces consistent shell script formatting.
+      - id: shfmt
+  - repo: https://github.com/shellcheck-py/shellcheck-py
+    rev: v0.11.0.1-1
     hooks:
-      - id: end-of-file-fixer
-      - id: trailing-whitespace
-      - id: check-toml
-      - id: sort-simple-yaml
-      - id: check-yaml
-        args: [--unsafe]
-  - repo: https://github.com/pre-commit/pygrep-hooks
-    rev: v1.10.0
+      # Lints shell scripts for bugs and portability issues.
+      - id: shellcheck
+  - repo: https://github.com/codespell-project/codespell
+    rev: v2.4.3
     hooks:
-      - id: python-check-blanket-noqa
-      - id: python-use-type-annotations
-  - repo: https://github.com/psf/black
-    rev: 26.10.1
-    hooks:
-      - id: black
-        language_version: python3.13
-  - repo: https://github.com/adamchainz/blacken-docs
-    rev: "1.20.0"
-    hooks:
-      - id: blacken-docs
+      # Spell-checks source and docs for common typos.
+      - id: codespell
         additional_dependencies:
-          - black>=25.11
-  - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.17.5
+          - tomli
+  - repo: local
     hooks:
-      - id: ruff-check
-        types_or: [python, pyi, jupyter]
-        args: [--fix, --unsafe-fixes]
-      - id: ruff-format
-        types_or: [python, pyi, jupyter]
+      - id: ty
+        name: ty
+        entry: uv run ty check
+        language: system
+        types: [python]
+        pass_filenames: false
+      # Enforces the package layering contract defined in pyproject.toml.
+      - id: import-linter
+        name: import-linter
+        entry: uv run lint-imports
+        language: system
+        types: [python]
+        pass_filenames: false

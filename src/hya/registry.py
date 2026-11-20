@@ -10,9 +10,39 @@ from importlib import import_module
 from types import MappingProxyType
 from typing import Any, TypeVar
 
+import omegaconf
 from omegaconf import OmegaConf
 
 F = TypeVar("F", bound=Callable[..., Any])
+
+# OmegaConf 2.4 renamed ``register_new_resolver`` to ``register_resolver`` and validates the
+# annotations of the resolvers at call time. OmegaConf 2.2 and 2.3 do not validate them.
+_HAS_ANNOTATION_VALIDATION: bool = tuple(map(int, omegaconf.__version__.split(".")[:2])) >= (2, 4)
+
+
+def _publish(key: str, resolver: Callable[..., Any], *, replace: bool) -> None:
+    r"""Publish a resolver to OmegaConf.
+
+    This function is the only place that depends on the version of OmegaConf. With OmegaConf
+    2.4 and later, the annotations of the resolver are not validated at call time
+    (``annotation_validation="off"``); OmegaConf 2.2 and 2.3 never validate them.
+
+    Args:
+        key: The key of the resolver.
+        resolver: The resolver to publish.
+        replace: If ``True``, replace the resolver that OmegaConf has for the key.
+
+    Example:
+        ```pycon
+        >>> from hya.registry import _publish
+        >>> _publish("hya.doc_example", lambda x: x, replace=True)
+
+        ```
+    """
+    if _HAS_ANNOTATION_VALIDATION:
+        OmegaConf.register_resolver(key, resolver, replace=replace, annotation_validation="off")
+    else:
+        OmegaConf.register_new_resolver(key, resolver, replace=replace)
 
 
 class ResolverRegistry:
@@ -182,8 +212,9 @@ class ResolverRegistry:
         registry changed, or registered by another source) and ``replace`` is
         ``False``.
 
-        The resolvers are published with ``annotation_validation="off"``: the
-        annotations of the resolvers are not a runtime contract.
+        The resolvers are published with ``annotation_validation="off"`` when
+        OmegaConf validates the annotations (2.4 and later): the annotations of
+        the resolvers are not a runtime contract.
 
         Args:
             replace: If ``True``, the resolvers replace the resolvers that
@@ -218,5 +249,5 @@ class ResolverRegistry:
                     stacklevel=2,
                 )
                 continue
-            OmegaConf.register_resolver(key, resolver, replace=replace, annotation_validation="off")
+            _publish(key, resolver, replace=replace)
             self._published[key] = resolver

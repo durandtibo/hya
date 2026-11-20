@@ -18,6 +18,7 @@ repository.
 | P11 | **Any value out**          | A resolver may return any Python object (`Path`, `ndarray`, `Tensor`, `dtype`, list). Such values are for use in code and are not meant for `OmegaConf.to_yaml`.                                               |
 | P12 | **Typed and documented**   | The package has a `py.typed` file, every public name is documented with a doctest, and every resolver is listed in the [resolvers](resolvers.md) page.                                                         |
 | P13 | **Keyword-only options**   | Options are keyword-only (`exist_ok`, `replace`). Positional arguments are the data.                                                                                                                           |
+| P14 | **Installs next to Hydra** | `hya` accepts every OmegaConf release that a Hydra release accepts (`omegaconf>=2.2,<3.0`). CI runs the tests on the oldest and the newest OmegaConf.                                                          |
 
 ## Details
 
@@ -30,8 +31,9 @@ repository.
   (`registry.register("hya.add", exist_ok=True)`) warns until `register_resolvers(replace=True)` is
   called. OmegaConf caches the resolved nodes of a configuration: `replace=True` does not clear the
   cache of the existing configurations (`OmegaConf.clear_cache(cfg)`).
-- **P10.** OmegaConf validation of the annotations is off for the resolvers published by `hya`:
-  the annotations are documentation for readers and type checkers, not a runtime contract.
+- **P10.** OmegaConf validation of the annotations (OmegaConf 2.4 and later) is off for the
+  resolvers published by `hya`: the annotations are documentation for readers and type checkers, not
+  a runtime contract.
 - **P11.** The value of an interpolation of a resolver that returns an object cannot always be
   written in YAML: use the value in code, or `OmegaConf.to_container(cfg, resolve=True)`.
 

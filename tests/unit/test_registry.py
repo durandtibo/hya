@@ -6,16 +6,21 @@ from unittest.mock import Mock, NonCallableMock, call, patch
 
 import pytest
 
-from hya.registry import (
-    ResolverRegistry,
-)
+from hya.registry import ResolverRegistry, _publish
 
 if TYPE_CHECKING:
-    from collections.abc import Callable
+    from collections.abc import Callable, Generator
 
 
 def add_two(value: int) -> int:
     return value + 2
+
+
+@pytest.fixture(autouse=True)
+def _annotation_validation() -> Generator[None, None, None]:
+    # The tests assert the calls of the API of OmegaConf 2.4; _publish is tested separately
+    with patch("hya.registry._HAS_ANNOTATION_VALIDATION", new=True):
+        yield
 
 
 ######################################
@@ -414,3 +419,34 @@ def test_resolver_registry_register_resolvers_registries_are_independent() -> No
         with pytest.warns(UserWarning, match=r"not replaced"):
             second.register_resolvers()
     assert omegaconf.register_resolver.call_count == 1
+
+
+#############################
+#     Tests for _publish    #
+#############################
+
+
+def test_publish_with_annotation_validation() -> None:
+    with patch("hya.registry.OmegaConf") as omegaconf:
+        _publish("key", add_two, replace=True)
+    assert omegaconf.register_resolver.call_args_list == [
+        call("key", add_two, replace=True, annotation_validation="off")
+    ]
+
+
+def test_publish_without_annotation_validation() -> None:
+    with (
+        patch("hya.registry._HAS_ANNOTATION_VALIDATION", new=False),
+        patch("hya.registry.OmegaConf") as omegaconf,
+    ):
+        _publish("key", add_two, replace=False)
+    assert omegaconf.register_new_resolver.call_args_list == [call("key", add_two, replace=False)]
+
+
+def test_publish_without_annotation_validation_does_not_use_register_resolver() -> None:
+    with (
+        patch("hya.registry._HAS_ANNOTATION_VALIDATION", new=False),
+        patch("hya.registry.OmegaConf") as omegaconf,
+    ):
+        _publish("key", add_two, replace=False)
+    assert omegaconf.register_resolver.call_count == 0

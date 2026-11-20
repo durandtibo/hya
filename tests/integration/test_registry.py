@@ -142,6 +142,14 @@ def test_register_resolvers_key_of_another_source_is_replaced() -> None:
     assert resolve() == 10
 
 
+def test_register_resolvers_publishes_again_after_clear_resolver() -> None:
+    registry = ResolverRegistry({KEY: double})
+    registry.register_resolvers()
+    OmegaConf.clear_resolver(KEY)
+    registry.register_resolvers()
+    assert resolve() == 10
+
+
 def test_register_resolvers_does_not_validate_annotations(
     recwarn: pytest.WarningsRecorder,
 ) -> None:
@@ -175,6 +183,20 @@ def run_python(code: str) -> subprocess.CompletedProcess[str]:
 
 def test_import_hya_emits_no_warning() -> None:
     assert run_python("import hya").returncode == 0
+
+
+def test_register_default_resolvers_after_clear_resolvers() -> None:
+    code = """
+import hya
+from omegaconf import OmegaConf
+
+OmegaConf.clear_resolvers()
+assert not OmegaConf.has_resolver("hya.add")
+hya.get_default_registry().register_resolvers()
+assert OmegaConf.create({"k": "${hya.add:1,2}"}).k == 3
+"""
+    result = run_python(code)
+    assert result.returncode == 0, result.stderr
 
 
 def test_register_default_resolvers_twice_is_silent() -> None:

@@ -207,7 +207,10 @@ that knows about the OmegaConf version:
 ```python
 # OmegaConf 2.4 renamed register_new_resolver to register_resolver (and validates the annotations
 # at call time). 2.2 and 2.3 have no validation, which is what annotation_validation="off" selects.
-_OMEGACONF_HAS_ANNOTATION_VALIDATION = tuple(map(int, omegaconf.__version__.split(".")[:2])) >= (2, 4)
+_OMEGACONF_HAS_ANNOTATION_VALIDATION = tuple(map(int, omegaconf.__version__.split(".")[:2])) >= (
+    2,
+    4,
+)
 
 
 def _publish(key: str, resolver: Callable[..., Any], *, replace: bool) -> None:

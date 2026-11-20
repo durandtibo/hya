@@ -8,7 +8,10 @@
   `.venv/bin/ruff format src tests`. Fix the issues raised by ruff. Ignoring an issue (`noqa`, a
   changed rule set) is not fixing it.
 - Type check with `.venv/bin/inv types.check` (ty) and
-  `.venv/bin/pyright --verifytypes hya --ignoreexternal`. Fix the issues raised by the checkers.
+  `VIRTUAL_ENV=$PWD/.venv PATH=$PWD/.venv/bin:$PATH .venv/bin/pyright --verifytypes hya --ignoreexternal`.
+  The environment must be activated (set `VIRTUAL_ENV` and `PATH` as above): without it pyright does
+  not find the package and reports a false result (`No py.typed file found`, 0 %). The score must
+  be 100 %. Fix the issues raised by the checkers.
   Ignoring an issue (`type: ignore`, `pyright: ignore`, a cast that hides the problem) is not
   fixing it.
 - Run the unit tests of the modules you changed (for example

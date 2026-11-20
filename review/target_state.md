@@ -1,6 +1,6 @@
 # hya: target state and the changes to reach it
 
-This document proposes a target state for the `hya` package (v0.5 → v0.6, breaking changes
+This document proposes a target state for the `hya` package (0.4.0 → 0.5.0, breaking changes
 accepted) and a plan of small pull requests to reach it. The aim: **one registry, one
 registration rule, thin resolvers, nothing heavy at import time**.
 
@@ -19,11 +19,17 @@ code).
 3. **Follow `CLAUDE.md`.** Lazy optional imports, `from __future__ import annotations` and
    `__all__` in every module, keyword-only options, Google docstrings with doctests, one
    behaviour per test, 100% coverage, patched tests backed by integration tests.
-4. **OmegaConf range stays `>=2.2,<3.0`.** CI tests 2.2.3, 2.3.1 and 2.4.0
-   (`dev/config/package_versions.json`), and Hydra users are often pinned below 2.4
-   **[reading]**. Nothing in the target may need a 2.4-only API without a fallback.
-5. **Optional libraries** (`braceexpand`, `numpy`, `torch`) stay optional. Missing package ⇒
-   the resolver is not registered.
+4. **OmegaConf requires `>=2.4,<3.0`** (maintainer decision). The target uses the 2.4 API
+   (`OmegaConf.register_resolver`) with no compatibility shim, and `dev/config/package_versions.json`
+   keeps only the 2.4 versions. Consequence: users must have a Hydra release that accepts
+   OmegaConf 2.4 (`hydra-core` 1.3 declares `<2.4` **[reading, to verify]**); say so in the
+   release notes.
+5. **Optional libraries** (`braceexpand`, `numpy`, `torch`) stay optional and are managed as in
+   `coola`: `is_*_available` / `check_*` in `hya.imports`, a guarded import with a
+   `hya.utils.fallback` module in the module that uses the library, and **lazy registration** of
+   the optional resolvers (section 3.4). Missing package ⇒ the resolver is not registered.
+6. **Release.** The next stable release is 0.5.0 (`pyproject.toml` is at `0.5.0a0`; the last
+   release is 0.4.0). The request said "0.0.5"; read as a typo, to confirm.
 
 ---
 
@@ -35,13 +41,13 @@ Where `main` violates one, section 2 says so.
 | #   | Property                    | Statement                                                                                                                                                               |
 | --- | --------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | P1  | **Import is enough**        | `import hya` registers every available default resolver with OmegaConf. No other call is needed.                                                                        |
-| P2  | **Cheap import**            | `import hya` imports neither `numpy`, `torch` nor `braceexpand`, and emits no warning. Optional packages are imported on the first call of their resolver.              |
+| P2  | **Cheap import**            | `import hya` imports neither `numpy`, `torch` nor `braceexpand`, and emits no warning. The module of an optional resolver is imported on the first call of that resolver.  |
 | P3  | **Namespaced**              | Every built-in key starts with `hya.`. Optional ones are grouped (`hya.np.*`, `hya.torch.*`). Nothing is registered outside this namespace.                             |
 | P4  | **Thin resolvers**          | A resolver is a stdlib function or a function of a few lines with one documented behaviour. No hidden state, no I/O beyond what its name says (`hya.path` touches the file system).     |
 | P5  | **Pure**                    | A resolver never modifies its arguments. Interpolating a config node into a resolver cannot change the config.                                                           |
 | P6  | **Deterministic output**    | Same arguments ⇒ same output, including inside error messages (sorted, no set order).                                                                                   |
 | P7  | **Explicit registry**       | A `ResolverRegistry` is a plain key → callable map. `register` adds, `register_resolvers` publishes to OmegaConf. Registries are independent of each other.              |
-| P8  | **Registry wins**           | `register_resolvers()` is idempotent and always installs the registry's callable, so overriding a key (`exist_ok=True`) takes effect. Calling it twice changes nothing.   |
+| P8  | **Replace is explicit**     | `register_resolvers()` is idempotent. It never silently keeps a stale resolver: a key that changed since it was published, or that another source registered, is skipped with a warning unless `replace=True`. |
 | P9  | **One default registry**    | `get_default_registry()` returns one process-wide registry holding the built-in resolvers. Users extend it or create their own registry.                                  |
 | P10 | **Errors are OmegaConf's**  | A failing resolver surfaces as `InterpolationResolutionError` with the original error as cause. `hya` adds no wrapper of its own. A missing optional package says how to install it. |
 | P11 | **Any value out**           | A resolver may return any Python object (`Path`, `ndarray`, `Tensor`, `dtype`, list). Such values are for use in code and are not meant for `OmegaConf.to_yaml`.        |
@@ -79,8 +85,9 @@ a global dict); caching of resolver outputs (OmegaConf default: none); support o
 - **D1. `import hya` is slow [verified].** 0.59 s, of which 0.52 s is `import torch`.
   `hya.torch` and `hya.numpy` import their library at module level when it is installed
   (`if TYPE_CHECKING or is_torch_available(): import torch`), and `hya.default` imports those
-  modules. Violates P2 and the lazy-import rule of `CLAUDE.md`. The `hya.utils.fallback`
-  package (5 files, 3 test files) exists only to make this eager import type-check.
+  modules. Violates P2. `coola` has the same guarded import in its modules but never imports
+  them at `import coola`, because its registry registers optional modules lazily; `hya` should do
+  the same (section 3.4).
 - **D2. `import hya` emits one warning per resolver [verified].** OmegaConf 2.4 deprecates
   `register_new_resolver` (`UserWarning`, from `registry.py:143`). Three more warnings say
   "cannot resolve annotations for runtime validation" for `hya.iter_join`, `hya.braceexpand` and
@@ -141,16 +148,15 @@ src/hya/
 ├── registry.py       # ResolverRegistry
 ├── default.py        # get_default_registry (+ the table of built-in resolvers)
 ├── resolvers.py      # only resolvers with hya-specific behaviour (add, mul, ceildiv, ...)
-├── braceexpand.py    # braceexpand_resolver (lazy import)
-├── numpy.py          # to_array_resolver (lazy import)
-├── torch.py          # to_tensor_resolver, torch_dtype_resolver (lazy import)
+├── braceexpand.py    # braceexpand_resolver (guarded import + fallback, as today)
+├── numpy.py          # to_array_resolver (guarded import + fallback, as today)
+├── torch.py          # to_tensor_resolver, torch_dtype_resolver (guarded import + fallback)
 ├── imports.py        # check_*/is_*_available (unchanged API)
-└── testing.py        # pytest markers (unchanged)
+├── testing.py        # pytest markers (unchanged)
+└── utils/fallback/   # fake modules for the guarded imports (unchanged)
 ```
 
-Removed: `hya/utils/` (the `fallback` package; `utils/__init__` is an empty docstring) and its
-tests. `CLAUDE.md` is updated: the optional-library rule becomes "imported lazily with
-`importlib.import_module` after `check_*()`; no fallback module".
+Nothing is removed from `hya/utils/`. `CLAUDE.md` needs no change.
 
 ### 3.2 `ResolverRegistry`
 
@@ -166,35 +172,51 @@ class ResolverRegistry:
 
     def register(self, key: str, *, exist_ok: bool = False) -> Callable[[F], F]: ...
 
-    def register_resolvers(self) -> None:
-        """Publish every resolver of the registry to OmegaConf, replacing existing ones."""
+    def register_lazy(self, key: str, target: str, *, exist_ok: bool = False) -> None:
+        """Register ``"module:function"``; the module is imported on the first call."""
+
+    def register_resolvers(self, *, replace: bool = False) -> None:
+        """Publish the resolvers of the registry to OmegaConf."""
 ```
 
 Changes:
 
 - `exist_ok` is keyword-only (P13). `state` is a read-only view; the guide stops showing
   mutation through it.
-- `register_resolvers` always installs the registry's callable (P8):
+- `register_resolvers(*, replace=False)` (decision D2, alternative chosen). The registry
+  remembers what it published (`_published: dict[str, Callable]`):
 
   ```python
-  def register_resolvers(self) -> None:
+  def register_resolvers(self, *, replace: bool = False) -> None:
       for key, resolver in self._state.items():
-          _publish(key, resolver)
-
-
-  def _publish(key: str, resolver: Callable[..., Any]) -> None:
-      """Install one resolver in OmegaConf, replacing any previous one."""
-      if hasattr(OmegaConf, "register_resolver"):  # OmegaConf >= 2.4
-          OmegaConf.register_resolver(key, resolver, replace=True, annotation_validation="off")
-      else:
-          OmegaConf.register_new_resolver(key, resolver, replace=True)
+          if self._published.get(key) is resolver:
+              continue  # already published, nothing to do: calling twice changes nothing
+          if OmegaConf.has_resolver(key) and not replace:
+              warnings.warn(
+                  f"A resolver is already registered in OmegaConf for '{key}': not replaced. "
+                  "Use register_resolvers(replace=True) to replace it.",
+                  stacklevel=2,
+              )
+              continue
+          OmegaConf.register_resolver(
+              key, resolver, replace=replace, annotation_validation="off"
+          )
+          self._published[key] = resolver
   ```
 
-  One private function hides the 2.4 API change. `annotation_validation="off"` fixes D2: the
-  annotations of `hya` resolvers are documentation for readers and type checkers (they use
-  `TYPE_CHECKING` imports on purpose), not a runtime contract. `replace=True` exists in
-  OmegaConf 2.2 and 2.3 **[reading, to confirm in the CI matrix]**. OmegaConf's per-config cache of
-  already-resolved nodes is not cleared; document it.
+  - Calling it twice is silent (idempotent). After `import hya`, the guide's custom-resolver
+    example (`registry.register("double")` then `registry.register_resolvers()`) is silent: the
+    `hya.*` keys are unchanged and already published.
+  - Overriding a built-in (`register("hya.add", exist_ok=True)`) now **warns** instead of being
+    ignored (B2), and `register_resolvers(replace=True)` makes it take effect.
+  - A key registered in OmegaConf by something else (another registry, user code) is not
+    overwritten unless `replace=True`.
+  - `annotation_validation="off"` fixes D2: the annotations of `hya` resolvers are documentation
+    for readers and type checkers (they use `TYPE_CHECKING` imports on purpose), not a runtime
+    contract.
+  - No shim: OmegaConf `>=2.4` is required (constraint 4), so `register_new_resolver` (deprecated)
+    is not used. OmegaConf's per-config cache of already-resolved nodes is not cleared by
+    `replace=True` (`OmegaConf.clear_cache(cfg)`); document it.
 - The constructor keeps copying its input, so `ResolverRegistry(table)` is how `default.py`
   builds the default registry.
 
@@ -207,23 +229,26 @@ _BUILTINS: dict[str, Callable[..., Any]] = {
     ...
 }
 
+# (key, "module:function", required package)
+_OPTIONAL: tuple[tuple[str, str, Callable[[], bool]], ...] = (
+    ("hya.braceexpand", "hya.braceexpand:braceexpand_resolver", is_braceexpand_available),
+    ("hya.np.array", "hya.numpy:to_array_resolver", is_numpy_available),
+    ("hya.torch.tensor", "hya.torch:to_tensor_resolver", is_torch_available),
+    ("hya.torch.dtype", "hya.torch:torch_dtype_resolver", is_torch_available),
+)
+
 
 @cache
 def get_default_registry() -> ResolverRegistry:
     registry = ResolverRegistry(_BUILTINS)
-    if is_braceexpand_available():
-        registry.register("hya.braceexpand")(braceexpand_resolver)
-    if is_numpy_available():
-        registry.register("hya.np.array")(to_array_resolver)
-    if is_torch_available():
-        registry.register("hya.torch.tensor")(to_tensor_resolver)
-        registry.register("hya.torch.dtype")(torch_dtype_resolver)
+    for key, target, is_available in _OPTIONAL:
+        if is_available():
+            registry.register_lazy(key, target)
     return registry
 ```
 
-`hya/numpy.py`, `hya/torch.py` and `hya/braceexpand.py` no longer import their library at module
-level, so `default.py` imports them unconditionally at the top: no local imports, no `noqa`, no
-`pragma: no cover`. The side effect moves from `default.py` to `hya/__init__.py`:
+`default.py` no longer imports `hya.braceexpand`, `hya.numpy` or `hya.torch`: no local imports, no
+`noqa`, no `pragma: no cover`. The side effect moves from `default.py` to `hya/__init__.py`:
 
 ```python
 from hya.default import get_default_registry
@@ -232,21 +257,43 @@ from hya.registry import ResolverRegistry
 get_default_registry().register_resolvers()
 ```
 
-### 3.4 Lazy optional imports (P2)
+### 3.4 Lazy registration of the optional resolvers (P2), as in coola
+
+`coola` registers its optional testers as `"module:function"` strings and imports the module only
+when it is first needed (`register_lazy`), after checking the package with `find_spec`
+(`package_available`). `hya` does the same. The modules `hya.numpy`, `hya.torch` and
+`hya.braceexpand` keep their guarded import and fallback:
 
 ```python
-from importlib import import_module
-
-
-def to_tensor_resolver(data: Any) -> torch.Tensor:
-    check_torch()
-    return import_module("torch").tensor(data)
+if TYPE_CHECKING or is_torch_available():
+    import torch
+else:  # pragma: no cover
+    from hya.utils.fallback.torch import torch
 ```
 
-`torch` is imported under `TYPE_CHECKING` for annotations only. `check_torch()` keeps the
-install hint when someone calls the function directly without the package. `import_module` is
-not a lint or type-check workaround: it is the lazy import. Cost: the first torch resolver call
-pays the 0.5 s import instead of every `import hya`.
+`register_lazy` stores a small closure, because OmegaConf needs a callable at registration time:
+
+```python
+def register_lazy(self, key: str, target: str, *, exist_ok: bool = False) -> None:
+    module_name, _, function_name = target.partition(":")
+
+    def resolver(*args: Any) -> Any:
+        return getattr(import_module(module_name), function_name)(*args)
+
+    self.register(key, exist_ok=exist_ok)(resolver)
+```
+
+- The first call of `${hya.torch.tensor:...}` imports `hya.torch` and so torch (0.5 s, once);
+  `import hya` does not.
+- `register_lazy` needs its own tests (the target string is split, the module is not imported at
+  registration, the first call imports it, a bad target raises on the call), and an integration
+  test that resolves a real `${hya.np.array:[1,2]}` through the lazy callable. To verify in PR 4:
+  OmegaConf accepts a `*args` closure (it only inspects the parameter names `_parent_`, `_root_`
+  and `_node_` **[reading]**).
+- The resolver functions in `hya.numpy`, `hya.torch` and `hya.braceexpand` keep `check_*()` for
+  direct calls without the package.
+- Alternative not taken: `lazy_exports` (PEP 562) as in `coola.utils.imports.lazy`. `hya` has
+  no lazy public names; its only lazy items are resolvers.
 
 ### 3.5 Resolvers
 
@@ -310,16 +357,15 @@ written. Tilde needs quotes in an interpolation: `${hya.path:"~/data"}` (documen
 | ---------------------- | ---- | ------ | ------------------------------------------------- |
 | `resolvers.py`         | 573  | ~130   | 14 wrappers removed, `to_path` merged             |
 | `default.py`           | 157  | ~70    | table + three `if`                                |
-| `registry.py`          | 143  | ~130   | `_publish` helper, read-only state                |
-| `braceexpand.py`       | 51   | ~35    | lazy import                                       |
-| `numpy.py`             | 48   | ~35    | lazy import                                       |
-| `torch.py`             | 117  | ~90    | lazy import, sorted names                         |
-| `utils/` (5 files)     | ~45  | 0      | removed                                           |
+| `registry.py`          | 143  | ~170   | `register_lazy`, `_published`, read-only state    |
+| `braceexpand.py`       | 51   | ~45    | list result                                       |
+| `numpy.py`             | 48   | ~48    | unchanged                                         |
+| `torch.py`             | 117  | ~100   | sorted names                                      |
 | `imports.py`           | 142  | ~142   | unchanged (D7 optional)                           |
-| **`src` total**        | 1334 | ~720   |                                                   |
+| **`src` total**        | 1334 | ~770   |                                                   |
 
 Unit tests shrink by the same logic: 48 tests of stdlib wrappers in `tests/unit/test_resolvers.py`
-become about 15 (one per remaining function and edge), and `tests/unit/utils/` disappears.
+become about 15 (one per remaining function and edge).
 
 ---
 
@@ -339,7 +385,7 @@ from hya.testing import numpy_available, ...        # unchanged
 Resolver functions stay importable from `hya.resolvers`, `hya.numpy`, `hya.torch`,
 `hya.braceexpand` for direct calls. Removed: `hya.resolvers.{asinh,exp,floordiv,len,log,log10,max,
 min,neg,pow,sinh,sqrt,sub,truediv}_resolver`, `hya.resolvers.to_path_resolver`,
-`hya.utils.fallback.*`, `hya.torch.get_dtypes`.
+`hya.torch.get_dtypes`. New: `ResolverRegistry.register_lazy`, `register_resolvers(*, replace=False)`.
 
 ---
 
@@ -349,13 +395,14 @@ min,neg,pow,sinh,sqrt,sub,truediv}_resolver`, `hya.resolvers.to_path_resolver`,
 | --------------------------------------------------- | ------------------------------------------------------------- | -------------------------------------------------------------- |
 | `hya.add` does not modify its arguments (B1)        | `conf.x` changed when read through `${hya.add:${x},[3]}`      | `conf.x` unchanged                                             |
 | `hya.mul` on a list and an int                      | repeats the list (in place)                                   | `TypeError` from OmegaConf (`ListConfig` has no `*`). Numbers only |
-| `register_resolvers()` replaces                     | existing key skipped                                          | registry's resolver installed                                  |
+| `register_resolvers(*, replace=False)`              | existing key skipped silently                                 | skipped with a warning; `replace=True` replaces                |
 | `register(key, exist_ok)`                           | positional allowed                                            | `exist_ok` keyword-only                                        |
 | `registry.state`                                    | live `dict`                                                   | read-only mapping                                              |
 | `hya.to_path` removed                               | URL parsed for every input                                    | use `hya.path` (decodes `file://` only)                        |
 | `hya.braceexpand`                                   | generator                                                     | `list[str]`                                                    |
 | `hya.torch.dtype` error                             | unordered set of dtypes                                       | sorted names                                                   |
 | `import hya`                                        | 0.59 s, imports torch/numpy, emits warnings                   | no numpy/torch import, no warning                              |
+| OmegaConf requirement                               | `>=2.2,<3.0`                                                  | `>=2.4,<3.0`                                                   |
 | `hya.max:1` / `hya.sqrt:...` messages               | hya wrapper's error                                           | stdlib's error                                                 |
 
 ---
@@ -368,11 +415,10 @@ min,neg,pow,sinh,sqrt,sub,truediv}_resolver`, `hya.resolvers.to_path_resolver`,
 - Add a short **Properties** page (section 1) to the user guide, and link it from `index.md`.
 - Fix U1 to U6. Add the OmegaConf 2.4 note (annotation validation is off) and the cache note
   (`OmegaConf.clear_cache`) to the registry section.
-- Add `docs/migration/v0.5_to_v0.6.md` generated from section 5.
+- Add `docs/migration/v0.4_to_v0.5.md` generated from section 5.
 - `docs/refs/`: keep `registry.md` and `resolvers.md`; add `hya` (top-level exports) and
   remove nothing else.
 - Update `README.md` ("Available Resolvers" count, example of `register_resolvers`).
-- Update `CLAUDE.md` (lazy-import rule, no fallback package) in the PR that removes the fallbacks.
 
 ---
 
@@ -385,12 +431,12 @@ branch from `main`.
 | - | --------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- | -------- |
 | 1 | `docs/fix-user-guide`                   | Fix U2 to U6 (what is false today). Mark the override example as "fixed in the next PR" or hold U1 for PR 3.                      | no       |
 | 2 | `bugfix/add-mul-no-mutation`            | B1: `add`/`mul` with `functools.reduce`; regression test (`conf.x` unchanged), checked to fail without the fix.                    | yes (list `*`) |
-| 3 | `bugfix/register-resolvers-replace`     | B2 and D2: `_publish` helper, `replace=True`, `annotation_validation="off"` when available, keyword-only `exist_ok`, read-only `state`, export `ResolverRegistry`. Integration test of an override and `-W error` import. | yes |
-| 4 | `perf/lazy-optional-imports`            | D1, D5: `import_module` in `numpy.py`, `torch.py`, `braceexpand.py`; table-based `default.py`; registration moved to `__init__`; delete `hya/utils` and its tests; update `CLAUDE.md`. | no (internal) |
+| 3 | `bugfix/register-resolvers-replace`     | B2 and D2: require `omegaconf>=2.4` (`pyproject.toml`, `dev/config/package_versions.json`, README table), `OmegaConf.register_resolver` with `annotation_validation="off"`, `register_resolvers(*, replace=False)` with `_published` and the warning, keyword-only `exist_ok`, read-only `state`, export `ResolverRegistry`. Integration test of an override and `-W error` import. | yes |
+| 4 | `perf/lazy-optional-resolvers`          | D1, D5: `register_lazy`; table-based `default.py` that no longer imports the optional modules; registration moved to `__init__`. The optional modules keep their guarded imports and fallbacks. | no (internal) |
 | 5 | `refactor/stdlib-resolvers`             | D3: register stdlib callables, delete 14 wrappers and their tests, rewrite `resolvers.md` table, add the integration table test. | yes (imports of removed functions) |
 | 6 | `refactor/merge-path-resolvers`         | B3: `hya.path` handles `file:`; remove `hya.to_path`.                                                                              | yes      |
 | 7 | `feat/braceexpand-list`                 | D4 and B4: list result, sorted dtype names, private `_dtype_names`.                                                                | yes      |
-| 8 | `docs/properties-and-migration`         | Properties page, migration page, README, final pass on the guide. Version bump to `0.6.0a0`.                                       | no       |
+| 8 | `docs/properties-and-migration`         | Properties page, migration page, README, final pass on the guide. Release as `0.5.0` (confirm the number).                                       | no       |
 
 Each PR updates the docs it touches and runs: `ruff check`, `ruff format`, `inv types.check`,
 `pyright --verifytypes hya --ignoreexternal`, the unit tests of the changed modules,
@@ -409,9 +455,9 @@ Each PR updates the docs it touches and runs: `ruff check`, `ruff format`, `inv 
 - **Import** (subprocess, `python -X importtime` not needed): `import hya` leaves `numpy`,
   `torch` and `braceexpand` out of `sys.modules` (P2) and `python -W error -c "import hya"`
   exits 0 (D2).
-- **Override** (P8): register `hya.add` with `exist_ok=True`, call `register_resolvers()`, check
-  the new resolver is used; call it twice, check nothing changes. Run on OmegaConf 2.2, 2.3 and 2.4
-  (CI matrix `ci-test-deps`).
+- **Override** (P8): register `hya.add` with `exist_ok=True`; `register_resolvers()` warns and keeps
+  the old resolver (`pytest.warns` with `match`); `register_resolvers(replace=True)` installs the
+  new one; calling it twice is silent.
 - **Purity** (P5): `${hya.add:${x},[3]}` leaves `x` unchanged.
 - **Optional packages**: with the package, resolvers work; without it (`*_not_available`
   markers) the key is absent and the direct function call raises `RuntimeError` with the install
@@ -447,11 +493,11 @@ Each PR updates the docs it touches and runs: `ruff check`, `ruff format`, `inv 
 | ID  | Question                                                        | Recommendation                                                                                                           | Alternative                                                         |
 | --- | --------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------- |
 | D1  | Register stdlib callables directly (section 3.5)?               | **Yes.** About 300 fewer lines, no copy of stdlib docs, no annotation warnings.                                          | Keep one wrapper per resolver, with docstring and doctest in `src`. |
-| D2  | `register_resolvers` replaces existing OmegaConf resolvers?     | **Yes.** The registry is the source of truth; predictable and idempotent (P8).                                           | Add `replace: bool` keyword defaulting to `False`, with a warning.  |
+| D2  | `register_resolvers` replaces existing OmegaConf resolvers?     | **Decided: alternative.** `replace: bool` keyword, default `False`, with a warning when a key is skipped (section 3.2).  | Always replace; simpler, but overwrites resolvers of other sources. |
 | D3  | `hya.braceexpand` returns a list?                               | **Yes** (re-iterable, indexable, typed like the other list resolvers).                                                   | Keep the generator for huge expansions, documented as one-shot.     |
 | D4  | Drop `hya.to_path` and fold `file:` into `hya.path`?            | **Yes** (B3).                                                                                                            | Keep both, but make `to_path` parse `file:` only.                   |
-| D5  | Lazy `import_module` instead of guarded imports + fallbacks?    | **Yes**; update `CLAUDE.md`. Fixes 0.5 s of import time.                                                                 | Keep guarded imports and the `fallback` package; accept the cost.   |
-| D6  | Keep `omegaconf >=2.2,<3.0` with the `_publish` shim?           | **Yes** (constraint 4).                                                                                                  | Require `>=2.4` and drop the shim; may conflict with Hydra pins.    |
+| D5  | How are optional dependencies managed?                          | **Decided: as in coola**: guarded imports + fallbacks in the modules, lazy registration of the optional resolvers (3.4). | Lazy `import_module` in each resolver; drops the fallback package.  |
+| D6  | OmegaConf requirement?                                          | **Decided: `>=2.4,<3.0`**, no shim (constraint 4).                                                                       | Keep `>=2.2` with a `register_new_resolver` fallback.               |
 | D7  | `annotation_validation="off"` for all registered resolvers?     | **Yes.** `hya` annotations are not a runtime contract; users' own resolvers in the default registry are published the same way. | Per-key option on `register`; more API for little value.     |
 | D8  | Keep import-time registration (P1)?                             | **Yes.** It is the documented way (`import hya`), and Hydra users rely on it.                                            | Explicit `hya.register()`; cleaner, but breaks every user config.   |
 | D9  | `hya.mul` stops repeating lists?                                | **Yes.** In-place repetition of a config list is the same bug as B1.                                                     | Special-case `ListConfig * int` with `list(x) * n`.                 |
@@ -469,5 +515,6 @@ Each PR updates the docs it touches and runs: `ruff check`, `ruff format`, `inv 
   (`hya.torch.tensor:[1,2],dtype=...`). OmegaConf resolvers take positional arguments only.
 - Auto-discovery of resolvers through entry points (a plugin group), as in other packages. The
   registry already lets a project register its own resolvers in two lines.
-- The GitHub Actions workflows: aligned with `coola` in #751 and unchanged here, except that PR 4
-  must keep the "required dependencies only" CI job green.
+- The GitHub Actions workflows: aligned with `coola` in #751 and unchanged here. PR 3 edits
+  `dev/config/package_versions.json` (OmegaConf versions) and PR 4 must keep the "required
+  dependencies only" CI job green.

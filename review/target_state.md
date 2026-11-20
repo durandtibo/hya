@@ -427,16 +427,16 @@ min,neg,pow,sinh,sqrt,sub,truediv}_resolver`, `hya.resolvers.to_path_resolver`,
 One branch and one PR per row, branch names per `CLAUDE.md`. Rows 3 to 5 are stacked; the others
 branch from `main`.
 
-| # | Branch                                  | Content                                                                                                                           | Breaking |
-| - | --------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- | -------- |
-| 1 | `docs/fix-user-guide`                   | Fix U2 to U6 (what is false today). Mark the override example as "fixed in the next PR" or hold U1 for PR 3.                      | no       |
-| 2 | `bugfix/add-mul-no-mutation`            | B1: `add`/`mul` with `functools.reduce`; regression test (`conf.x` unchanged), checked to fail without the fix.                    | yes (list `*`) |
-| 3 | `bugfix/register-resolvers-replace`     | B2 and D2: require `omegaconf>=2.4` (`pyproject.toml`, `dev/config/package_versions.json`, README table), `OmegaConf.register_resolver` with `annotation_validation="off"`, `register_resolvers(*, replace=False)` with `_published` and the warning, keyword-only `exist_ok`, read-only `state`, export `ResolverRegistry`. Integration test of an override and `-W error` import. | yes |
-| 4 | `perf/lazy-optional-resolvers`          | D1, D5: `register_lazy`; table-based `default.py` that no longer imports the optional modules; registration moved to `__init__`. The optional modules keep their guarded imports and fallbacks. | no (internal) |
-| 5 | `refactor/stdlib-resolvers`             | D3: register stdlib callables, delete 14 wrappers and their tests, rewrite `resolvers.md` table, add the integration table test. | yes (imports of removed functions) |
-| 6 | `refactor/merge-path-resolvers`         | B3: `hya.path` handles `file:`; remove `hya.to_path`.                                                                              | yes      |
-| 7 | `feat/braceexpand-list`                 | D4 and B4: list result, sorted dtype names, private `_dtype_names`.                                                                | yes      |
-| 8 | `docs/properties-and-migration`         | Properties page, migration page, README, final pass on the guide. Release as `0.5.0` (confirm the number).                                       | no       |
+| # | PR   | Branch                                  | Content                                                                                                                           | Breaking |
+| - | ---- | --------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- | -------- |
+| 1 | #754 | `docs/fix-user-guide`                   | Fix U2 to U6 (what is false today). Mark the override example as "fixed in the next PR" or hold U1 for PR 3.                      | no       |
+| 2 | #755 | `bugfix/add-mul-no-mutation`            | B1: `add`/`mul` with `functools.reduce`; regression test (`conf.x` unchanged), checked to fail without the fix.                    | yes (list `*`) |
+| 3 | #756 | `bugfix/register-resolvers-replace`     | B2 and D2: require `omegaconf>=2.4` (`pyproject.toml`, `dev/config/package_versions.json`, README table), `OmegaConf.register_resolver` with `annotation_validation="off"`, `register_resolvers(*, replace=False)` with `_published` and the warning, keyword-only `exist_ok`, read-only `state`, export `ResolverRegistry`. Integration test of an override and `-W error` import. | yes |
+| 4 | #757 | `perf/lazy-optional-resolvers`          | D1, D5: `register_lazy`; table-based `default.py` that no longer imports the optional modules; registration moved to `__init__`. The optional modules keep their guarded imports and fallbacks. | no (internal) |
+| 5 | #758 | `refactor/stdlib-resolvers`             | D3: register stdlib callables, delete 14 wrappers and their tests, rewrite `resolvers.md` table, add the integration table test. | yes (imports of removed functions) |
+| 6 | #759 | `refactor/merge-path-resolvers`         | B3: `hya.path` handles `file:`; remove `hya.to_path`.                                                                              | yes      |
+| 7 | #760 | `feat/braceexpand-list`                 | D4 and B4: list result, sorted dtype names, private `_dtype_names`.                                                                | yes      |
+| 8 | #761 | `docs/properties-and-migration`         | Properties page, migration page, README, final pass on the guide. Release as `0.5.0` (confirm the number).                                       | no       |
 
 Each PR updates the docs it touches and runs: `ruff check`, `ruff format`, `inv types.check`,
 `pyright --verifytypes hya --ignoreexternal`, the unit tests of the changed modules,

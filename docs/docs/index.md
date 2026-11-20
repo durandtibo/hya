@@ -158,7 +158,9 @@ print(conf.result)  # Output: 15
   - PyTorch: `torch.tensor`, `torch.dtype`
   - Braceexpand: `braceexpand`
 
-See the [Resolvers](resolvers.md) page for complete documentation of all resolvers.
+See the [Resolvers](resolvers.md) page for complete documentation of all resolvers, and the
+[Properties](properties.md) page for the rules `hya` guarantees. If you upgrade from 0.4, read
+the [migration guide](migration/v0.4_to_v0.5.md).
 
 ## API stability
 

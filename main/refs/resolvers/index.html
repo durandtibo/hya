@@ -1633,12 +1633,14 @@
 
 
 <a href="#hya.resolvers.add_resolver" class="headerlink" title="Permanent link">&para;</a></h3>
-<div class="doc-signature highlight"><pre><span></span><code><span class="nf">add_resolver</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="n"><span title="typing.Any">Any</span></span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n"><span title="typing.Any">Any</span></span>
+<div class="doc-signature highlight"><pre><span></span><code><span class="nf">add_resolver</span><span class="p">(</span><span class="n">first</span><span class="p">:</span> <span class="n"><span title="typing.Any">Any</span></span><span class="p">,</span> <span class="o">*</span><span class="n">others</span><span class="p">:</span> <span class="n"><span title="typing.Any">Any</span></span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n"><span title="typing.Any">Any</span></span>
 </code></pre></div>
 
     <div class="doc doc-contents ">
 
         <p>Return the addition of several objects.</p>
+<p>The arguments are not modified: <code>first</code> is never extended in place,
+so interpolating a list of the configuration does not change it.</p>
 
 
 <p><span class="doc-section-title">Parameters:</span></p>
@@ -1654,14 +1656,30 @@
       <tbody>
           <tr class="doc-section-item">
             <td>
-                <code>*args</code>
+                <code>first</code>
             </td>
             <td>
                   <code><span title="typing.Any">Any</span></code>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>The values to add.</p>
+                <p>The first value to add.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>*others</code>
+            </td>
+            <td>
+                  <code><span title="typing.Any">Any</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The other values to add.</p>
               </div>
             </td>
             <td>
@@ -1687,7 +1705,7 @@
             </td>
             <td>
               <div class="doc-md-description">
-                <p><code>arg1 + arg2 + arg3 + ... + argN</code></p>
+                <p><code>first + other1 + other2 + ... + otherN</code></p>
               </div>
             </td>
           </tr>
@@ -1705,6 +1723,11 @@
 <span class="gp">&gt;&gt;&gt; </span><span class="n">conf</span> <span class="o">=</span> <span class="n">OmegaConf</span><span class="o">.</span><span class="n">create</span><span class="p">({</span><span class="s2">"key"</span><span class="p">:</span> <span class="s2">"${hya.add:1,2,3,4}"</span><span class="p">})</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">conf</span><span class="o">.</span><span class="n">key</span>
 <span class="go">10</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">conf</span> <span class="o">=</span> <span class="n">OmegaConf</span><span class="o">.</span><span class="n">create</span><span class="p">({</span><span class="s2">"x"</span><span class="p">:</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">],</span> <span class="s2">"key"</span><span class="p">:</span> <span class="s2">"${hya.add:$</span><span class="si">{x}</span><span class="s2">,[3]}"</span><span class="p">})</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">conf</span><span class="o">.</span><span class="n">key</span>
+<span class="go">[1, 2, 3]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">conf</span><span class="o">.</span><span class="n">x</span>
+<span class="go">[1, 2]</span>
 </code></pre></div>
 </details>
 
@@ -2657,12 +2680,15 @@ Can be any string including empty string, space, comma, etc.</p>
 
 
 <a href="#hya.resolvers.mul_resolver" class="headerlink" title="Permanent link">&para;</a></h3>
-<div class="doc-signature highlight"><pre><span></span><code><span class="nf">mul_resolver</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="n"><span title="typing.Any">Any</span></span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n"><span title="typing.Any">Any</span></span>
+<div class="doc-signature highlight"><pre><span></span><code><span class="nf">mul_resolver</span><span class="p">(</span><span class="n">first</span><span class="p">:</span> <span class="n"><span title="typing.Any">Any</span></span><span class="p">,</span> <span class="o">*</span><span class="n">others</span><span class="p">:</span> <span class="n"><span title="typing.Any">Any</span></span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n"><span title="typing.Any">Any</span></span>
 </code></pre></div>
 
     <div class="doc doc-contents ">
 
         <p>Return the multiplication of several objects.</p>
+<p>The arguments are not modified. The values are meant to be numbers: the
+repetition of a list of the configuration (<code>[1, 2] * 2</code>) is not
+supported.</p>
 
 
 <p><span class="doc-section-title">Parameters:</span></p>
@@ -2678,14 +2704,30 @@ Can be any string including empty string, space, comma, etc.</p>
       <tbody>
           <tr class="doc-section-item">
             <td>
-                <code>*args</code>
+                <code>first</code>
             </td>
             <td>
                   <code><span title="typing.Any">Any</span></code>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>The values to multiply.</p>
+                <p>The first value to multiply.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>*others</code>
+            </td>
+            <td>
+                  <code><span title="typing.Any">Any</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The other values to multiply.</p>
               </div>
             </td>
             <td>
@@ -2711,7 +2753,7 @@ Can be any string including empty string, space, comma, etc.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p><code>arg1 * arg2 * arg3 * ... * argN</code></p>
+                <p><code>first * other1 * other2 * ... * otherN</code></p>
               </div>
             </td>
           </tr>
@@ -2906,20 +2948,22 @@ home directory expansion.</p>
 
 <details class="note" open>
   <summary>Note</summary>
-  <p>The tilde (~) expansion works when the path is passed as
-a regular string, but may not work correctly when used
-within OmegaConf interpolation syntax due to grammar
-restrictions. For paths with tilde, consider using
-direct Python code or configuration string values.</p>
+  <p>Within an OmegaConf interpolation, a path with a tilde (~)
+must be quoted (<code>${hya.path:"~/data"}</code>); unquoted, the
+interpolation is a grammar error.</p>
 </details>
 
 <details class="example" open>
   <summary>Example</summary>
-  <div class="highlight"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">hya</span>
+  <div class="highlight"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">hya</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">omegaconf</span><span class="w"> </span><span class="kn">import</span> <span class="n">OmegaConf</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">conf</span> <span class="o">=</span> <span class="n">OmegaConf</span><span class="o">.</span><span class="n">create</span><span class="p">({</span><span class="s2">"key"</span><span class="p">:</span> <span class="s2">"${hya.path:/my/path}"</span><span class="p">})</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">conf</span><span class="o">.</span><span class="n">key</span>
 <span class="go">PosixPath('/my/path')</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">conf</span> <span class="o">=</span> <span class="n">OmegaConf</span><span class="o">.</span><span class="n">create</span><span class="p">({</span><span class="s2">"key"</span><span class="p">:</span> <span class="s1">'${hya.path:"~/my/path"}'</span><span class="p">})</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">conf</span><span class="o">.</span><span class="n">key</span> <span class="o">==</span> <span class="n">Path</span><span class="p">(</span><span class="s2">"~/my/path"</span><span class="p">)</span><span class="o">.</span><span class="n">expanduser</span><span class="p">()</span><span class="o">.</span><span class="n">resolve</span><span class="p">()</span>
+<span class="go">True</span>
 </code></pre></div>
 </details>
 

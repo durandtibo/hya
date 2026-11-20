@@ -1855,6 +1855,9 @@
 
 <span class="w">  </span><span class="c1"># Use path resolver for proper Path objects</span>
 <span class="w">  </span><span class="nt">model_checkpoint</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">${hya.path:${paths.data_dir}/models/checkpoint.pth}</span>
+
+<span class="w">  </span><span class="c1"># A tilde must be quoted in an interpolation (unquoted, it is a grammar error)</span>
+<span class="w">  </span><span class="nt">home_dir</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">${hya.path:"~/data"}</span>
 </code></pre></div>
 <h3 id="mathematical-computations">Mathematical Computations<a class="headerlink" href="#mathematical-computations" title="Permanent link">&para;</a></h3>
 <p>Perform calculations in your configuration:</p>
@@ -1866,7 +1869,8 @@
 <span class="nt">training</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">total_steps</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">100000</span>
 <span class="w">  </span><span class="nt">warmup_ratio</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.1</span>
-<span class="w">  </span><span class="nt">warmup_steps</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">${hya.mul:${training.total_steps},${training.warmup_ratio}}</span><span class="w"> </span><span class="c1"># 10000</span>
+<span class="w">  </span><span class="c1"># 100000 * 0.1 is the float 10000.0: use ceildiv to get an integer</span>
+<span class="w">  </span><span class="nt">warmup_steps</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">${hya.ceildiv:${training.total_steps},10}</span><span class="w"> </span><span class="c1"># 10000</span>
 
 <span class="w">  </span><span class="c1"># Calculate batch size for distributed training</span>
 <span class="w">  </span><span class="nt">per_device_batch_size</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">16</span>
@@ -1959,15 +1963,18 @@
 <span class="c1"># total_hidden: 9216  # If you change hidden_size, this becomes incorrect</span>
 </code></pre></div>
 <h3 id="error-handling">Error Handling<a class="headerlink" href="#error-handling" title="Permanent link">&para;</a></h3>
-<p>When using optional resolvers, provide helpful error messages:</p>
+<p>An optional resolver is registered only when its package is installed. When the package is
+missing, the key is unknown to OmegaConf and the access raises
+<code>UnsupportedInterpolationType</code>. An error raised by a resolver is reported by OmegaConf as an
+<code>InterpolationResolutionError</code>:</p>
 <div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">hya</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">omegaconf</span><span class="w"> </span><span class="kn">import</span> <span class="n">OmegaConf</span><span class="p">,</span> <span class="n">errors</span>
 
 <span class="k">try</span><span class="p">:</span>
     <span class="n">conf</span> <span class="o">=</span> <span class="n">OmegaConf</span><span class="o">.</span><span class="n">create</span><span class="p">({</span><span class="s2">"tensor"</span><span class="p">:</span> <span class="s2">"${hya.torch.tensor:[1,2,3]}"</span><span class="p">})</span>
     <span class="nb">print</span><span class="p">(</span><span class="n">conf</span><span class="o">.</span><span class="n">tensor</span><span class="p">)</span>
-<span class="k">except</span> <span class="n">errors</span><span class="o">.</span><span class="n">InterpolationResolutionError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Error: PyTorch is required. Install with: pip install torch"</span><span class="p">)</span>
+<span class="k">except</span> <span class="n">errors</span><span class="o">.</span><span class="n">UnsupportedInterpolationType</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">"Error: PyTorch is required. Install with: pip install torch"</span><span class="p">)</span>
 </code></pre></div>
 <h3 id="type-safety">Type Safety<a class="headerlink" href="#type-safety" title="Permanent link">&para;</a></h3>
 <p>Use appropriate resolvers for type safety:</p>
@@ -1988,18 +1995,19 @@
 <span class="c1"># Only computed when accessed</span>
 <span class="n">result</span> <span class="o">=</span> <span class="n">conf</span><span class="o">.</span><span class="n">slow_computation</span>  <span class="c1"># Computed here</span>
 </code></pre></div>
-<p>Cache expensive computations:</p>
-<div class="highlight"><pre><span></span><code><span class="c1"># Good: Compute once, reuse</span>
-<span class="nt">model</span><span class="p">:</span>
+<p>OmegaConf does not cache the output of a resolver: every access of an interpolation calls the
+resolver again, even when several keys point to the same interpolation. Compute an expensive
+value once in Python and store it in the configuration if it is used many times:</p>
+<div class="highlight"><pre><span></span><code><span class="nt">model</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">vocab_size</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">50000</span>
 <span class="w">  </span><span class="nt">embedding_dim</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">512</span>
 <span class="w">  </span><span class="nt">total_embeddings</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">${hya.mul:${model.vocab_size},${model.embedding_dim}}</span>
 
 <span class="nt">layer1</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">input_size</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">${model.total_embeddings}</span><span class="w"> </span><span class="c1"># Reuses cached computation</span>
+<span class="w">  </span><span class="nt">input_size</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">${model.total_embeddings}</span><span class="w"> </span><span class="c1"># Calls hya.mul at each access</span>
 
 <span class="nt">layer2</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">input_size</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">${model.total_embeddings}</span><span class="w"> </span><span class="c1"># Reuses cached computation</span>
+<span class="w">  </span><span class="nt">input_size</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">${model.total_embeddings}</span><span class="w"> </span><span class="c1"># Calls hya.mul at each access</span>
 </code></pre></div>
 <h2 id="troubleshooting">Troubleshooting<a class="headerlink" href="#troubleshooting" title="Permanent link">&para;</a></h2>
 <h3 id="resolver-not-found">Resolver Not Found<a class="headerlink" href="#resolver-not-found" title="Permanent link">&para;</a></h3>
@@ -2009,7 +2017,10 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">omegaconf</span><span class="w"> </span><span class="kn">import</span> <span class="n">OmegaConf</span>
 </code></pre></div>
 <h3 id="optional-dependency-missing">Optional Dependency Missing<a class="headerlink" href="#optional-dependency-missing" title="Permanent link">&para;</a></h3>
-<p><strong>Error:</strong> <code>ImportError: braceexpand is required to use hya.braceexpand resolver</code></p>
+<p><strong>Error:</strong> <code>omegaconf.errors.UnsupportedInterpolationType: Unsupported interpolation type hya.braceexpand</code></p>
+<p>The optional resolvers (<code>hya.braceexpand</code>, <code>hya.np.array</code>, <code>hya.torch.*</code>) are registered only if
+their package is installed. Calling the resolver function directly without the package raises
+<code>RuntimeError: 'braceexpand' package is required but not installed</code>.</p>
 <p><strong>Solution:</strong> Install the required package:</p>
 <div class="highlight"><pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>braceexpand<span class="w">  </span><span class="c1"># or numpy, or torch</span>
 </code></pre></div>

@@ -16,6 +16,7 @@ import hashlib
 import logging
 import math
 import operator
+import os
 from functools import reduce
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
@@ -157,22 +158,30 @@ def mul_resolver(first: Any, *others: Any) -> Any:
     return reduce(operator.mul, others, first)
 
 
-def path_resolver(path: str) -> Path:
-    r"""Return a resolved path object from a string path or a file URL.
+def path_resolver(path: str | os.PathLike[str]) -> Path:
+    r"""Return a resolved path object from a path or a file URL.
 
-    This resolver converts a string to a ``pathlib.Path`` object: it
-    expands the user home directory (``~``) and resolves the path to an
-    absolute path. A string that starts with ``file:`` is read as a file
-    URL: the path of the URL is used, with its percent-encoding (for
-    example ``%20`` for a space) decoded. Any other string is a plain
-    path, written as is: ``?`` and ``%`` are not interpreted.
+    This resolver converts a string, or any path-like object (for example
+    a ``pathlib.Path`` stored in the configuration), to a ``pathlib.Path``
+    object: it expands the user home directory (``~``) and resolves the
+    path to an absolute path. A string that starts with ``file:`` (the
+    scheme is case-insensitive) is read as a file URL: the path of the URL
+    is used, with its percent-encoding (for example ``%20`` for a space)
+    decoded. Any other string is a plain path, written as is: ``?`` and
+    ``%`` are not interpreted.
 
     Args:
-        path: The target path as a string, or a ``file:`` URL.
+        path: The target path as a string or a path-like object, or a
+            ``file:`` URL.
 
     Returns:
         A fully resolved ``pathlib.Path`` object with expanded user
         directory and converted to absolute path.
+
+    Raises:
+        ValueError: If a ``file:`` URL has a host other than ``localhost``
+            (for example ``file://host/a``): the host would be dropped
+            silently.
 
     Note:
         Within an OmegaConf interpolation, a path with a tilde (~)
@@ -193,11 +202,19 @@ def path_resolver(path: str) -> Path:
         >>> conf = OmegaConf.create({"key": '${hya.path:"~/my/path"}'})
         >>> conf.key == Path("~/my/path").expanduser().resolve()
         True
+        >>> conf = OmegaConf.create({"key": "${hya.path:${hya.path:/my/path}}"})
+        >>> conf.key
+        PosixPath('/my/path')
 
         ```
     """
-    if path.startswith("file:"):
-        path = unquote(urlparse(path).path)
+    path = os.fspath(path)
+    url = urlparse(path)
+    if url.scheme == "file":
+        if url.netloc not in ("", "localhost"):
+            msg = f"A file URL with a host is not supported: '{path}'"
+            raise ValueError(msg)
+        path = unquote(url.path)
     return Path(path).expanduser().resolve()
 
 

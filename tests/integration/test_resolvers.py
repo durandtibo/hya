@@ -1,94 +1,121 @@
 from __future__ import annotations
 
+import re
+from pathlib import Path
+from typing import Any
+
+import pytest
 from omegaconf import OmegaConf
+from omegaconf.errors import InterpolationResolutionError
+
+from hya import get_default_registry
+
+DOCS_RESOLVERS = Path(__file__).parents[2] / "docs" / "docs" / "resolvers.md"
+# A resolver is documented by a heading (#### `hya.add`) or by a row of a table (| `hya.sub` |)
+DOCUMENTED_KEY = re.compile(r"^(?:#### |\| )`(hya\.[\w.]+)`", re.MULTILINE)
+
+OPTIONAL_KEYS = {"hya.braceexpand", "hya.np.array", "hya.torch.tensor", "hya.torch.dtype"}
+
+###########################################
+#     Tests for the default resolvers     #
+###########################################
 
 
-def test_add_resolver() -> None:
-    assert OmegaConf.has_resolver("hya.add")
+@pytest.mark.parametrize(
+    ("expression", "expected"),
+    [
+        ("${hya.add:1,2,3}", 6),
+        ("${hya.asinh:0}", 0.0),
+        ("${hya.ceildiv:100,32}", 4),
+        ("${hya.exp:0}", 1.0),
+        ("${hya.floordiv:100,32}", 3),
+        ("${hya.iter_join:[a,b,c],/}", "a/b/c"),
+        ("${hya.len:[1,2,3]}", 3),
+        ("${hya.log:8,2}", 3.0),
+        ("${hya.log10:100}", 2.0),
+        ("${hya.max:1,5,3}", 5),
+        ("${hya.min:4,2,3}", 2),
+        ("${hya.mul:2,3,4}", 24),
+        ("${hya.neg:2}", -2),
+        ("${hya.path:/my/path}", Path("/my/path")),
+        ("${hya.pi:}", 3.141592653589793),
+        ("${hya.pow:2,10}", 1024),
+        (
+            "${hya.sha256:abc}",
+            "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad",
+        ),
+        ("${hya.sinh:0}", 0.0),
+        ("${hya.sqrt:64}", 8.0),
+        ("${hya.sub:5,3}", 2),
+        ("${hya.to_path:/my/path}", Path("/my/path")),
+        ("${hya.truediv:10,4}", 2.5),
+    ],
+)
+def test_default_resolver(expression: str, expected: Any) -> None:
+    assert OmegaConf.create({"key": expression}).key == expected
 
 
-def test_asinh_resolver() -> None:
-    assert OmegaConf.has_resolver("hya.asinh")
+def test_default_resolvers_table_covers_the_builtin_keys() -> None:
+    keys = set(get_default_registry().state) - OPTIONAL_KEYS
+    assert keys == {
+        "hya.add",
+        "hya.asinh",
+        "hya.ceildiv",
+        "hya.exp",
+        "hya.floordiv",
+        "hya.iter_join",
+        "hya.len",
+        "hya.log",
+        "hya.log10",
+        "hya.max",
+        "hya.min",
+        "hya.mul",
+        "hya.neg",
+        "hya.path",
+        "hya.pi",
+        "hya.pow",
+        "hya.sha256",
+        "hya.sinh",
+        "hya.sqrt",
+        "hya.sub",
+        "hya.to_path",
+        "hya.truediv",
+    }
 
 
-def test_ceildiv_resolver() -> None:
-    assert OmegaConf.has_resolver("hya.ceildiv")
+def test_default_resolvers_are_documented() -> None:
+    documented = set(DOCUMENTED_KEY.findall(DOCS_RESOLVERS.read_text()))
+    assert set(get_default_registry().state) - documented == set()
 
 
-def test_exp_resolver() -> None:
-    assert OmegaConf.has_resolver("hya.exp")
+def test_documented_resolvers_exist() -> None:
+    documented = set(DOCUMENTED_KEY.findall(DOCS_RESOLVERS.read_text()))
+    assert documented - set(get_default_registry().state) - OPTIONAL_KEYS == set()
 
 
-def test_floordiv_resolver() -> None:
-    assert OmegaConf.has_resolver("hya.floordiv")
+##########################################
+#     Tests for the stdlib resolvers     #
+##########################################
 
 
-def test_len_resolver() -> None:
-    assert OmegaConf.has_resolver("hya.len")
+@pytest.mark.parametrize(
+    ("expression", "message"),
+    [
+        ("${hya.max:1}", r"'int' object is not iterable"),
+        ("${hya.sqrt:-1}", r"(math domain error|expected a nonnegative input)"),
+        ("${hya.truediv:1,0}", r"division by zero"),
+        ("${hya.floordiv:1,0}", r"(division|modulo) by zero"),
+    ],
+)
+def test_stdlib_resolver_error_is_the_error_of_the_stdlib(expression: str, message: str) -> None:
+    conf = OmegaConf.create({"key": expression})
+    with pytest.raises(InterpolationResolutionError, match=message):
+        _ = conf.key
 
 
-def test_iter_join_resolver() -> None:
-    assert OmegaConf.has_resolver("hya.iter_join")
-
-
-def test_log_resolver() -> None:
-    assert OmegaConf.has_resolver("hya.log")
-
-
-def test_log10_resolver() -> None:
-    assert OmegaConf.has_resolver("hya.log10")
-
-
-def test_max_resolver() -> None:
-    assert OmegaConf.has_resolver("hya.max")
-
-
-def test_min_resolver() -> None:
-    assert OmegaConf.has_resolver("hya.min")
-
-
-def test_mul_resolver() -> None:
-    assert OmegaConf.has_resolver("hya.mul")
-
-
-def test_neg_resolver() -> None:
-    assert OmegaConf.has_resolver("hya.neg")
-
-
-def test_path_resolver() -> None:
-    assert OmegaConf.has_resolver("hya.path")
-
-
-def test_pi_resolver() -> None:
-    assert OmegaConf.has_resolver("hya.pi")
-
-
-def test_pow_resolver() -> None:
-    assert OmegaConf.has_resolver("hya.pow")
-
-
-def test_sqrt_resolver() -> None:
-    assert OmegaConf.has_resolver("hya.sqrt")
-
-
-def test_sha256_resolver() -> None:
-    assert OmegaConf.has_resolver("hya.sha256")
-
-
-def test_sinh_resolver() -> None:
-    assert OmegaConf.has_resolver("hya.sinh")
-
-
-def test_sub_resolver() -> None:
-    assert OmegaConf.has_resolver("hya.sub")
-
-
-def test_to_path_resolver() -> None:
-    assert OmegaConf.has_resolver("hya.to_path")
-
-
-def test_truediv_resolver() -> None:
-    assert OmegaConf.has_resolver("hya.truediv")
+def test_stdlib_resolver_does_not_warn_on_int_arguments(recwarn: pytest.WarningsRecorder) -> None:
+    assert OmegaConf.create({"key": "${hya.log:1}"}).key == 0.0
+    assert len(recwarn) == 0
 
 
 def test_add_resolver_does_not_modify_config_list() -> None:

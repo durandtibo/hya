@@ -5,6 +5,8 @@ from __future__ import annotations
 
 __all__ = ["get_default_registry"]
 
+import math
+import operator
 from functools import cache
 from typing import TYPE_CHECKING, Any
 
@@ -17,27 +19,27 @@ if TYPE_CHECKING:
 
 _BUILTINS: dict[str, Callable[..., Any]] = {
     "hya.add": resolvers.add_resolver,
-    "hya.asinh": resolvers.asinh_resolver,
+    "hya.asinh": math.asinh,
     "hya.ceildiv": resolvers.ceildiv_resolver,
-    "hya.exp": resolvers.exp_resolver,
-    "hya.floordiv": resolvers.floordiv_resolver,
-    "hya.len": resolvers.len_resolver,
+    "hya.exp": math.exp,
+    "hya.floordiv": operator.floordiv,
     "hya.iter_join": resolvers.iter_join_resolver,
-    "hya.log": resolvers.log_resolver,
-    "hya.log10": resolvers.log10_resolver,
-    "hya.max": resolvers.max_resolver,
-    "hya.min": resolvers.min_resolver,
+    "hya.len": len,
+    "hya.log": math.log,
+    "hya.log10": math.log10,
+    "hya.max": max,
+    "hya.min": min,
     "hya.mul": resolvers.mul_resolver,
-    "hya.neg": resolvers.neg_resolver,
+    "hya.neg": operator.neg,
     "hya.path": resolvers.path_resolver,
     "hya.pi": resolvers.pi_resolver,
-    "hya.pow": resolvers.pow_resolver,
-    "hya.sqrt": resolvers.sqrt_resolver,
+    "hya.pow": operator.pow,
     "hya.sha256": resolvers.sha256_resolver,
-    "hya.sinh": resolvers.sinh_resolver,
-    "hya.sub": resolvers.sub_resolver,
+    "hya.sinh": math.sinh,
+    "hya.sqrt": math.sqrt,
+    "hya.sub": operator.sub,
     "hya.to_path": resolvers.to_path_resolver,
-    "hya.truediv": resolvers.truediv_resolver,
+    "hya.truediv": operator.truediv,
 }
 
 

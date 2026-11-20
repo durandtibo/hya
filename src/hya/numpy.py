@@ -23,16 +23,22 @@ if TYPE_CHECKING:
     from numpy.typing import ArrayLike
 
 
-def to_array_resolver(data: ArrayLike) -> np.ndarray:
+def to_array_resolver(data: ArrayLike, dtype: str | None = None) -> np.ndarray:
     r"""Implement a resolver to transform the input to a
     ``numpy.ndarray``.
 
     Args:
         data: Specifies the data to transform in ``numpy.ndarray``.
             This value should be compatible with ``numpy.array``
+        dtype: The data type of the array, as a string that
+            ``numpy.array`` accepts (for example ``"float32"``).
+            ``None`` lets NumPy infer the data type from the data.
 
     Returns:
         The input in a ``numpy.ndarray`` object.
+
+    Raises:
+        TypeError: If ``dtype`` is not a valid NumPy data type.
 
     Example:
         ```pycon
@@ -41,8 +47,11 @@ def to_array_resolver(data: ArrayLike) -> np.ndarray:
         >>> conf = OmegaConf.create({"key": "${hya.np.array:[1, 2, 3]}"})
         >>> conf.key
         array([1, 2, 3])
+        >>> conf = OmegaConf.create({"key": "${hya.np.array:[1, 2, 3],float32}"})
+        >>> conf.key
+        array([1., 2., 3.], dtype=float32)
 
         ```
     """
     validate_numpy()
-    return np.array(data)
+    return np.array(data, dtype=dtype)

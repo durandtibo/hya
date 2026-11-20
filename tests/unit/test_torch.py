@@ -9,7 +9,7 @@ from omegaconf.errors import InterpolationResolutionError
 
 from hya.imports import is_torch_available
 from hya.testing import torch_available
-from hya.torch import _dtype_names, torch_dtype_resolver
+from hya.torch import _dtype_names, to_tensor_resolver, torch_dtype_resolver
 
 if is_torch_available():
     import torch
@@ -121,3 +121,46 @@ def test_dtype_names_does_not_contain_other_attributes() -> None:
 @torch_available
 def test_dtype_names_is_deterministic() -> None:
     assert _dtype_names() == _dtype_names()
+
+
+@torch_available
+def test_to_tensor_resolver_default_dtype() -> None:
+    assert to_tensor_resolver([1, 2]).dtype == torch.int64
+
+
+@torch_available
+def test_to_tensor_resolver_dtype_none_is_the_default() -> None:
+    assert to_tensor_resolver([1, 2], None).dtype == to_tensor_resolver([1, 2]).dtype
+
+
+@torch_available
+def test_to_tensor_resolver_dtype() -> None:
+    assert to_tensor_resolver([1, 2], torch.float32).dtype == torch.float32
+
+
+@torch_available
+def test_to_tensor_resolver_dtype_tensor() -> None:
+    assert to_tensor_resolver([1, 2], torch.float32).equal(torch.tensor([1.0, 2.0]))
+
+
+@torch_available
+def test_to_tensor_resolver_resolver_with_dtype() -> None:
+    result = OmegaConf.create({"key": "${hya.torch.tensor:[1,2],${hya.torch.dtype:float64}}"}).key
+    assert result.dtype == torch.float64
+
+
+def test_to_tensor_resolver_missing_package() -> None:
+    with (
+        patch("hya.torch.validate_torch", side_effect=RuntimeError("missing package")),
+        pytest.raises(RuntimeError, match=r"missing package"),
+    ):
+        to_tensor_resolver([1, 2])
+
+
+@torch_available
+def test_to_tensor_resolver_missing_package_with_dtype() -> None:
+    with (
+        patch("hya.torch.validate_torch", side_effect=RuntimeError("missing package")),
+        pytest.raises(RuntimeError, match=r"missing package"),
+    ):
+        to_tensor_resolver([1, 2], torch.float32)

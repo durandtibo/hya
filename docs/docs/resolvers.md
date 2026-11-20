@@ -355,9 +355,10 @@ Install with: `pip install numpy`
 
 #### `hya.np.array`
 
-Converts data to a NumPy array.
+Converts data to a NumPy array. The optional second argument is the data type, as a string that
+`np.array` accepts (a NumPy resolver of the data type is not needed).
 
-**Syntax:** `${hya.np.array:data}`
+**Syntax:** `${hya.np.array:data}` or `${hya.np.array:data,dtype}`
 
 **Example:**
 
@@ -367,6 +368,9 @@ vector: ${hya.np.array:[1,2,3,4,5]}
 
 # 2D array
 matrix: ${hya.np.array:[[1,2,3],[4,5,6]]}
+
+# Array with a data type
+weights: ${hya.np.array:[1,2,3],float32} # array([1., 2., 3.], dtype=float32)
 
 # Use in configuration
 data:
@@ -380,6 +384,7 @@ data:
 import numpy as np
 
 value = np.array(data)
+value = np.array(data, dtype=dtype)  # with a dtype
 ```
 
 ### PyTorch
@@ -390,9 +395,10 @@ Install with: `pip install torch`
 
 #### `hya.torch.tensor`
 
-Converts data to a PyTorch tensor.
+Converts data to a PyTorch tensor. The optional second argument is a `torch.dtype`, for example the
+output of [`hya.torch.dtype`](#hyatorchdtype).
 
-**Syntax:** `${hya.torch.tensor:data}`
+**Syntax:** `${hya.torch.tensor:data}` or `${hya.torch.tensor:data,dtype}`
 
 **Example:**
 
@@ -402,6 +408,9 @@ weights: ${hya.torch.tensor:[0.1,0.2,0.3,0.4]}
 
 # 2D tensor
 matrix: ${hya.torch.tensor:[[1,2],[3,4]]}
+
+# Tensor with a data type
+mask: ${hya.torch.tensor:[1,0,1],${hya.torch.dtype:bool}} # tensor([ True, False,  True])
 
 # Use in model configuration
 model:
@@ -414,6 +423,7 @@ model:
 import torch
 
 value = torch.tensor(data)
+value = torch.tensor(data, dtype=dtype)  # with a dtype
 ```
 
 #### `hya.torch.dtype`

@@ -2,6 +2,17 @@ r"""Implement some resolvers using features from standard libraries."""
 
 from __future__ import annotations
 
+__all__ = [
+    "add_resolver",
+    "ceildiv_resolver",
+    "iter_join_resolver",
+    "mul_resolver",
+    "path_resolver",
+    "pi_resolver",
+    "sha256_resolver",
+    "to_path_resolver",
+]
+
 import hashlib
 import logging
 import math
@@ -44,28 +55,6 @@ def add_resolver(*args: Any) -> Any:
     return output
 
 
-def asinh_resolver(number: float) -> float:
-    r"""Return the inverse hyperbolic sine.
-
-    Args:
-        number: The number to transform.
-
-    Returns:
-        The inverse hyperbolic sine of the input number.
-
-    Example:
-        ```pycon
-        >>> import hya
-        >>> from omegaconf import OmegaConf
-        >>> conf = OmegaConf.create({"key": "${hya.asinh:1}"})
-        >>> conf.key
-        0.881373...
-
-        ```
-    """
-    return math.asinh(number)
-
-
 def ceildiv_resolver(dividend: float, divisor: float) -> float:
     r"""Compute the ceiling division of two numbers.
 
@@ -96,79 +85,6 @@ def ceildiv_resolver(dividend: float, divisor: float) -> float:
         ```
     """
     return -(dividend // -divisor)
-
-
-def exp_resolver(number: float) -> float:
-    r"""Return the exponential value of the input.
-
-    Args:
-        number: The number to transform.
-
-    Returns:
-        The exponential value of the input.
-
-    Example:
-        ```pycon
-        >>> import hya
-        >>> from omegaconf import OmegaConf
-        >>> conf = OmegaConf.create({"key": "${hya.exp:0}"})
-        >>> conf.key
-        1.0
-
-        ```
-    """
-    return math.exp(number)
-
-
-def floordiv_resolver(dividend: float, divisor: float) -> float:
-    r"""Compute the floor division of two numbers.
-
-    Floor division rounds the result down to the nearest integer,
-    equivalent to the // operator in Python.
-
-    Args:
-        dividend: The dividend (numerator).
-        divisor: The divisor (denominator).
-
-    Returns:
-        The floor of dividend / divisor, i.e., ``dividend // divisor``.
-
-    Example:
-        ```pycon
-        >>> import hya
-        >>> from omegaconf import OmegaConf
-        >>> conf = OmegaConf.create({"key": "${hya.floordiv:11,4}"})
-        >>> conf.key
-        2
-        >>> conf = OmegaConf.create({"key": "${hya.floordiv:10,3}"})
-        >>> conf.key
-        3
-
-        ```
-    """
-    return dividend // divisor
-
-
-def len_resolver(obj: Any) -> int:
-    r"""Return the length of an object.
-
-    Args:
-        obj: The object.
-
-    Returns:
-        The length of the object.
-
-    Example:
-        ```pycon
-        >>> import hya
-        >>> from omegaconf import OmegaConf
-        >>> conf = OmegaConf.create({"key": "${hya.len:[1,2,3]}"})
-        >>> conf.key
-        3
-
-        ```
-    """
-    return len(obj)
 
 
 def iter_join_resolver(iterable: Iterable[Any], separator: str) -> str:
@@ -204,95 +120,6 @@ def iter_join_resolver(iterable: Iterable[Any], separator: str) -> str:
     return separator.join(map(str, iterable))
 
 
-def log_resolver(number: float, base: float = math.e) -> float:
-    r"""Compute logarithm of the input value to the given base.
-
-    Args:
-        number: The number to transform.
-        base: The base.
-
-    Returns:
-        The logarithm of the input value to the given base.
-
-    Example:
-        ```pycon
-        >>> import hya
-        >>> from omegaconf import OmegaConf
-        >>> conf = OmegaConf.create({"key": "${hya.log:1}"})
-        >>> conf.key
-        0.0
-
-        ```
-    """
-    return math.log(number, base)
-
-
-def log10_resolver(number: float) -> float:
-    r"""Compute base 10 logarithm of the input value.
-
-    Args:
-        number: The number to transform.
-
-    Returns:
-        The base 10 logarithm of the input value.
-
-    Example:
-        ```pycon
-        >>> import hya
-        >>> from omegaconf import OmegaConf
-        >>> conf = OmegaConf.create({"key": "${hya.log10:1}"})
-        >>> conf.key
-        0.0
-
-        ```
-    """
-    return math.log10(number)
-
-
-def max_resolver(*args: Any) -> Any:
-    r"""Return the maximum between multiple values.
-
-    Args:
-        *args: The values.
-
-    Returns:
-        ``max(arg1, arg2, arg3, ..., argN)``
-
-    Example:
-        ```pycon
-        >>> import hya
-        >>> from omegaconf import OmegaConf
-        >>> conf = OmegaConf.create({"key": "${hya.max:1,2,3}"})
-        >>> conf.key
-        3
-
-        ```
-    """
-    return max(*args)
-
-
-def min_resolver(*args: Any) -> Any:
-    r"""Return the minimum between multiple values.
-
-    Args:
-        *args: The values.
-
-    Returns:
-        ``min(arg1, arg2, arg3, ..., argN)``
-
-    Example:
-        ```pycon
-        >>> import hya
-        >>> from omegaconf import OmegaConf
-        >>> conf = OmegaConf.create({"key": "${hya.min:1,2,3}"})
-        >>> conf.key
-        1
-
-        ```
-    """
-    return min(*args)
-
-
 def mul_resolver(*args: Any) -> Any:
     r"""Return the multiplication of several objects.
 
@@ -319,28 +146,6 @@ def mul_resolver(*args: Any) -> Any:
     for arg in args[1:]:
         output *= arg
     return output
-
-
-def neg_resolver(number: float) -> float:
-    r"""Return the negation (``-number``).
-
-    Args:
-        number: The number to transform.
-
-    Returns:
-        The negated input number.
-
-    Example:
-        ```pycon
-        >>> import hya
-        >>> from omegaconf import OmegaConf
-        >>> conf = OmegaConf.create({"key": "${hya.neg:1}"})
-        >>> conf.key
-        -1
-
-        ```
-    """
-    return -number
 
 
 def path_resolver(path: str) -> Path:
@@ -397,52 +202,6 @@ def pi_resolver() -> float:
     return math.pi
 
 
-def pow_resolver(value: float, exponent: float) -> float:
-    r"""Return a value to a given power.
-
-    Args:
-        value: The value or base.
-        exponent: The exponent.
-
-    Returns:
-        ``x ** y``
-
-    Example:
-        ```pycon
-        >>> import hya
-        >>> from omegaconf import OmegaConf
-        >>> conf = OmegaConf.create({"key": "${hya.pow:2,3}"})
-        >>> conf.key
-        8
-
-        ```
-    """
-    return value**exponent
-
-
-def sqrt_resolver(number: float) -> float:
-    r"""Return the square root of a number.
-
-    Args:
-        number: The number to compute the
-            square root.
-
-    Returns:
-        The square root of the input number.
-
-    Example:
-        ```pycon
-        >>> import hya
-        >>> from omegaconf import OmegaConf
-        >>> conf = OmegaConf.create({"key": "${hya.sqrt:4}"})
-        >>> conf.key
-        2.0
-
-        ```
-    """
-    return math.sqrt(number)
-
-
 def sha256_resolver(obj: Any) -> str:
     r"""Compute the SHA-256 hash of an input object.
 
@@ -470,51 +229,6 @@ def sha256_resolver(obj: Any) -> str:
         ```
     """
     return hashlib.sha256(bytes(str(obj), "utf-8")).hexdigest()
-
-
-def sinh_resolver(number: float) -> float:
-    r"""Return the hyperbolic sine.
-
-    Args:
-        number: The number to transform.
-
-    Returns:
-        The hyperbolic sine of the input number.
-
-    Example:
-        ```pycon
-        >>> import hya
-        >>> from omegaconf import OmegaConf
-        >>> conf = OmegaConf.create({"key": "${hya.sinh:1}"})
-        >>> conf.key
-        1.175201...
-
-        ```
-    """
-    return math.sinh(number)
-
-
-def sub_resolver(object1: Any, object2: Any) -> Any:
-    r"""Return the subtraction of two objects.
-
-    Args:
-        object1: The first object.
-        object2: The second object.
-
-    Returns:
-        ``object1 - object2``
-
-    Example:
-        ```pycon
-        >>> import hya
-        >>> from omegaconf import OmegaConf
-        >>> conf = OmegaConf.create({"key": "${hya.sub:3,1}"})
-        >>> conf.key
-        2
-
-        ```
-    """
-    return object1 - object2
 
 
 def to_path_resolver(path: str) -> Path:
@@ -548,26 +262,3 @@ def to_path_resolver(path: str) -> Path:
         ```
     """
     return Path(unquote(urlparse(path).path)).expanduser().resolve()
-
-
-def truediv_resolver(dividend: float, divisor: float) -> float:
-    r"""Return the true division of two numbers.
-
-    Args:
-        dividend: The dividend.
-        divisor: The divisor.
-
-    Returns:
-        ``dividend / divisor``
-
-    Example:
-        ```pycon
-        >>> import hya
-        >>> from omegaconf import OmegaConf
-        >>> conf = OmegaConf.create({"key": "${hya.truediv:1,2}"})
-        >>> conf.key
-        0.5
-
-        ```
-    """
-    return dividend / divisor

@@ -21,6 +21,47 @@ All resolvers are automatically available after importing `hya`.
 
 These resolvers are available with the base installation (no optional dependencies required).
 
+### Standard Library Resolvers
+
+These resolvers are registered as the standard library callable itself, with no wrapper: the
+behaviour, the accepted arguments and the error messages are the ones of the callable. See the
+documentation of the callable for the details.
+
+| Key            | Callable            | Example                  | Result  |
+| -------------- | ------------------- | ------------------------ | ------- |
+| `hya.sub`      | `operator.sub`      | `${hya.sub:100,30}`      | `70`    |
+| `hya.truediv`  | `operator.truediv`  | `${hya.truediv:10,4}`    | `2.5`   |
+| `hya.floordiv` | `operator.floordiv` | `${hya.floordiv:100,32}` | `3`     |
+| `hya.neg`      | `operator.neg`      | `${hya.neg:5}`           | `-5`    |
+| `hya.pow`      | `operator.pow`      | `${hya.pow:10,-3}`       | `0.001` |
+| `hya.sqrt`     | `math.sqrt`         | `${hya.sqrt:64}`         | `8.0`   |
+| `hya.exp`      | `math.exp`          | `${hya.exp:0}`           | `1.0`   |
+| `hya.log`      | `math.log`          | `${hya.log:8,2}`         | `3.0`   |
+| `hya.log10`    | `math.log10`        | `${hya.log10:1000}`      | `3.0`   |
+| `hya.sinh`     | `math.sinh`         | `${hya.sinh:0}`          | `0.0`   |
+| `hya.asinh`    | `math.asinh`        | `${hya.asinh:0}`         | `0.0`   |
+| `hya.max`      | `max`               | `${hya.max:10,25,15}`    | `25`    |
+| `hya.min`      | `min`               | `${hya.min:10,25,15}`    | `10`    |
+| `hya.len`      | `len`               | `${hya.len:[1,2,3]}`     | `3`     |
+
+Examples with interpolations:
+
+```yaml
+dataset:
+  total_samples: 60000
+  val_samples: 10000
+  train_samples: ${hya.sub:${dataset.total_samples},${dataset.val_samples}} # 50000
+  warmup_ratio: ${hya.truediv:1000,${dataset.total_samples}} # 0.016666...
+
+model:
+  embedding_dim: 512
+  head_dim: ${hya.floordiv:${model.embedding_dim},8} # 64
+  scale_factor: ${hya.sqrt:${model.embedding_dim}} # 22.627...
+  layer_sizes: [128, 256, 512, 1024]
+  num_layers: ${hya.len:${model.layer_sizes}} # 4
+  actual_layers: ${hya.max:${model.num_layers},8} # 8
+```
+
 ### Arithmetic Operations
 
 #### `hya.add`
@@ -51,29 +92,6 @@ training:
 value = value1 + value2 + value3 + ...
 ```
 
-#### `hya.sub`
-
-Subtracts the second value from the first.
-
-**Syntax:** `${hya.sub:value1,value2}`
-
-**Example:**
-
-```yaml
-remaining: ${hya.sub:100,30} # Result: 70
-
-dataset:
-  total_samples: 60000
-  val_samples: 10000
-  train_samples: ${hya.sub:${dataset.total_samples},${dataset.val_samples}} # Result: 50000
-```
-
-**Equivalent Python:**
-
-```python
-value = object1 - object2
-```
-
 #### `hya.mul`
 
 Multiplies multiple values together.
@@ -100,52 +118,6 @@ model:
 
 ```python
 value = object1 * object2 * object3 * ...
-```
-
-#### `hya.truediv`
-
-Performs "true" division (floating-point division).
-
-**Syntax:** `${hya.truediv:dividend,divisor}`
-
-**Example:**
-
-```yaml
-ratio: ${hya.truediv:10,4} # Result: 2.5
-
-training:
-  total_steps: 10000
-  warmup_ratio: ${hya.truediv:1000,${training.total_steps}} # Result: 0.1
-```
-
-**Equivalent Python:**
-
-```python
-value = dividend / divisor
-```
-
-#### `hya.floordiv`
-
-Performs floor division (rounds down to nearest integer).
-
-**Syntax:** `${hya.floordiv:dividend,divisor}`
-
-**Example:**
-
-```yaml
-batches: ${hya.floordiv:100,32} # Result: 3
-
-# Complete batches only
-training:
-  samples: 10000
-  batch_size: 64
-  complete_batches: ${hya.floordiv:${training.samples},${training.batch_size}} # Result: 156
-```
-
-**Equivalent Python:**
-
-```python
-value = dividend // divisor
 ```
 
 #### `hya.ceildiv`
@@ -175,228 +147,6 @@ value = -(dividend // -divisor)  # Canonical implementation (no floating point)
 ```
 
 **Use Case:** Calculating the number of batches needed to process all samples.
-
-### Advanced Mathematical Functions
-
-#### `hya.pow`
-
-Raises a value to a given power.
-
-**Syntax:** `${hya.pow:base,exponent}`
-
-**Example:**
-
-```yaml
-squared: ${hya.pow:5,2} # Result: 25
-cubed: ${hya.pow:2,3} # Result: 8
-
-# Scientific notation for learning rates
-training:
-  lr: ${hya.pow:10,-3} # Result: 0.001
-  weight_decay: ${hya.pow:10,-4} # Result: 0.0001
-```
-
-**Equivalent Python:**
-
-```python
-value = base**exponent
-```
-
-#### `hya.sqrt`
-
-Computes the square root of a number.
-
-**Syntax:** `${hya.sqrt:number}`
-
-**Example:**
-
-```yaml
-side: ${hya.sqrt:64} # Result: 8.0
-
-model:
-  embedding_dim: 512
-  scale_factor: ${hya.sqrt:${model.embedding_dim}} # Result: 22.627...
-```
-
-**Equivalent Python:**
-
-```python
-import math
-
-value = math.sqrt(number)
-```
-
-#### `hya.exp`
-
-Computes the exponential (e^x).
-
-**Syntax:** `${hya.exp:number}`
-
-**Example:**
-
-```yaml
-exponential: ${hya.exp:0} # Result: 1.0
-growth: ${hya.exp:1} # Result: 2.718...
-```
-
-**Equivalent Python:**
-
-```python
-import math
-
-value = math.exp(number)
-```
-
-#### `hya.log`
-
-Computes the logarithm with a given base (default: natural log).
-
-**Syntax:** `${hya.log:number,base}` or `${hya.log:number}` (base e)
-
-**Example:**
-
-```yaml
-natural_log: ${hya.log:10} # Result: 2.302... (ln(10))
-log_base_2: ${hya.log:8,2} # Result: 3.0 (log2(8))
-log_base_10: ${hya.log:1000,10} # Result: 3.0
-```
-
-**Equivalent Python:**
-
-```python
-import math
-
-value = math.log(number, base)  # or math.log(number) for natural log
-```
-
-#### `hya.log10`
-
-Computes the base-10 logarithm.
-
-**Syntax:** `${hya.log10:number}`
-
-**Example:**
-
-```yaml
-log_value: ${hya.log10:100} # Result: 2.0
-decades: ${hya.log10:1000} # Result: 3.0
-```
-
-**Equivalent Python:**
-
-```python
-import math
-
-value = math.log10(number)
-```
-
-#### `hya.sinh`
-
-Computes the hyperbolic sine.
-
-**Syntax:** `${hya.sinh:number}`
-
-**Example:**
-
-```yaml
-result: ${hya.sinh:1} # Result: 1.175...
-```
-
-**Equivalent Python:**
-
-```python
-import math
-
-value = math.sinh(number)
-```
-
-#### `hya.asinh`
-
-Computes the inverse hyperbolic sine.
-
-**Syntax:** `${hya.asinh:number}`
-
-**Example:**
-
-```yaml
-result: ${hya.asinh:1} # Result: 0.881...
-```
-
-**Equivalent Python:**
-
-```python
-import math
-
-value = math.asinh(number)
-```
-
-#### `hya.neg`
-
-Returns the negation of a number.
-
-**Syntax:** `${hya.neg:number}`
-
-**Example:**
-
-```yaml
-negative: ${hya.neg:5} # Result: -5
-flipped: ${hya.neg:-10} # Result: 10
-```
-
-**Equivalent Python:**
-
-```python
-value = -number
-```
-
-### Comparison Functions
-
-#### `hya.max`
-
-Returns the maximum value among multiple inputs.
-
-**Syntax:** `${hya.max:value1,value2,...}`
-
-**Example:**
-
-```yaml
-maximum: ${hya.max:10,25,15} # Result: 25
-
-model:
-  min_layers: 4
-  default_layers: 8
-  requested_layers: 2
-  actual_layers: ${hya.max:${model.requested_layers},${model.min_layers}} # Result: 4 (enforces minimum)
-```
-
-**Equivalent Python:**
-
-```python
-value = max(value1, value2, value3, ...)
-```
-
-#### `hya.min`
-
-Returns the minimum value among multiple inputs.
-
-**Syntax:** `${hya.min:value1,value2,...}`
-
-**Example:**
-
-```yaml
-minimum: ${hya.min:10,25,15} # Result: 10
-
-training:
-  requested_lr: 0.1
-  max_lr: 0.01
-  actual_lr: ${hya.min:${training.requested_lr},${training.max_lr}} # Result: 0.01
-```
-
-**Equivalent Python:**
-
-```python
-value = min(value1, value2, value3, ...)
-```
 
 ### Constants
 
@@ -510,28 +260,6 @@ value = separator.join(map(str, iterable))
 **Use Case:** Dynamically constructing file paths, experiment names, or configuration strings.
 
 ### Utility Functions
-
-#### `hya.len`
-
-Returns the length of an object.
-
-**Syntax:** `${hya.len:object}`
-
-**Example:**
-
-```yaml
-list_length: ${hya.len:[1,2,3,4,5]} # Result: 5
-
-model:
-  layer_sizes: [128, 256, 512, 1024]
-  num_layers: ${hya.len:${model.layer_sizes}} # Result: 4
-```
-
-**Equivalent Python:**
-
-```python
-value = len(obj)
-```
 
 #### `hya.sha256`
 

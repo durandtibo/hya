@@ -20,12 +20,13 @@ keywords = ["omegaconf", "resolver", "hydra"]
 license = "BSD-3-Clause"
 license-files = ["LICENSE"]
 
+dynamic = ["maintainers"]
+
 classifiers = [
   "Development Status :: 4 - Beta",
   "Intended Audience :: Developers",
   "Intended Audience :: Information Technology",
   "Intended Audience :: Science/Research",
-  "License :: OSI Approved :: BSD License",
   "Operating System :: POSIX :: Linux",
   "Operating System :: MacOS",
   "Programming Language :: Python :: 3.11",
@@ -38,27 +39,25 @@ classifiers = [
   "Typing :: Typed",
 ]
 
-dynamic = ["maintainers"]
-
 requires-python = ">=3.11"
 
-dependencies = ["omegaconf >=2.2,<3.0"]
+dependencies = ["omegaconf>=2.2,<3.0"]
 
 [project.optional-dependencies]
-braceexpand = ["braceexpand >=0.1.7,<0.2.0"]
-numpy = ["numpy >=1.24,<3.0"]
+braceexpand = ["braceexpand>=0.1.7,<0.2.0"]
+numpy = ["numpy>=1.24,<3.0"]
 torch = [
   # Linux and Apple Silicon (arm64)
-  "torch >=2.0,<3.0; sys_platform == 'linux' or (sys_platform == 'darwin' and platform_machine == 'arm64')",
+  "torch>=2.0,<3.0; sys_platform == 'linux' or (sys_platform == 'darwin' and platform_machine == 'arm64')",
   # macOS x86_64 (deprecated upstream after torch 2.2)
   # https://dev-discuss.pytorch.org/t/pytorch-macos-x86-builds-deprecation-starting-january-2024/1690
-  "torch >=2.0,<2.3; sys_platform == 'darwin' and platform_machine != 'arm64' and python_version < '3.13'",
+  "torch>=2.0,<2.3; sys_platform == 'darwin' and platform_machine != 'arm64' and python_version < '3.13'",
 ]
 
 [dependency-groups]
 dev = [
   "codespell>=2.4,<3.0",
-  "coverage[toml]>=7.11,<8.0",
+  "coverage[toml]>=7.17.2,<8.0",
   "docformatter>=1.7.8,<2.0",
   "feu[all]>=0.8.4,<1.0",
   "invoke-tasklib>=0.1.0a0,<1.0",
@@ -75,11 +74,11 @@ dev = [
 ]
 
 docs = [
-  "griffe-inherited-docstrings >=1.1,<2.0",
-  "mike >=2.2,<3.0",
-  "mkdocs-material >=9.7,<10.0",
-  "mkdocstrings[python] >=1.0,<2.0",
-  "mkdocs-include-markdown-plugin >=7.3,<8.0",
+  "griffe-inherited-docstrings>=1.1,<2.0",
+  "mike>=2.2,<3.0",
+  "mkdocs-material>=9.7,<10.0",
+  "mkdocstrings[python]>=1.0.8,<2.0",
+  "mkdocs-include-markdown-plugin>=7.3,<8.0",
 ]
 
 [project.urls]
@@ -126,6 +125,11 @@ addopts = [
 ]
 xfail_strict = true
 timeout = 300
+filterwarnings = [
+  "error",
+  # torch 2.4 and later warn at import if NumPy is not installed, which is a supported setup.
+  "ignore:Failed to initialize NumPy:UserWarning",
+]
 # Configuration of the short test summary info
 # https://docs.pytest.org/en/stable/usage.html#detailed-summary-report
 
@@ -210,7 +214,6 @@ src = ["src"]
 # Ignore all directories named `tests`.
 "tests/**" = [
   "D",    # pydocstyle
-  "PL",   # Pylint
   "S101", # flake8-bandit: assert
 ]
 

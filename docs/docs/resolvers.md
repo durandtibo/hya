@@ -436,7 +436,7 @@ Converts a string to a resolved `pathlib.Path` object with user expansion.
 
 ```yaml
 data_dir: ${hya.path:/data/datasets}
-model_path: ${hya.path:~/models/checkpoint.pth}
+model_path: ${hya.path:"~/models/checkpoint.pth"}
 ```
 
 **Equivalent Python:**

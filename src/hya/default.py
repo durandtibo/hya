@@ -21,7 +21,9 @@ def get_default_registry() -> ResolverRegistry:
     """Get or create the default global resolver registry.
 
     Returns a singleton registry instance using a simple singleton pattern.
-    The registry is initially empty and can be populated with custom resolvers.
+    The registry initially contains the default resolvers (the optional ones
+    only if their package is installed) and can be extended with custom
+    resolvers.
 
     This function uses a singleton pattern to ensure the same registry instance
     is returned on subsequent calls, which is efficient and maintains consistency

@@ -651,6 +651,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#registering-a-resolver-lazily" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Registering a Resolver Lazily
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#creating-isolated-registries" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1324,6 +1335,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#registering-a-resolver-lazily" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Registering a Resolver Lazily
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#creating-isolated-registries" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1676,6 +1698,10 @@
 <span class="n">conf</span> <span class="o">=</span> <span class="n">OmegaConf</span><span class="o">.</span><span class="n">create</span><span class="p">({</span><span class="s2">"result"</span><span class="p">:</span> <span class="s2">"${hya.add:2,3}"</span><span class="p">})</span>
 <span class="nb">print</span><span class="p">(</span><span class="n">conf</span><span class="o">.</span><span class="n">result</span><span class="p">)</span>  <span class="c1"># Output: 5</span>
 </code></pre></div>
+<p>The optional resolvers (<code>hya.braceexpand</code>, <code>hya.np.array</code>, <code>hya.torch.tensor</code>, <code>hya.torch.dtype</code>)
+are registered only if their package is installed. <code>import hya</code> does not import <code>numpy</code>, <code>torch</code>
+or <code>braceexpand</code>: the module of an optional resolver is imported on the first call of that
+resolver.</p>
 <h3 id="using-resolvers-in-yaml-configurations">Using Resolvers in YAML Configurations<a class="headerlink" href="#using-resolvers-in-yaml-configurations" title="Permanent link">&para;</a></h3>
 <p>You can use resolvers directly in YAML configuration files:</p>
 <div class="highlight"><pre><span></span><code><span class="c1"># config.yaml</span>
@@ -1836,6 +1862,18 @@ overwritten unless <code>replace=True</code>.</p>
 this cache for existing configurations: call <code>OmegaConf.clear_cache(cfg)</code> to clear it.</p>
 <p>The resolvers are published with <code>annotation_validation="off"</code>: the type annotations of a resolver
 are documentation for readers and type checkers, OmegaConf does not check them at call time.</p>
+<h3 id="registering-a-resolver-lazily">Registering a Resolver Lazily<a class="headerlink" href="#registering-a-resolver-lazily" title="Permanent link">&para;</a></h3>
+<p><code>register_lazy</code> registers a resolver as a <code>"module:function"</code> string. The module is imported the
+first time OmegaConf calls the resolver, not when the resolver is registered. This is how <code>hya</code>
+registers the resolvers that need a heavy optional package:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">hya</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_default_registry</span>
+
+<span class="n">registry</span> <span class="o">=</span> <span class="n">get_default_registry</span><span class="p">()</span>
+<span class="n">registry</span><span class="o">.</span><span class="n">register_lazy</span><span class="p">(</span><span class="s2">"my.array"</span><span class="p">,</span> <span class="s2">"hya.numpy:to_array_resolver"</span><span class="p">)</span>
+<span class="n">registry</span><span class="o">.</span><span class="n">register_resolvers</span><span class="p">()</span>
+</code></pre></div>
+<p>A target that is not formatted as <code>"module:function"</code> raises a <code>ValueError</code> when it is registered.
+An unknown module or function raises an error on the first call of the resolver.</p>
 <h3 id="creating-isolated-registries">Creating Isolated Registries<a class="headerlink" href="#creating-isolated-registries" title="Permanent link">&para;</a></h3>
 <p>For advanced use cases, you can create independent registries:</p>
 <div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">hya.registry</span><span class="w"> </span><span class="kn">import</span> <span class="n">ResolverRegistry</span>

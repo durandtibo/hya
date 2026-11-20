@@ -159,3 +159,7 @@ print(register_resolvers.call_count)
 """
     result = run_python(code)
     assert result.stdout.strip() == "0", result.stderr
+
+
+def test_default_registry_keys_are_namespaced() -> None:
+    assert sorted(key for key in get_default_registry().state if not key.startswith("hya.")) == []

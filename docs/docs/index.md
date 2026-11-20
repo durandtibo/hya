@@ -151,7 +151,7 @@ print(conf.result)  # Output: 15
 - **Mathematical operations**: `add`, `sub`, `mul`, `truediv`, `floordiv`, `ceildiv`, `pow`, `sqrt`,
   `neg`, `max`, `min`, `exp`, `log`, `log10`, `sinh`, `asinh`
 - **Constants**: `pi`
-- **Path utilities**: `path`, `to_path`, `iter_join`
+- **Path utilities**: `path`, `iter_join`
 - **Utilities**: `len`, `sha256`
 - **Optional (with dependencies)**:
   - NumPy: `np.array`

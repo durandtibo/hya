@@ -47,7 +47,7 @@ OPTIONAL_KEYS = {"hya.braceexpand", "hya.np.array", "hya.torch.tensor", "hya.tor
         ("${hya.sinh:0}", 0.0),
         ("${hya.sqrt:64}", 8.0),
         ("${hya.sub:5,3}", 2),
-        ("${hya.to_path:/my/path}", Path("/my/path")),
+        ("${hya.path:file:///my/path}", Path("/my/path")),
         ("${hya.truediv:10,4}", 2.5),
     ],
 )
@@ -78,7 +78,6 @@ def test_default_resolvers_table_covers_the_builtin_keys() -> None:
         "hya.sinh",
         "hya.sqrt",
         "hya.sub",
-        "hya.to_path",
         "hya.truediv",
     }
 

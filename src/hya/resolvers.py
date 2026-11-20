@@ -10,7 +10,6 @@ __all__ = [
     "path_resolver",
     "pi_resolver",
     "sha256_resolver",
-    "to_path_resolver",
 ]
 
 import hashlib
@@ -159,18 +158,20 @@ def mul_resolver(first: Any, *others: Any) -> Any:
 
 
 def path_resolver(path: str) -> Path:
-    r"""Return a resolved path object from a string path.
+    r"""Return a resolved path object from a string path or a file URL.
 
-    This resolver converts a string path to a pathlib.Path object,
-    expanding user home directory references (~) and resolving to
-    an absolute path.
+    This resolver converts a string to a ``pathlib.Path`` object: it
+    expands the user home directory (``~``) and resolves the path to an
+    absolute path. A string that starts with ``file:`` is read as a file
+    URL: the path of the URL is used, with its percent-encoding (for
+    example ``%20`` for a space) decoded. Any other string is a plain
+    path, written as is: ``?`` and ``%`` are not interpreted.
 
     Args:
-        path: The target path as a string. Supports tilde (~) for
-            home directory expansion.
+        path: The target path as a string, or a ``file:`` URL.
 
     Returns:
-        A fully resolved pathlib.Path object with expanded user
+        A fully resolved ``pathlib.Path`` object with expanded user
         directory and converted to absolute path.
 
     Note:
@@ -186,12 +187,17 @@ def path_resolver(path: str) -> Path:
         >>> conf = OmegaConf.create({"key": "${hya.path:/my/path}"})
         >>> conf.key
         PosixPath('/my/path')
+        >>> conf = OmegaConf.create({"key": "${hya.path:file:///my/path%20to}"})
+        >>> conf.key
+        PosixPath('/my/path to')
         >>> conf = OmegaConf.create({"key": '${hya.path:"~/my/path"}'})
         >>> conf.key == Path("~/my/path").expanduser().resolve()
         True
 
         ```
     """
+    if path.startswith("file:"):
+        path = unquote(urlparse(path).path)
     return Path(path).expanduser().resolve()
 
 
@@ -241,36 +247,3 @@ def sha256_resolver(obj: Any) -> str:
         ```
     """
     return hashlib.sha256(bytes(str(obj), "utf-8")).hexdigest()
-
-
-def to_path_resolver(path: str) -> Path:
-    r"""Convert a path string (including URLs) into a ``pathlib.Path``.
-
-    This resolver handles both regular file paths and file:// URLs,
-    converting them to pathlib.Path objects. It also expands user
-    home directory references and resolves to absolute paths.
-
-    Args:
-        path: The path to convert. Can be a regular file path or
-            a file:// URL. URL encoding (e.g., %20 for spaces) is
-            automatically decoded. Supports tilde (~) for home
-            directory expansion.
-
-    Returns:
-        A fully resolved pathlib.Path object with URL decoding,
-        expanded user directory, and converted to absolute path.
-
-    Example:
-        ```pycon
-        >>> import hya
-        >>> from omegaconf import OmegaConf
-        >>> conf = OmegaConf.create({"key": "${hya.to_path:/my/path}"})
-        >>> conf.key
-        PosixPath('/my/path')
-        >>> conf = OmegaConf.create({"key": "${hya.to_path:file:///my/path}"})
-        >>> conf.key
-        PosixPath('/my/path')
-
-        ```
-    """
-    return Path(unquote(urlparse(path).path)).expanduser().resolve()

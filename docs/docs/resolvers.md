@@ -137,7 +137,9 @@ one argument is required.
 
 #### `hya.ceildiv`
 
-Performs ceiling division (rounds up to nearest integer).
+Performs ceiling division (rounds up). The type of the result follows `//`: an `int` for two
+integers (exact, whatever their size) and a `float` for a float (`${hya.ceildiv:11.0,4}` is `3.0`).
+Use `${hya.int:${hya.ceildiv:x,y}}` to get an `int`.
 
 **Syntax:** `${hya.ceildiv:dividend,divisor}`
 
@@ -157,8 +159,8 @@ training:
 
 ```python
 value = -(dividend // -divisor)  # Canonical implementation (no floating point)
-# Alternative (but may have precision issues with large integers):
-# value = math.ceil(dividend / divisor)
+# math.ceil(dividend / divisor) gives the same integer for small ints, but it may have
+# precision issues with large integers and it always returns an int
 ```
 
 **Use Case:** Calculating the number of batches needed to process all samples.

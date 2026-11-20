@@ -1,9 +1,11 @@
 r"""Implement PyTorch resolvers for tensor creation and dtype handling.
 
 This module provides OmegaConf resolvers that use PyTorch for tensor
-operations and data type specifications. The resolvers are registered
-only if the ``torch`` package is available, enabling users to create
-PyTorch tensors and specify dtypes directly from configuration files.
+operations and data type specifications. The resolvers are always
+registered; the ``torch`` package is needed only when one of them is
+called, and a missing package raises an error that says how to install
+it. Users can create PyTorch tensors and specify dtypes directly from
+configuration files.
 """
 
 from __future__ import annotations

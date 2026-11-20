@@ -42,7 +42,7 @@ dynamic = ["maintainers"]
 
 requires-python = ">=3.11"
 
-dependencies = ["omegaconf >=2.2,<3.0"]
+dependencies = ["omegaconf >=2.4,<3.0"]
 
 [project.optional-dependencies]
 braceexpand = ["braceexpand >=0.1.7,<0.2.0"]

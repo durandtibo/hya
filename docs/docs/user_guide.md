@@ -205,24 +205,29 @@ registry = get_default_registry()
 @registry.register("hya.add", exist_ok=True)
 def custom_add(first, *others):
     """Custom add that also prints the result."""
-    result = first + sum(others)
+    result = first
+    for other in others:
+        result = result + other
     print(f"Adding {(first, *others)} = {result}")
     return result
 
 
-# Without replace=True, the old resolver is kept and a warning is emitted
+# Without replace=True, the published resolver is kept and a warning is emitted.
+# With replace=True, the resolver of OmegaConf is replaced by custom_add.
 registry.register_resolvers(replace=True)
 ```
 
 `register_resolvers` is idempotent: calling it twice changes nothing, and a resolver that is already
-published is not registered again. A key that another source registered in OmegaConf is not
+published is not registered again. A resolver removed from OmegaConf (for example by
+`OmegaConf.clear_resolvers()`) is published again. A key that another source registered in OmegaConf is not
 overwritten unless `replace=True`.
 
 OmegaConf caches the value of the nodes it has already resolved. Replacing a resolver does not clear
 this cache for existing configurations: call `OmegaConf.clear_cache(cfg)` to clear it.
 
-With OmegaConf 2.4 and later, the resolvers are published with `annotation_validation="off"`: the type annotations of a resolver
-are documentation for readers and type checkers, OmegaConf does not check them at call time.
+With OmegaConf 2.4 and later, the resolvers are published with `annotation_validation="off"`: the
+type annotations of a resolver are documentation for readers and type checkers, OmegaConf does not
+check them at call time.
 
 ### Registering a Resolver Lazily
 

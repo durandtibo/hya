@@ -359,19 +359,21 @@ def path_resolver(path: str) -> Path:
         directory and converted to absolute path.
 
     Note:
-        The tilde (~) expansion works when the path is passed as
-        a regular string, but may not work correctly when used
-        within OmegaConf interpolation syntax due to grammar
-        restrictions. For paths with tilde, consider using
-        direct Python code or configuration string values.
+        Within an OmegaConf interpolation, a path with a tilde (~)
+        must be quoted (``${hya.path:"~/data"}``); unquoted, the
+        interpolation is a grammar error.
 
     Example:
         ```pycon
+        >>> from pathlib import Path
         >>> import hya
         >>> from omegaconf import OmegaConf
         >>> conf = OmegaConf.create({"key": "${hya.path:/my/path}"})
         >>> conf.key
         PosixPath('/my/path')
+        >>> conf = OmegaConf.create({"key": '${hya.path:"~/my/path"}'})
+        >>> conf.key == Path("~/my/path").expanduser().resolve()
+        True
 
         ```
     """

@@ -1,0 +1,5 @@
+# mbake configuration file
+# Used by the `format-makefile` target (see makefile.mk).
+
+[formatter]
+ensure_final_newline = true

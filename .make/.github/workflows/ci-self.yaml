@@ -1,0 +1,33 @@
+# Self module workflow.
+# Tests the self-update target (and the deprecated update-subtree alias) of self.mk (tests/test-self-mk.sh uses temp dirs and
+# does not touch the repository or the network) on multiple operating systems.
+
+name: Test self.mk
+on:
+  workflow_call:
+    inputs:
+      test-matrix:
+        description: "JSON test matrix from lib-get-test-matrix.yaml, loaded once by the caller"
+        required: true
+        type: string
+
+permissions: {}
+
+jobs:
+  test:
+    permissions:
+      contents: read
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 10
+    strategy:
+      max-parallel: 8
+      fail-fast: false
+      matrix:
+        os: ${{ fromJson(inputs.test-matrix).os_matrix }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # ratchet:actions/checkout@v7
+
+      - name: self-update removes unnecessary files
+        run: tests/test-self-mk.sh

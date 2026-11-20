@@ -1,0 +1,55 @@
+# Formatting and linting workflow.
+# Checks the formatting and lints the YAML, Makefile, shell, Markdown and GitHub Actions
+# files of the repository.
+
+name: Format
+on:
+  workflow_call:
+  workflow_dispatch: # to trigger manually
+
+permissions: {}
+
+jobs:
+  format:
+    permissions:
+      contents: read
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # ratchet:actions/checkout@v7
+
+      # The root Makefile includes the modules directly, so the format-files-action (which expects
+      # the modules vendored in .make/) is not used here.
+      - name: Format files
+        run: |
+          make format
+
+      - name: Check that the files are formatted
+        run: |
+          git diff --exit-code
+
+      - name: Check shell formatting
+        run: |
+          make check-format-shell
+
+      - name: Lint YAML files
+        run: |
+          make lint-yaml
+
+      - name: Lint Makefiles
+        run: |
+          make lint-makefile
+
+      - name: Lint shell scripts
+        run: |
+          make lint-shell
+
+      - name: Lint Markdown files
+        run: |
+          make lint-markdown
+
+      - name: Lint GitHub Actions workflows
+        run: |
+          make lint-actions

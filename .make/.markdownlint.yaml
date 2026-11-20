@@ -1,0 +1,11 @@
+# markdownlint configuration (also picked up by `make lint-markdown`).
+
+default: true
+
+# Lines are wrapped at 100 characters, like the other files of the repository.
+# Tables, code blocks and headings cannot be wrapped.
+MD013:
+  line_length: 100
+  code_blocks: false
+  tables: false
+  headings: false

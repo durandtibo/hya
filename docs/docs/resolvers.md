@@ -4,18 +4,18 @@
 
 ## Overview
 
-`hya` provides over 20 built-in resolvers for use in OmegaConf/Hydra configurations. Resolvers are
-organized into the following categories:
+`hya` provides 24 built-in resolvers and 4 optional resolvers for use in OmegaConf/Hydra
+configurations. Resolvers are organized into the following categories (see the
+[summary](#resolver-categories-summary) at the end of this page):
 
-- **Arithmetic Operations**: Basic mathematical operations (add, subtract, multiply, divide)
-- **Advanced Math**: Transcendental and special functions (exp, log, sqrt, powers)
-- **Comparison**: Min/max operations
-- **Path Utilities**: Path creation and manipulation
-- **String Utilities**: Joining and hashing
-- **Utility Functions**: Length, negation, constants
-- **Optional Resolvers**: Require additional packages (NumPy, PyTorch, braceexpand)
+- **Standard library resolvers**: the callable itself, with its own behaviour and errors
+- **Arithmetic**: `hya.add`, `hya.mul`, `hya.ceildiv`
+- **Constants**: `hya.pi`
+- **Paths and strings**: `hya.path`, `hya.iter_join`, `hya.sha256`
+- **Optional resolvers**: need an additional package (braceexpand, NumPy, PyTorch)
 
-All resolvers are automatically available after importing `hya`.
+All resolvers are automatically available after importing `hya`. The optional resolvers are
+registered too; the package they need is imported when they are called.
 
 ## Default Resolvers
 
@@ -68,7 +68,8 @@ model:
 
 `hya.int` casts the float of a computation back to an integer, and `hya.sum` adds the elements of a
 list (`hya.add` takes values: `${hya.add:${model.layer_sizes}}` returns the list). `bool` and `str`
-have no resolver: `bool("false")` is `True`, and `str` is what an interpolation already does.
+have no resolver: `bool("false")` is `True`, and `str` is what an interpolation already does. See
+[Design Choices](design.md) for why these resolvers have no wrapper.
 
 ### Arithmetic Operations
 
@@ -132,8 +133,8 @@ value = object1 * object2 * object3 * ...
 ```
 
 **Note:** The arguments are never modified and are meant to be numbers. Repeating a list of the
-configuration (`${hya.mul:${x},2}` with `x: [1, 2]`) is not supported and raises an error. At least
-one argument is required.
+configuration (`${hya.mul:${x},2}` with `x: [1, 2]`) is not supported and raises a `TypeError`: repeat
+the list in your code. At least one argument is required.
 
 #### `hya.ceildiv`
 
@@ -230,13 +231,12 @@ value = Path(path).expanduser().resolve()
 - Returns a `pathlib.Path` object, which is useful for path operations in Python.
 - Only a string that starts with `file:` (the scheme is case-insensitive) is read as a URL (its
   percent-encoding is decoded and its query is dropped). A host other than `localhost`
-  (`file://host/a`) raises a `ValueError` instead of being dropped.
+  (`file://host/a`) raises a `ValueError`: the host is never dropped silently.
 - Any other string is a plain path, written as is: `/data/a?b` and `/data/a%20b` keep the `?` and
   the `%20`.
 - A `pathlib.Path` is accepted, so the output of `hya.path` can be passed to `hya.path` again.
 - A path with a tilde must be quoted in an interpolation: `${hya.path:"~/data"}`. Unquoted, it is a
   grammar error.
-- `hya.to_path` was merged into `hya.path` in 0.5.0.
 
 #### `hya.iter_join`
 
@@ -474,9 +474,11 @@ available dtype names, sorted.
 | **Arithmetic**     | `add`, `sub`, `mul`, `truediv`, `floordiv`, `ceildiv`, `neg` |
 | **Math Functions** | `pow`, `sqrt`, `exp`, `log`, `log10`, `sinh`, `asinh`        |
 | **Comparison**     | `max`, `min`                                                 |
+| **Casts**          | `int`, `float`                                               |
+| **Collections**    | `len`, `sum`                                                 |
 | **Constants**      | `pi`                                                         |
 | **Paths**          | `path`, `iter_join`                                          |
-| **Utilities**      | `len`, `sha256`                                              |
+| **Hashing**        | `sha256`                                                     |
 | **Optional**       | `braceexpand`, `np.array`, `torch.tensor`, `torch.dtype`     |
 
 ## Quick Reference Examples

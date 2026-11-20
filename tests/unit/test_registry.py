@@ -28,7 +28,7 @@ def test_resolver_registry_init_empty() -> None:
 
 
 def test_resolver_registry_init_with_state() -> None:
-    initial_state: dict[str, Callable[[...], Any]] = {"add2": add_two}
+    initial_state: dict[str, Callable[..., Any]] = {"add2": add_two}
     registry = ResolverRegistry(initial_state)
 
     assert "add2" in registry.state

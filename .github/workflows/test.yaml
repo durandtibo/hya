@@ -41,11 +41,11 @@ jobs:
 
       - name: Run unit tests
         run: |
-          inv unit-test --cov
+          inv test.unit --cov
 
       - name: Run integration tests
         run: |
-          inv integration-test --cov
+          inv test.integration --cov
 
   min:
     runs-on: ${{ matrix.os }}
@@ -82,8 +82,8 @@ jobs:
 
       - name: Run unit tests
         run: |
-          inv unit-test --cov
+          inv test.unit --cov
 
       - name: Run integration tests
         run: |
-          inv integration-test --cov
+          inv test.integration --cov

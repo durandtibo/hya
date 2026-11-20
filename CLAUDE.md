@@ -7,9 +7,10 @@
 - Lint and format before committing: `.venv/bin/ruff check src tests` and
   `.venv/bin/ruff format src tests`. Fix the issues raised by ruff. Ignoring an issue (`noqa`, a
   changed rule set) is not fixing it.
-- Type check with `.venv/bin/pyright --verifytypes hya --ignoreexternal` (the `inv check-types`
-  task). Fix the issues raised by pyright. Ignoring an issue (`type: ignore`, `pyright: ignore`, a
-  cast that hides the problem) is not fixing it.
+- Type check with `.venv/bin/inv types.check` (ty) and
+  `.venv/bin/pyright --verifytypes hya --ignoreexternal`. Fix the issues raised by the checkers.
+  Ignoring an issue (`type: ignore`, `pyright: ignore`, a cast that hides the problem) is not
+  fixing it.
 - Run the unit tests of the modules you changed (for example
   `.venv/bin/pytest tests/unit/test_registry.py -q`). Some tests fail on `main`; check with
   `git stash` before blaming your change.

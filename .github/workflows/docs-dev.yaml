@@ -40,4 +40,4 @@ jobs:
       # Build and deploy documentation for the development version
       - name: Build and deploy documentation
         run: |
-          inv publish-doc-dev
+          inv doc.publish-dev

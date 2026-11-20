@@ -65,7 +65,6 @@ The resolvers can be easily registered in your python project by adding the foll
 >>> @registry.register("multiply")
 ... def multiply_resolver(x, y):
 ...     return x * y
-...
 >>> registry.register_resolvers()
 
 ```

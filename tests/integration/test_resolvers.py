@@ -89,3 +89,9 @@ def test_to_path_resolver() -> None:
 
 def test_truediv_resolver() -> None:
     assert OmegaConf.has_resolver("hya.truediv")
+
+
+def test_add_resolver_does_not_modify_config_list() -> None:
+    conf = OmegaConf.create({"x": [1, 2], "key": "${hya.add:${x},[3]}"})
+    assert conf.key == [1, 2, 3]
+    assert conf.x == [1, 2]

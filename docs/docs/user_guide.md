@@ -360,12 +360,16 @@ Generate multiple values from patterns:
 
 ```yaml
 files:
-  # Expands to iterator: file_1.txt, file_2.txt, ..., file_5.txt
-  pattern: ${hya.braceexpand:file_{1..5}.txt}
+  # Expands to a list: file_1.txt, file_2.txt, ..., file_5.txt
+  pattern: ${hya.braceexpand:"file_{1..5}.txt"}
 
-  # Expands to: train_a.json, train_b.json, train_c.json
-  train_configs: ${hya.braceexpand:train_{a,b,c}.json}
+  # Expands to a list: train_a.json, train_b.json, train_c.json
+  train_configs: ${hya.braceexpand:"train_{a,b,c}.json"}
 ```
+
+The pattern must be quoted in an interpolation. The result is a list (it has a length, can be
+indexed and can be read several times), so it can be used by other resolvers such as
+`hya.iter_join`.
 
 ## Registry API
 

@@ -199,8 +199,46 @@ def test_path_resolver_url_is_not_parsed_when_it_is_not_a_file_url() -> None:
     assert path_resolver("http://host/path") == Path.cwd() / "http:" / "host" / "path"
 
 
-def test_path_resolver_file_prefix_is_case_sensitive() -> None:
-    assert path_resolver("File:/my/path") == Path.cwd() / "File:" / "my" / "path"
+def test_path_resolver_file_scheme_is_case_insensitive() -> None:
+    assert path_resolver("FILE:///my/path") == Path("/my/path")
+
+
+def test_path_resolver_file_scheme_is_case_insensitive_without_slashes() -> None:
+    assert path_resolver("File:/my/path") == Path("/my/path")
+
+
+def test_path_resolver_file_url_with_a_host_raises() -> None:
+    with pytest.raises(
+        ValueError, match=r"A file URL with a host is not supported: 'file://host/a'"
+    ):
+        path_resolver("file://host/a")
+
+
+def test_path_resolver_file_url_with_a_host_raises_in_an_interpolation() -> None:
+    conf = OmegaConf.create({"key": "${hya.path:file://host/a/b}"})
+    with pytest.raises(InterpolationResolutionError, match=r"with a host"):
+        _ = conf.key
+
+
+def test_path_resolver_file_url_relative_path() -> None:
+    assert path_resolver("file:my/path") == Path.cwd() / "my" / "path"
+
+
+def test_path_resolver_path_object() -> None:
+    assert path_resolver(Path("/my/path")) == Path("/my/path")
+
+
+def test_path_resolver_path_object_with_tilde() -> None:
+    assert path_resolver(Path("~/my/path")) == Path.home() / "my" / "path"
+
+
+def test_path_resolver_path_of_a_path_resolver() -> None:
+    assert OmegaConf.create({"key": "${hya.path:${hya.path:/my/path}}"}).key == Path("/my/path")
+
+
+def test_path_resolver_path_object_in_a_configuration() -> None:
+    conf = OmegaConf.create({"p": Path("/my/path"), "key": "${hya.path:${p}}"})
+    assert conf.key == Path("/my/path")
 
 
 def test_pi_resolver() -> None:

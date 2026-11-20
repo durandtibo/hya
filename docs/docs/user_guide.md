@@ -281,6 +281,9 @@ paths:
 
   # Use path resolver for proper Path objects
   model_checkpoint: ${hya.path:${paths.data_dir}/models/checkpoint.pth}
+
+  # A tilde must be quoted in an interpolation (unquoted, it is a grammar error)
+  home_dir: ${hya.path:"~/data"}
 ```
 
 ### Mathematical Computations
@@ -296,7 +299,8 @@ model:
 training:
   total_steps: 100000
   warmup_ratio: 0.1
-  warmup_steps: ${hya.mul:${training.total_steps},${training.warmup_ratio}} # 10000
+  # 100000 * 0.1 is the float 10000.0: use ceildiv to get an integer
+  warmup_steps: ${hya.ceildiv:${training.total_steps},10} # 10000
 
   # Calculate batch size for distributed training
   per_device_batch_size: 16
@@ -420,7 +424,10 @@ model:
 
 ### Error Handling
 
-When using optional resolvers, provide helpful error messages:
+An optional resolver is registered only when its package is installed. When the package is
+missing, the key is unknown to OmegaConf and the access raises
+`UnsupportedInterpolationType`. An error raised by a resolver is reported by OmegaConf as an
+`InterpolationResolutionError`:
 
 ```python
 import hya
@@ -429,8 +436,8 @@ from omegaconf import OmegaConf, errors
 try:
     conf = OmegaConf.create({"tensor": "${hya.torch.tensor:[1,2,3]}"})
     print(conf.tensor)
-except errors.InterpolationResolutionError as e:
-    print(f"Error: PyTorch is required. Install with: pip install torch")
+except errors.UnsupportedInterpolationType:
+    print("Error: PyTorch is required. Install with: pip install torch")
 ```
 
 ### Type Safety
@@ -460,20 +467,21 @@ conf = OmegaConf.create(
 result = conf.slow_computation  # Computed here
 ```
 
-Cache expensive computations:
+OmegaConf does not cache the output of a resolver: every access of an interpolation calls the
+resolver again, even when several keys point to the same interpolation. Compute an expensive
+value once in Python and store it in the configuration if it is used many times:
 
 ```yaml
-# Good: Compute once, reuse
 model:
   vocab_size: 50000
   embedding_dim: 512
   total_embeddings: ${hya.mul:${model.vocab_size},${model.embedding_dim}}
 
 layer1:
-  input_size: ${model.total_embeddings} # Reuses cached computation
+  input_size: ${model.total_embeddings} # Calls hya.mul at each access
 
 layer2:
-  input_size: ${model.total_embeddings} # Reuses cached computation
+  input_size: ${model.total_embeddings} # Calls hya.mul at each access
 ```
 
 ## Troubleshooting
@@ -491,7 +499,11 @@ from omegaconf import OmegaConf
 
 ### Optional Dependency Missing
 
-**Error:** `ImportError: braceexpand is required to use hya.braceexpand resolver`
+**Error:** `omegaconf.errors.UnsupportedInterpolationType: Unsupported interpolation type hya.braceexpand`
+
+The optional resolvers (`hya.braceexpand`, `hya.np.array`, `hya.torch.*`) are registered only if
+their package is installed. Calling the resolver function directly without the package raises
+`RuntimeError: 'braceexpand' package is required but not installed`.
 
 **Solution:** Install the required package:
 

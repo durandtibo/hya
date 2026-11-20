@@ -32,6 +32,33 @@ def test_add_resolver_str3() -> None:
     assert OmegaConf.create({"key": "${hya.add:abc,d,ef}"}).key == "abcdef"
 
 
+def test_add_resolver_one_argument() -> None:
+    assert OmegaConf.create({"key": "${hya.add:5}"}).key == 5
+
+
+def test_add_resolver_list_interpolation() -> None:
+    conf = OmegaConf.create({"x": [1, 2], "key": "${hya.add:${x},[3]}"})
+    assert conf.key == [1, 2, 3]
+
+
+def test_add_resolver_does_not_modify_config_list() -> None:
+    conf = OmegaConf.create({"x": [1, 2], "key": "${hya.add:${x},[3]}"})
+    _ = conf.key
+    assert conf.x == [1, 2]
+
+
+def test_add_resolver_does_not_modify_config_list_when_read_twice() -> None:
+    conf = OmegaConf.create({"x": [1, 2], "key": "${hya.add:${x},[3]}"})
+    _ = conf.key
+    assert conf.key == [1, 2, 3]
+
+
+def test_add_resolver_no_argument() -> None:
+    conf = OmegaConf.create({"key": "${hya.add:}"})
+    with pytest.raises(InterpolationResolutionError, match=r"missing 1 required positional"):
+        _ = conf.key
+
+
 def test_ceildiv_resolver() -> None:
     assert OmegaConf.create({"key": "${hya.ceildiv:11,4}"}).key == 3
 
@@ -71,6 +98,29 @@ def test_mul_resolver_float3() -> None:
 
 def test_mul_resolver_list() -> None:
     assert OmegaConf.create({"key": "${hya.mul:[1,2,3],3}"}).key == [1, 2, 3, 1, 2, 3, 1, 2, 3]
+
+
+def test_mul_resolver_one_argument() -> None:
+    assert OmegaConf.create({"key": "${hya.mul:5}"}).key == 5
+
+
+def test_mul_resolver_config_list_is_not_repeated() -> None:
+    conf = OmegaConf.create({"x": [1, 2], "key": "${hya.mul:${x},2}"})
+    with pytest.raises(InterpolationResolutionError, match=r"unsupported operand type"):
+        _ = conf.key
+
+
+def test_mul_resolver_config_list_is_not_modified() -> None:
+    conf = OmegaConf.create({"x": [1, 2], "key": "${hya.mul:${x},2}"})
+    with pytest.raises(InterpolationResolutionError, match=r"unsupported operand type"):
+        _ = conf.key
+    assert conf.x == [1, 2]
+
+
+def test_mul_resolver_no_argument() -> None:
+    conf = OmegaConf.create({"key": "${hya.mul:}"})
+    with pytest.raises(InterpolationResolutionError, match=r"missing 1 required positional"):
+        _ = conf.key
 
 
 def test_path_resolver() -> None:

@@ -185,7 +185,7 @@ value = math.pi
 
 #### `hya.path`
 
-Converts a string, or a `file:` URL, to a resolved `pathlib.Path` object with user expansion.
+Converts a string, a path-like object, or a `file:` URL, to a resolved `pathlib.Path` object with user expansion.
 
 **Syntax:** `${hya.path:path_string}`
 
@@ -201,20 +201,28 @@ url_decoded: ${hya.path:file:///data/my%20file.txt} # /data/my file.txt
 **Equivalent Python:**
 
 ```python
+import os
 from pathlib import Path
 from urllib.parse import unquote, urlparse
 
-if path.startswith("file:"):
-    path = unquote(urlparse(path).path)
+path = os.fspath(path)
+url = urlparse(path)
+if url.scheme == "file":
+    if url.netloc not in ("", "localhost"):
+        raise ValueError(f"A file URL with a host is not supported: '{path}'")
+    path = unquote(url.path)
 value = Path(path).expanduser().resolve()
 ```
 
 **Notes:**
 
 - Returns a `pathlib.Path` object, which is useful for path operations in Python.
-- Only a string that starts with `file:` is read as a URL (its percent-encoding is decoded and its
-  query is dropped). Any other string is a plain path, written as is: `/data/a?b` and `/data/a%20b`
-  keep the `?` and the `%20`.
+- Only a string that starts with `file:` (the scheme is case-insensitive) is read as a URL (its
+  percent-encoding is decoded and its query is dropped). A host other than `localhost`
+  (`file://host/a`) raises a `ValueError` instead of being dropped.
+- Any other string is a plain path, written as is: `/data/a?b` and `/data/a%20b` keep the `?` and
+  the `%20`.
+- A `pathlib.Path` is accepted, so the output of `hya.path` can be passed to `hya.path` again.
 - A path with a tilde must be quoted in an interpolation: `${hya.path:"~/data"}`. Unquoted, it is a
   grammar error.
 - `hya.to_path` was merged into `hya.path` in 0.5.0.

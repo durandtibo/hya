@@ -48,6 +48,8 @@ OPTIONAL_KEYS = {"hya.braceexpand", "hya.np.array", "hya.torch.tensor", "hya.tor
         ("${hya.sqrt:64}", 8.0),
         ("${hya.sub:5,3}", 2),
         ("${hya.path:file:///my/path}", Path("/my/path")),
+        ("${hya.path:FILE:///my/path}", Path("/my/path")),
+        ("${hya.path:${hya.path:/my/path}}", Path("/my/path")),
         ("${hya.truediv:10,4}", 2.5),
     ],
 )
@@ -90,6 +92,12 @@ def test_default_resolvers_are_documented() -> None:
 def test_documented_resolvers_exist() -> None:
     documented = set(DOCUMENTED_KEY.findall(DOCS_RESOLVERS.read_text()))
     assert documented - set(get_default_registry().state) - OPTIONAL_KEYS == set()
+
+
+def test_path_resolver_file_url_with_a_host_is_an_error() -> None:
+    conf = OmegaConf.create({"key": "${hya.path:file://host/my/path}"})
+    with pytest.raises(InterpolationResolutionError, match=r"A file URL with a host"):
+        _ = conf.key
 
 
 ##########################################

@@ -23,8 +23,7 @@ nav:
       - user_guide.md
       - Resolvers: resolvers.md
       - Properties: properties.md
-  - Migration:
-      - Migrate from 0.4 to 0.5: migration/v0.4_to_v0.5.md
+      - Design Choices: design.md
   - Reference:
       - refs/index.md
       - refs/registry.md

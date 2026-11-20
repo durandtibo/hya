@@ -146,22 +146,24 @@ print(conf.result)  # Output: 15
 
 ## Available Resolvers
 
-`hya` provides over 20 built-in resolvers organized into categories:
+`hya` provides 24 built-in resolvers, plus 4 that need an optional package. All keys start with
+`hya.`:
 
-- **Mathematical operations**: `add`, `sub`, `mul`, `truediv`, `floordiv`, `ceildiv`, `pow`, `sqrt`,
-  `neg`, `max`, `min`, `exp`, `log`, `log10`, `sinh`, `asinh`, `sum`
+- **Arithmetic**: `add`, `sub`, `mul`, `truediv`, `floordiv`, `ceildiv`, `neg`, `pow`, `sum`
+- **Math functions**: `sqrt`, `exp`, `log`, `log10`, `sinh`, `asinh`
+- **Comparison**: `max`, `min`
 - **Casts**: `int`, `float`
 - **Constants**: `pi`
-- **Path utilities**: `path`, `iter_join`
-- **Utilities**: `len`, `sha256`
+- **Paths and strings**: `path`, `iter_join`, `sha256`
+- **Collections**: `len`
 - **Optional (with dependencies)**:
   - NumPy: `np.array`
   - PyTorch: `torch.tensor`, `torch.dtype`
   - Braceexpand: `braceexpand`
 
-See the [Resolvers](resolvers.md) page for complete documentation of all resolvers, and the
-[Properties](properties.md) page for the rules `hya` guarantees. If you upgrade from 0.4, read
-the [migration guide](migration/v0.4_to_v0.5.md).
+See the [Resolvers](resolvers.md) page for the documentation of every resolver, the
+[Properties](properties.md) page for the rules `hya` guarantees, and the
+[Design Choices](design.md) page for the reasons behind the design and its trade-offs.
 
 ## API stability
 

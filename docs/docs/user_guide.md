@@ -1,6 +1,7 @@
 # User Guide
 
-This guide provides comprehensive information on using `hya` in your projects.
+This guide explains how to use `hya` in your projects. For the reasons behind the design, see
+[Design Choices](design.md); for the guarantees, see [Properties](properties.md).
 
 ## Basic Usage
 
@@ -629,8 +630,8 @@ paths:
   project: ${oc.env:PROJECT_NAME,default_project}
   output: ${hya.iter_join:[${paths.root},${paths.project}],/}
 
-# Use resolvers with optional values
+# Use resolvers with Hydra overrides
 model:
-  size: ${size:512} # Can be overridden via command line
+  size: 512 # Can be overridden via the command line: model.size=1024
   doubled_size: ${hya.mul:${model.size},2}
 ```

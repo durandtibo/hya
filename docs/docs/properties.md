@@ -1,7 +1,7 @@
 # Properties
 
 These are the rules `hya` guarantees. Each one is enforced by the code or by a test of the
-repository.
+repository. The [Design Choices](design.md) page explains the reasons and the trade-offs.
 
 | #   | Property                   | Statement                                                                                                                                                                                                                                                                                                                      |
 | --- | -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
@@ -26,28 +26,33 @@ repository.
 - **P2.** The optional resolvers are registered lazily (`ResolverRegistry.register_lazy`): the key
   is always in the registry, and the module is imported when OmegaConf calls the resolver for the
   first time. `import hya` does not look for the packages on disk.
-- **P9.** The optional keys are registered whether or not the package is installed, so the registry
-  has the same keys on every machine.
-- **P10.** With a missing package, the resolver raises a `RuntimeError` that says how to install it
-  (`pip install torch`); OmegaConf reports it as an `InterpolationResolutionError`.
 - **P8.** After `import hya`, the default resolvers are already published, so
   `registry.register_resolvers()` is silent. Overriding a built-in
   (`registry.register("hya.add", exist_ok=True)`) warns until `register_resolvers(replace=True)` is
   called. OmegaConf caches the resolved nodes of a configuration: `replace=True` does not clear the
   cache of the existing configurations (`OmegaConf.clear_cache(cfg)`).
-- **P10.** OmegaConf validation of the annotations (OmegaConf 2.4 and later) is off for the
-  resolvers published by `hya`: the annotations are documentation for readers and type checkers, not
-  a runtime contract.
+- **P9.** The optional keys are registered whether or not the package is installed, so the registry
+  has the same keys on every machine.
+- **P10.** With a missing package, the resolver raises a `RuntimeError` that says how to install it
+  (`pip install torch`); OmegaConf reports it as an `InterpolationResolutionError`.
+- **P10.** With OmegaConf 2.4 and later, the validation of the annotations is off for the resolvers
+  published by `hya`: the annotations are documentation for readers and type checkers, not a runtime
+  contract.
 - **P11.** The value of an interpolation of a resolver that returns an object cannot always be
   written in YAML: use the value in code, or `OmegaConf.to_container(cfg, resolve=True)`.
 
-## Not guaranteed
+## Limits
 
-- Thread-safety of registering resolvers while OmegaConf resolves interpolations (the registry of
-  OmegaConf is a global dictionary).
-- Detection of a resolver that another source registers after `hya` published the same key (it
-  needs the private `BaseContainer._resolvers` of OmegaConf, which changes between releases).
-- The textual form of `hya.sha256` for an input whose `str()` OmegaConf changes: the hash is of
-  `str(obj)`, so two mappings with the same items in another order have different hashes.
-- Caching of the output of the resolvers (OmegaConf default: no cache).
-- Support of `OmegaConf.to_yaml(resolve=True)` for resolvers that return objects (P11).
+`hya` does not provide the following.
+
+- **Thread-safety** of registering resolvers while OmegaConf resolves interpolations. The resolver
+  table of OmegaConf is a global dictionary.
+- **Detection of a conflicting registration.** A resolver that another source registers after `hya`
+  published the same key is not detected: it needs the private `BaseContainer._resolvers` of
+  OmegaConf, which changes between releases.
+- **Order-insensitive hashes.** `hya.sha256` hashes `str(obj)`, so two mappings with the same items
+  in another order have different hashes.
+- **Caching of the output of the resolvers.** OmegaConf does not cache it: every access of an
+  interpolation calls the resolver again.
+- **YAML export of objects.** `OmegaConf.to_yaml(resolve=True)` does not support the resolvers that
+  return objects (P11).

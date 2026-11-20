@@ -51,6 +51,9 @@ training:
 value = value1 + value2 + value3 + ...
 ```
 
+**Note:** The arguments are never modified: `${hya.add:${x},[3]}` returns a new list and leaves
+`x` unchanged. At least one argument is required.
+
 #### `hya.sub`
 
 Subtracts the second value from the first.
@@ -101,6 +104,10 @@ model:
 ```python
 value = object1 * object2 * object3 * ...
 ```
+
+**Note:** The arguments are never modified and are meant to be numbers. Repeating a list of the
+configuration (`${hya.mul:${x},2}` with `x: [1, 2]`) is not supported and raises an error. At least
+one argument is required.
 
 #### `hya.truediv`
 

@@ -35,7 +35,7 @@ uv pip install hya torch        # For hya.torch.tensor and hya.torch.dtype resol
 The following table shows which resolvers require which packages:
 
 | Resolver           | Required Package     | Description                     |
-|--------------------|----------------------|---------------------------------|
+| ------------------ | -------------------- | ------------------------------- |
 | `hya.braceexpand`  | `braceexpand>=0.1.7` | Brace expansion patterns        |
 | `hya.np.array`     | `numpy>=1.24`        | NumPy array creation            |
 | `hya.torch.tensor` | `torch>=2.0`         | PyTorch tensor creation         |

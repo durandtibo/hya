@@ -92,7 +92,7 @@ model:
 training:
   batch_size: 32
   num_epochs: 10
-  learning_rate: ${hya.pow:10,-3}  # 0.001
+  learning_rate: ${hya.pow:10,-3} # 0.001
 
 paths:
   data_dir: ${hya.path:/data}

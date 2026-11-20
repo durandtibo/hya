@@ -5,7 +5,7 @@
 name: Test - Dependencies
 on:
   workflow_call:
-  workflow_dispatch:  # to trigger manually
+  workflow_dispatch: # to trigger manually
 
 permissions:
   contents: read
@@ -14,7 +14,6 @@ jobs:
   # Get dependency version information from config file
   get-versions:
     uses: ./.github/workflows/get-versions.yaml
-
 
   ########################
   #     Dependencies     #
@@ -26,7 +25,6 @@ jobs:
     with:
       package-name: omegaconf
       package-versions: ${{ toJson(fromJson(needs.get-versions.outputs.package_versions).omegaconf) }}
-
 
   #################################
   #     Optional dependencies     #

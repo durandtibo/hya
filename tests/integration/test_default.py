@@ -125,3 +125,36 @@ print(len(hya.get_default_registry().state))
 """
     result = run_python(code)
     assert result.stdout.strip() == "25", result.stderr
+
+
+################################
+#     Tests for the import     #
+################################
+
+
+def test_import_hya_publishes_the_default_resolvers() -> None:
+    code = """
+import hya
+from omegaconf import OmegaConf
+
+assert all(OmegaConf.has_resolver(key) for key in hya.get_default_registry().state)
+"""
+    result = run_python(code)
+    assert result.returncode == 0, result.stderr
+
+
+def test_import_hya_default_module_does_not_publish_by_itself() -> None:
+    code = """
+from unittest.mock import patch
+
+import hya.registry
+
+with patch.object(hya.registry.ResolverRegistry, "register_resolvers") as register_resolvers:
+    import importlib
+    import hya.default
+
+    importlib.reload(hya.default)
+print(register_resolvers.call_count)
+"""
+    result = run_python(code)
+    assert result.stdout.strip() == "0", result.stderr

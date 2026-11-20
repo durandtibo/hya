@@ -165,7 +165,10 @@ class ResolverRegistry:
         The module of the resolver is not imported when the resolver is
         registered, but the first time OmegaConf calls the resolver. It
         is useful for the resolvers that need a heavy package, because
-        the package is not imported if the resolver is never used.
+        the package is not imported if the resolver is never used. The
+        registered callable is named after the function of the target and
+        its docstring gives the target, so that tracebacks and the state of
+        the registry say what it is.
 
         Args:
             key: The key used to register the resolver. Must be unique unless
@@ -198,6 +201,10 @@ class ResolverRegistry:
 
         def resolver(*args: Any) -> Any:
             return getattr(import_module(module_name), function_name)(*args)
+
+        resolver.__name__ = function_name
+        resolver.__qualname__ = function_name
+        resolver.__doc__ = f"Resolver {target}, imported on its first call."
 
         self.register(key, exist_ok=exist_ok)(resolver)
 

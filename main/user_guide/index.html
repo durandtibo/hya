@@ -1964,12 +1964,15 @@ An unknown module or function raises an error on the first call of the resolver.
 <h3 id="brace-expansion-requires-braceexpand">Brace Expansion (requires braceexpand)<a class="headerlink" href="#brace-expansion-requires-braceexpand" title="Permanent link">&para;</a></h3>
 <p>Generate multiple values from patterns:</p>
 <div class="highlight"><pre><span></span><code><span class="nt">files</span><span class="p">:</span>
-<span class="w">  </span><span class="c1"># Expands to iterator: file_1.txt, file_2.txt, ..., file_5.txt</span>
-<span class="w">  </span><span class="nt">pattern</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">${hya.braceexpand:file_{1..5}.txt}</span>
+<span class="w">  </span><span class="c1"># Expands to a list: file_1.txt, file_2.txt, ..., file_5.txt</span>
+<span class="w">  </span><span class="nt">pattern</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">${hya.braceexpand:"file_{1..5}.txt"}</span>
 
-<span class="w">  </span><span class="c1"># Expands to: train_a.json, train_b.json, train_c.json</span>
-<span class="w">  </span><span class="nt">train_configs</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">${hya.braceexpand:train_{a,b,c}.json}</span>
+<span class="w">  </span><span class="c1"># Expands to a list: train_a.json, train_b.json, train_c.json</span>
+<span class="w">  </span><span class="nt">train_configs</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">${hya.braceexpand:"train_{a,b,c}.json"}</span>
 </code></pre></div>
+<p>The pattern must be quoted in an interpolation. The result is a list (it has a length, can be
+indexed and can be read several times), so it can be used by other resolvers such as
+<code>hya.iter_join</code>.</p>
 <h2 id="registry-api">Registry API<a class="headerlink" href="#registry-api" title="Permanent link">&para;</a></h2>
 <h3 id="checking-for-resolvers">Checking for Resolvers<a class="headerlink" href="#checking-for-resolvers" title="Permanent link">&para;</a></h3>
 <p>Check if a resolver is registered:</p>

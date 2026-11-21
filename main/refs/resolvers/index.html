@@ -899,17 +899,6 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#hya.torch.get_dtypes" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        get_dtypes
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
   <a href="#hya.torch.to_tensor_resolver" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1197,17 +1186,6 @@
   
     <nav class="md-nav" aria-label="torch">
       <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#hya.torch.get_dtypes" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        get_dtypes
-      
-    </span>
-  </a>
-  
-</li>
         
           <li class="md-nav__item">
   <a href="#hya.torch.to_tensor_resolver" class="md-nav__link">
@@ -2051,12 +2029,12 @@ package is available.</p>
 
 
 <a href="#hya.braceexpand.braceexpand_resolver" class="headerlink" title="Permanent link">&para;</a></h3>
-<div class="doc-signature highlight"><pre><span></span><code><span class="nf">braceexpand_resolver</span><span class="p">(</span><span class="n">pattern</span><span class="p">:</span> <span class="n"><span title="str">str</span></span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n"><span title="collections.abc.Iterator">Iterator</span></span><span class="p">[</span><span class="n"><span title="str">str</span></span><span class="p">]</span>
+<div class="doc-signature highlight"><pre><span></span><code><span class="nf">braceexpand_resolver</span><span class="p">(</span><span class="n">pattern</span><span class="p">:</span> <span class="n"><span title="str">str</span></span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n"><span title="list">list</span></span><span class="p">[</span><span class="n"><span title="str">str</span></span><span class="p">]</span>
 </code></pre></div>
 
     <div class="doc doc-contents ">
 
-        <p>Return an iterator from a brace expansion of pattern.</p>
+        <p>Return the list of the strings of a brace expansion of pattern.</p>
 <p>This resolver expands a string with brace patterns similar to
 bash brace expansion, generating multiple strings from a single
 pattern. Useful for generating lists of similar configuration
@@ -2110,21 +2088,41 @@ patterns.</p>
       <tbody>
           <tr class="doc-section-item">
             <td>
-                  <code><span title="collections.abc.Iterator">Iterator</span>[<span title="str">str</span>]</code>
+                  <code><span title="list">list</span>[<span title="str">str</span>]</code>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>An iterator yielding strings resulting from brace expansion</p>
+                <p>The list of the strings resulting from the brace expansion of</p>
               </div>
             </td>
           </tr>
           <tr class="doc-section-item">
             <td>
-                  <code><span title="collections.abc.Iterator">Iterator</span>[<span title="str">str</span>]</code>
+                  <code><span title="list">list</span>[<span title="str">str</span>]</code>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>of the pattern.</p>
+                <p>the pattern. It is a list (and not an iterator), so it has a</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="list">list</span>[<span title="str">str</span>]</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>length, can be indexed and can be read several times. The</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="list">list</span>[<span title="str">str</span>]</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>whole expansion is built at once.</p>
               </div>
             </td>
           </tr>
@@ -2134,9 +2132,22 @@ patterns.</p>
 
 <details class="note" open>
   <summary>Note</summary>
-  <p>When using brace expansion patterns in OmegaConf, you may need
-to escape or quote the pattern string to avoid conflicts with
-OmegaConf's own syntax for curly braces.</p>
+  <p>When using brace expansion patterns in OmegaConf, you need
+to quote the pattern string (<code>${hya.braceexpand:"a{1,2}"}</code>)
+or to escape the braces to avoid conflicts with OmegaConf's
+own syntax for curly braces.</p>
+</details>
+
+<details class="example" open>
+  <summary>Example</summary>
+  <div class="highlight"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">hya</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">omegaconf</span><span class="w"> </span><span class="kn">import</span> <span class="n">OmegaConf</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">conf</span> <span class="o">=</span> <span class="n">OmegaConf</span><span class="o">.</span><span class="n">create</span><span class="p">({</span><span class="s2">"key"</span><span class="p">:</span> <span class="s1">'${hya.braceexpand:"file_{1..3}.txt"}'</span><span class="p">})</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">list</span><span class="p">(</span><span class="n">conf</span><span class="o">.</span><span class="n">key</span><span class="p">)</span>
+<span class="go">['file_1.txt', 'file_2.txt', 'file_3.txt']</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">len</span><span class="p">(</span><span class="n">conf</span><span class="o">.</span><span class="n">key</span><span class="p">)</span>
+<span class="go">3</span>
+</code></pre></div>
 </details>
 
     </div>
@@ -2325,82 +2336,6 @@ PyTorch tensors and specify dtypes directly from configuration files.</p>
 <div class="doc doc-object doc-function">
 
 
-<h3 id="hya.torch.get_dtypes" class="doc doc-heading">
-            <span class="doc doc-object-name doc-function-name">hya.torch.get_dtypes</span>
-
-
-<a href="#hya.torch.get_dtypes" class="headerlink" title="Permanent link">&para;</a></h3>
-<div class="doc-signature highlight"><pre><span></span><code><span class="nf">get_dtypes</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n"><span title="set">set</span></span><span class="p">[</span><span class="n"><span title="hya.utils.fallback.torch.torch.dtype">dtype</span></span><span class="p">]</span>
-</code></pre></div>
-
-    <div class="doc doc-contents ">
-
-        <p>Get all available PyTorch data types.</p>
-<p>This function introspects the torch module to find all available
-dtype objects. It's useful for validation and error messages when
-working with torch dtype resolvers.</p>
-
-
-    <p><span class="doc-section-title">Returns:</span></p>
-    <table>
-      <thead>
-        <tr>
-          <th>Type</th>
-          <th>Description</th>
-        </tr>
-      </thead>
-      <tbody>
-          <tr class="doc-section-item">
-            <td>
-                  <code><span title="set">set</span>[<span title="hya.utils.fallback.torch.torch.dtype">dtype</span>]</code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>A set containing all PyTorch dtype objects available in the</p>
-              </div>
-            </td>
-          </tr>
-          <tr class="doc-section-item">
-            <td>
-                  <code><span title="set">set</span>[<span title="hya.utils.fallback.torch.torch.dtype">dtype</span>]</code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>current torch installation (e.g., torch.float32, torch.int64,</p>
-              </div>
-            </td>
-          </tr>
-          <tr class="doc-section-item">
-            <td>
-                  <code><span title="set">set</span>[<span title="hya.utils.fallback.torch.torch.dtype">dtype</span>]</code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>torch.bool, etc.).</p>
-              </div>
-            </td>
-          </tr>
-      </tbody>
-    </table>
-
-
-<details class="example" open>
-  <summary>Example</summary>
-  <div class="highlight"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">hya</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">hya.torch</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_dtypes</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">dtypes</span> <span class="o">=</span> <span class="n">get_dtypes</span><span class="p">()</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">torch</span><span class="o">.</span><span class="n">float32</span> <span class="ow">in</span> <span class="n">dtypes</span>
-<span class="go">True</span>
-</code></pre></div>
-</details>
-
-    </div>
-
-</div>
-
-<div class="doc doc-object doc-function">
-
-
 <h3 id="hya.torch.to_tensor_resolver" class="doc doc-heading">
             <span class="doc doc-object-name doc-function-name">hya.torch.to_tensor_resolver</span>
 
@@ -2577,7 +2512,8 @@ should match the attribute name in torch (e.g., use
             <td>
               <div class="doc-md-description">
                 <p>If the target string doesn't
-correspond to a valid torch dtype.</p>
+correspond to a valid torch dtype. The message lists the
+available dtype names, sorted.</p>
               </div>
             </td>
           </tr>

@@ -1827,17 +1827,27 @@ one argument is required.</p>
 <p><strong>Syntax:</strong> <code>${hya.braceexpand:pattern}</code></p>
 <p><strong>Example:</strong></p>
 <div class="highlight"><pre><span></span><code><span class="c1"># Numeric range</span>
-<span class="nt">files</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">${hya.braceexpand:file_{1..5}.txt}</span>
-<span class="c1"># Returns iterator: file_1.txt, file_2.txt, ..., file_5.txt</span>
+<span class="nt">files</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">${hya.braceexpand:"file_{1..5}.txt"}</span>
+<span class="c1"># Returns a list: [file_1.txt, file_2.txt, ..., file_5.txt]</span>
 
 <span class="c1"># Choice expansion</span>
-<span class="nt">configs</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">${hya.braceexpand:config_{train,val,test}.yaml}</span>
-<span class="c1"># Returns iterator: config_train.yaml, config_val.yaml, config_test.yaml</span>
+<span class="nt">configs</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">${hya.braceexpand:"config_{train,val,test}.yaml"}</span>
+<span class="c1"># Returns a list: [config_train.yaml, config_val.yaml, config_test.yaml]</span>
 
 <span class="c1"># Nested patterns</span>
-<span class="nt">paths</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">${hya.braceexpand:data/{2020..2022}/{jan,feb,mar}}</span>
-<span class="c1"># Returns: data/2020/jan, data/2020/feb, ..., data/2022/mar</span>
+<span class="nt">paths</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">${hya.braceexpand:"data/{2020..2022}/{jan,feb,mar}"}</span>
+<span class="c1"># Returns a list: [data/2020/jan, data/2020/feb, ..., data/2022/mar]</span>
+
+<span class="c1"># The list can be used by another resolver</span>
+<span class="nt">names</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">${hya.iter_join:${hya.braceexpand:"a{1..3}"},-}</span><span class="w"> </span><span class="c1"># Result: "a1-a2-a3"</span>
 </code></pre></div>
+<p><strong>Notes:</strong></p>
+<ul>
+<li>The pattern must be quoted (or its braces escaped) in an interpolation: unquoted, the braces are
+  a grammar error of OmegaConf.</li>
+<li>The resolver returns a <code>list</code>, not an iterator: it has a length, can be indexed and can be read
+  several times. The whole expansion is built at once.</li>
+</ul>
 <p><strong>Reference:</strong> <a href="https://github.com/trendels/braceexpand">braceexpand documentation</a></p>
 <h3 id="numpy">NumPy<a class="headerlink" href="#numpy" title="Permanent link">&para;</a></h3>
 <p><strong>Package Required:</strong> <code>numpy&gt;=1.24</code></p>
@@ -1911,6 +1921,8 @@ The exact available dtypes depend on your PyTorch installation. For a complete l
 
 <span class="n">value</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">float32</span>  <span class="c1"># for dtype_name="float32"</span>
 </code></pre></div>
+<p><strong>Note:</strong> An unknown name raises an <code>InterpolationResolutionError</code> whose message lists the
+available dtype names, sorted.</p>
 <h2 id="resolver-categories-summary">Resolver Categories Summary<a class="headerlink" href="#resolver-categories-summary" title="Permanent link">&para;</a></h2>
 <table>
 <thead>

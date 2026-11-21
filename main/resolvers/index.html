@@ -702,17 +702,6 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#hyato_path" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        hya.to_path
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
   <a href="#hyaiter_join" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1293,17 +1282,6 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#hyato_path" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        hya.to_path
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
   <a href="#hyaiter_join" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1768,32 +1746,32 @@ one argument is required.</p>
 </code></pre></div>
 <h3 id="path-utilities">Path Utilities<a class="headerlink" href="#path-utilities" title="Permanent link">&para;</a></h3>
 <h4 id="hyapath"><code>hya.path</code><a class="headerlink" href="#hyapath" title="Permanent link">&para;</a></h4>
-<p>Converts a string to a resolved <code>pathlib.Path</code> object with user expansion.</p>
+<p>Converts a string, or a <code>file:</code> URL, to a resolved <code>pathlib.Path</code> object with user expansion.</p>
 <p><strong>Syntax:</strong> <code>${hya.path:path_string}</code></p>
 <p><strong>Example:</strong></p>
 <div class="highlight"><pre><span></span><code><span class="nt">data_dir</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">${hya.path:/data/datasets}</span>
 <span class="nt">model_path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">${hya.path:"~/models/checkpoint.pth"}</span>
-</code></pre></div>
-<p><strong>Equivalent Python:</strong></p>
-<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
-
-<span class="n">value</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">path</span><span class="p">)</span><span class="o">.</span><span class="n">expanduser</span><span class="p">()</span><span class="o">.</span><span class="n">resolve</span><span class="p">()</span>
-</code></pre></div>
-<p><strong>Note:</strong> Returns a <code>pathlib.Path</code> object, which is useful for path operations in Python.</p>
-<h4 id="hyato_path"><code>hya.to_path</code><a class="headerlink" href="#hyato_path" title="Permanent link">&para;</a></h4>
-<p>Converts a string (including file:// URLs) to a <code>pathlib.Path</code> with URL decoding.</p>
-<p><strong>Syntax:</strong> <code>${hya.to_path:path_string}</code></p>
-<p><strong>Example:</strong></p>
-<div class="highlight"><pre><span></span><code><span class="nt">local_file</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">${hya.to_path:file:///data/file.txt}</span>
-<span class="nt">url_decoded</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">${hya.to_path:/path/with%20spaces}</span>
+<span class="nt">local_file</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">${hya.path:file:///data/file.txt}</span>
+<span class="nt">url_decoded</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">${hya.path:file:///data/my%20file.txt}</span><span class="w"> </span><span class="c1"># /data/my file.txt</span>
 </code></pre></div>
 <p><strong>Equivalent Python:</strong></p>
 <div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">urllib.parse</span><span class="w"> </span><span class="kn">import</span> <span class="n">unquote</span><span class="p">,</span> <span class="n">urlparse</span>
 
-<span class="n">value</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">unquote</span><span class="p">(</span><span class="n">urlparse</span><span class="p">(</span><span class="n">path</span><span class="p">)</span><span class="o">.</span><span class="n">path</span><span class="p">))</span><span class="o">.</span><span class="n">expanduser</span><span class="p">()</span><span class="o">.</span><span class="n">resolve</span><span class="p">()</span>
+<span class="k">if</span> <span class="n">path</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">"file:"</span><span class="p">):</span>
+    <span class="n">path</span> <span class="o">=</span> <span class="n">unquote</span><span class="p">(</span><span class="n">urlparse</span><span class="p">(</span><span class="n">path</span><span class="p">)</span><span class="o">.</span><span class="n">path</span><span class="p">)</span>
+<span class="n">value</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">path</span><span class="p">)</span><span class="o">.</span><span class="n">expanduser</span><span class="p">()</span><span class="o">.</span><span class="n">resolve</span><span class="p">()</span>
 </code></pre></div>
-<p><strong>Use Case:</strong> Handling file URLs and paths with URL encoding.</p>
+<p><strong>Notes:</strong></p>
+<ul>
+<li>Returns a <code>pathlib.Path</code> object, which is useful for path operations in Python.</li>
+<li>Only a string that starts with <code>file:</code> is read as a URL (its percent-encoding is decoded and its
+  query is dropped). Any other string is a plain path, written as is: <code>/data/a?b</code> and <code>/data/a%20b</code>
+  keep the <code>?</code> and the <code>%20</code>.</li>
+<li>A path with a tilde must be quoted in an interpolation: <code>${hya.path:"~/data"}</code>. Unquoted, it is a
+  grammar error.</li>
+<li><code>hya.to_path</code> was merged into <code>hya.path</code> in 0.5.0.</li>
+</ul>
 <h4 id="hyaiter_join"><code>hya.iter_join</code><a class="headerlink" href="#hyaiter_join" title="Permanent link">&para;</a></h4>
 <p>Joins elements of an iterable into a string with a separator.</p>
 <p><strong>Syntax:</strong> <code>${hya.iter_join:iterable,separator}</code></p>
@@ -1960,7 +1938,7 @@ The exact available dtypes depend on your PyTorch installation. For a complete l
 </tr>
 <tr>
 <td><strong>Paths</strong></td>
-<td><code>path</code>, <code>to_path</code>, <code>iter_join</code></td>
+<td><code>path</code>, <code>iter_join</code></td>
 </tr>
 <tr>
 <td><strong>Utilities</strong></td>

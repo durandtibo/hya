@@ -12,7 +12,7 @@
         <link rel="prev" href="../resolvers/">
       
       
-        <link rel="next" href="../migration/v0.4_to_v0.5/">
+        <link rel="next" href="../design/">
       
       
         
@@ -272,26 +272,6 @@
   
   
   User Guide
-
-        </a>
-      </li>
-    
-  
-
-      
-        
-  
-  
-  
-  
-    
-    
-      <li class="md-tabs__item">
-        <a href="../migration/v0.4_to_v0.5/" class="md-tabs__link">
-          
-  
-  
-  Migration
 
         </a>
       </li>
@@ -626,10 +606,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#not-guaranteed" class="md-nav__link">
+  <a href="#limits" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Not guaranteed
+        Limits
       
     </span>
   </a>
@@ -640,6 +620,34 @@
   
 </nav>
       
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../design/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Design Choices
+  
+
+    
+  </span>
+  
+  
+
+      </a>
     </li>
   
 
@@ -682,7 +690,7 @@
   <span class="md-ellipsis">
     
   
-    Migration
+    Reference
   
 
     
@@ -695,93 +703,6 @@
         
         <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
           <label class="md-nav__title" for="__nav_4">
-            <span class="md-nav__icon md-icon"></span>
-            
-  
-    Migration
-  
-
-          </label>
-          <ul class="md-nav__list" data-md-scrollfix>
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../migration/v0.4_to_v0.5/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Migrate from 0.4 to 0.5
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-          </ul>
-        </nav>
-      
-    </li>
-  
-
-    
-      
-      
-  
-  
-  
-  
-    
-    
-    
-    
-      
-      
-    
-    
-    <li class="md-nav__item md-nav__item--nested">
-      
-        
-        
-          
-        
-        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_5" >
-        
-          
-          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
-            
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Reference
-  
-
-    
-  </span>
-  
-  
-
-            <span class="md-nav__icon md-icon"></span>
-          </label>
-        
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_5">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -947,10 +868,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#not-guaranteed" class="md-nav__link">
+  <a href="#limits" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Not guaranteed
+        Limits
       
     </span>
   </a>
@@ -979,7 +900,7 @@
 
 <h1 id="properties">Properties<a class="headerlink" href="#properties" title="Permanent link">&para;</a></h1>
 <p>These are the rules <code>hya</code> guarantees. Each one is enforced by the code or by a test of the
-repository.</p>
+repository. The <a href="../design/">Design Choices</a> page explains the reasons and the trade-offs.</p>
 <table>
 <thead>
 <tr>
@@ -992,7 +913,7 @@ repository.</p>
 <tr>
 <td>P1</td>
 <td><strong>Import is enough</strong></td>
-<td><code>import hya</code> registers every available default resolver with OmegaConf. No other call is needed.</td>
+<td><code>import hya</code> registers every available default resolver with OmegaConf. No other call is needed, and <code>register_resolvers()</code> publishes them again after <code>OmegaConf.clear_resolvers()</code>.</td>
 </tr>
 <tr>
 <td>P2</td>
@@ -1027,17 +948,17 @@ repository.</p>
 <tr>
 <td>P8</td>
 <td><strong>Replace is explicit</strong></td>
-<td><code>register_resolvers()</code> is idempotent. It never silently keeps a stale resolver: a key that changed since it was published, or that another source registered, is skipped with a warning unless <code>replace=True</code>.</td>
+<td><code>register_resolvers()</code> is idempotent. It never silently keeps a stale resolver: a key that changed since it was published, or that another source registered before the registry published it, is skipped with a warning unless <code>replace=True</code>.</td>
 </tr>
 <tr>
 <td>P9</td>
 <td><strong>One default registry</strong></td>
-<td><code>get_default_registry()</code> returns one process-wide registry holding the built-in resolvers. Users extend it or create their own registry.</td>
+<td><code>get_default_registry()</code> returns one process-wide registry holding the built-in resolvers. It holds the same keys on every machine, whatever packages are installed. Users extend it or create their own registry.</td>
 </tr>
 <tr>
 <td>P10</td>
 <td><strong>Errors are OmegaConf's</strong></td>
-<td>A failing resolver surfaces as <code>InterpolationResolutionError</code> with the original error as cause. <code>hya</code> adds no wrapper of its own. Calling the function of a missing optional package says how to install it.</td>
+<td>A failing resolver surfaces as <code>InterpolationResolutionError</code>. The message names the original exception and the original exception is in its <code>__context__</code> chain (not its <code>__cause__</code>). <code>hya</code> adds no wrapper of its own. A missing optional package gives an error that says how to install it, through an interpolation too.</td>
 </tr>
 <tr>
 <td>P11</td>
@@ -1047,37 +968,59 @@ repository.</p>
 <tr>
 <td>P12</td>
 <td><strong>Typed and documented</strong></td>
-<td>The package has a <code>py.typed</code> file, every public name is documented with a doctest, and every resolver is listed in the <a href="../resolvers/">resolvers</a> page.</td>
+<td>The package has a <code>py.typed</code> file, <code>pyright --verifytypes</code> scores 100 %, every public name is documented with a doctest, and every resolver is listed in the <a href="../resolvers/">resolvers</a> page.</td>
 </tr>
 <tr>
 <td>P13</td>
 <td><strong>Keyword-only options</strong></td>
-<td>Options are keyword-only (<code>exist_ok</code>, <code>replace</code>). Positional arguments are the data.</td>
+<td>The options of the Python API are keyword-only (<code>exist_ok</code>, <code>replace</code>). The arguments of a resolver are positional, because the interpolation grammar has no keyword syntax; an optional argument of a resolver comes last and has a default.</td>
+</tr>
+<tr>
+<td>P14</td>
+<td><strong>Installs next to Hydra</strong></td>
+<td><code>hya</code> accepts every OmegaConf release that a Hydra release accepts (<code>omegaconf&gt;=2.2,&lt;3.0</code>). CI runs the tests on the oldest and the newest OmegaConf.</td>
+</tr>
+<tr>
+<td>P15</td>
+<td><strong>Composable</strong></td>
+<td>A resolver accepts the values OmegaConf gives it (<code>str</code>, <code>int</code>, <code>float</code>, <code>bool</code>, <code>None</code>, <code>list</code>, <code>dict</code>, <code>ListConfig</code>, <code>DictConfig</code>) and the output of another <code>hya</code> resolver (a <code>Path</code> for <code>hya.path</code>, a <code>torch.dtype</code> for <code>hya.torch.tensor</code>).</td>
 </tr>
 </tbody>
 </table>
 <h2 id="details">Details<a class="headerlink" href="#details" title="Permanent link">&para;</a></h2>
 <ul>
 <li><strong>P2.</strong> The optional resolvers are registered lazily (<code>ResolverRegistry.register_lazy</code>): the key
-  is in the registry only if the package is installed, and the module is imported when OmegaConf
-  calls the resolver for the first time. With a missing package the key is not registered, so
-  OmegaConf raises <code>UnsupportedInterpolationType</code>.</li>
+  is always in the registry, and the module is imported when OmegaConf calls the resolver for the
+  first time. <code>import hya</code> does not look for the packages on disk.</li>
 <li><strong>P8.</strong> After <code>import hya</code>, the default resolvers are already published, so
   <code>registry.register_resolvers()</code> is silent. Overriding a built-in
   (<code>registry.register("hya.add", exist_ok=True)</code>) warns until <code>register_resolvers(replace=True)</code> is
   called. OmegaConf caches the resolved nodes of a configuration: <code>replace=True</code> does not clear the
   cache of the existing configurations (<code>OmegaConf.clear_cache(cfg)</code>).</li>
-<li><strong>P10.</strong> OmegaConf validation of the annotations is off for the resolvers published by <code>hya</code>:
-  the annotations are documentation for readers and type checkers, not a runtime contract.</li>
+<li><strong>P9.</strong> The optional keys are registered whether or not the package is installed, so the registry
+  has the same keys on every machine.</li>
+<li><strong>P10.</strong> With a missing package, the resolver raises a <code>RuntimeError</code> that says how to install it
+  (<code>pip install torch</code>); OmegaConf reports it as an <code>InterpolationResolutionError</code>.</li>
+<li><strong>P10.</strong> With OmegaConf 2.4 and later, the validation of the annotations is off for the resolvers
+  published by <code>hya</code>: the annotations are documentation for readers and type checkers, not a runtime
+  contract.</li>
 <li><strong>P11.</strong> The value of an interpolation of a resolver that returns an object cannot always be
   written in YAML: use the value in code, or <code>OmegaConf.to_container(cfg, resolve=True)</code>.</li>
 </ul>
-<h2 id="not-guaranteed">Not guaranteed<a class="headerlink" href="#not-guaranteed" title="Permanent link">&para;</a></h2>
+<h2 id="limits">Limits<a class="headerlink" href="#limits" title="Permanent link">&para;</a></h2>
+<p><code>hya</code> does not provide the following.</p>
 <ul>
-<li>Thread-safety of registering resolvers while OmegaConf resolves interpolations (the registry of
-  OmegaConf is a global dictionary).</li>
-<li>Caching of the output of the resolvers (OmegaConf default: no cache).</li>
-<li>Support of <code>OmegaConf.to_yaml(resolve=True)</code> for resolvers that return objects (P11).</li>
+<li><strong>Thread-safety</strong> of registering resolvers while OmegaConf resolves interpolations. The resolver
+  table of OmegaConf is a global dictionary.</li>
+<li><strong>Detection of a conflicting registration.</strong> A resolver that another source registers after <code>hya</code>
+  published the same key is not detected: it needs the private <code>BaseContainer._resolvers</code> of
+  OmegaConf, which changes between releases.</li>
+<li><strong>Order-insensitive hashes.</strong> <code>hya.sha256</code> hashes <code>str(obj)</code>, so two mappings with the same items
+  in another order have different hashes.</li>
+<li><strong>Caching of the output of the resolvers.</strong> OmegaConf does not cache it: every access of an
+  interpolation calls the resolver again.</li>
+<li><strong>YAML export of objects.</strong> <code>OmegaConf.to_yaml(resolve=True)</code> does not support the resolvers that
+  return objects (P11).</li>
 </ul>
 
 

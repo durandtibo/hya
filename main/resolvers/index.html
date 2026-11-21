@@ -287,26 +287,6 @@
     
     
       <li class="md-tabs__item">
-        <a href="../migration/v0.4_to_v0.5/" class="md-tabs__link">
-          
-  
-  
-  Migration
-
-        </a>
-      </li>
-    
-  
-
-      
-        
-  
-  
-  
-  
-    
-    
-      <li class="md-tabs__item">
         <a href="../refs/" class="md-tabs__link">
           
   
@@ -991,65 +971,6 @@
 
               
             
-          </ul>
-        </nav>
-      
-    </li>
-  
-
-    
-      
-      
-  
-  
-  
-  
-    
-    
-    
-    
-      
-      
-    
-    
-    <li class="md-nav__item md-nav__item--nested">
-      
-        
-        
-          
-        
-        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4" >
-        
-          
-          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
-            
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Migration
-  
-
-    
-  </span>
-  
-  
-
-            <span class="md-nav__icon md-icon"></span>
-          </label>
-        
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_4">
-            <span class="md-nav__icon md-icon"></span>
-            
-  
-    Migration
-  
-
-          </label>
-          <ul class="md-nav__list" data-md-scrollfix>
-            
               
                 
   
@@ -1057,14 +978,14 @@
   
   
     <li class="md-nav__item">
-      <a href="../migration/v0.4_to_v0.5/" class="md-nav__link">
+      <a href="../design/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    Migrate from 0.4 to 0.5
+    Design Choices
   
 
     
@@ -1105,10 +1026,10 @@
         
           
         
-        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_5" >
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4" >
         
           
-          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
             
   
   
@@ -1126,8 +1047,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_5">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -1672,18 +1593,18 @@
 <h1 id="resolvers">Resolvers<a class="headerlink" href="#resolvers" title="Permanent link">&para;</a></h1>
 <p><img alt="📖" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/1f4d6.svg" title=":book:" /> This page provides comprehensive documentation for all resolvers implemented in <code>hya</code>.</p>
 <h2 id="overview">Overview<a class="headerlink" href="#overview" title="Permanent link">&para;</a></h2>
-<p><code>hya</code> provides over 20 built-in resolvers for use in OmegaConf/Hydra configurations. Resolvers are
-organized into the following categories:</p>
+<p><code>hya</code> provides 24 built-in resolvers and 4 optional resolvers for use in OmegaConf/Hydra
+configurations. Resolvers are organized into the following categories (see the
+<a href="#resolver-categories-summary">summary</a> at the end of this page):</p>
 <ul>
-<li><strong>Arithmetic Operations</strong>: Basic mathematical operations (add, subtract, multiply, divide)</li>
-<li><strong>Advanced Math</strong>: Transcendental and special functions (exp, log, sqrt, powers)</li>
-<li><strong>Comparison</strong>: Min/max operations</li>
-<li><strong>Path Utilities</strong>: Path creation and manipulation</li>
-<li><strong>String Utilities</strong>: Joining and hashing</li>
-<li><strong>Utility Functions</strong>: Length, negation, constants</li>
-<li><strong>Optional Resolvers</strong>: Require additional packages (NumPy, PyTorch, braceexpand)</li>
+<li><strong>Standard library resolvers</strong>: the callable itself, with its own behaviour and errors</li>
+<li><strong>Arithmetic</strong>: <code>hya.add</code>, <code>hya.mul</code>, <code>hya.ceildiv</code></li>
+<li><strong>Constants</strong>: <code>hya.pi</code></li>
+<li><strong>Paths and strings</strong>: <code>hya.path</code>, <code>hya.iter_join</code>, <code>hya.sha256</code></li>
+<li><strong>Optional resolvers</strong>: need an additional package (braceexpand, NumPy, PyTorch)</li>
 </ul>
-<p>All resolvers are automatically available after importing <code>hya</code>.</p>
+<p>All resolvers are automatically available after importing <code>hya</code>. The optional resolvers are
+registered too; the package they need is imported when they are called.</p>
 <h2 id="default-resolvers">Default Resolvers<a class="headerlink" href="#default-resolvers" title="Permanent link">&para;</a></h2>
 <p>These resolvers are available with the base installation (no optional dependencies required).</p>
 <h3 id="standard-library-resolvers">Standard Library Resolvers<a class="headerlink" href="#standard-library-resolvers" title="Permanent link">&para;</a></h3>
@@ -1784,6 +1705,24 @@ documentation of the callable for the details.</p>
 <td><code>${hya.len:[1,2,3]}</code></td>
 <td><code>3</code></td>
 </tr>
+<tr>
+<td><code>hya.sum</code></td>
+<td><code>sum</code></td>
+<td><code>${hya.sum:[1,2,3]}</code></td>
+<td><code>6</code></td>
+</tr>
+<tr>
+<td><code>hya.int</code></td>
+<td><code>int</code></td>
+<td><code>${hya.int:${hya.mul:100000,0.1}}</code></td>
+<td><code>10000</code></td>
+</tr>
+<tr>
+<td><code>hya.float</code></td>
+<td><code>float</code></td>
+<td><code>${hya.float:3}</code></td>
+<td><code>3.0</code></td>
+</tr>
 </tbody>
 </table>
 <p>Examples with interpolations:</p>
@@ -1800,7 +1739,12 @@ documentation of the callable for the details.</p>
 <span class="w">  </span><span class="nt">layer_sizes</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">128</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">256</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">512</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">1024</span><span class="p p-Indicator">]</span>
 <span class="w">  </span><span class="nt">num_layers</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">${hya.len:${model.layer_sizes}}</span><span class="w"> </span><span class="c1"># 4</span>
 <span class="w">  </span><span class="nt">actual_layers</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">${hya.max:${model.num_layers},8}</span><span class="w"> </span><span class="c1"># 8</span>
+<span class="w">  </span><span class="nt">total_units</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">${hya.sum:${model.layer_sizes}}</span><span class="w"> </span><span class="c1"># 1920</span>
 </code></pre></div>
+<p><code>hya.int</code> casts the float of a computation back to an integer, and <code>hya.sum</code> adds the elements of a
+list (<code>hya.add</code> takes values: <code>${hya.add:${model.layer_sizes}}</code> returns the list). <code>bool</code> and <code>str</code>
+have no resolver: <code>bool("false")</code> is <code>True</code>, and <code>str</code> is what an interpolation already does. See
+<a href="../design/">Design Choices</a> for why these resolvers have no wrapper.</p>
 <h3 id="arithmetic-operations">Arithmetic Operations<a class="headerlink" href="#arithmetic-operations" title="Permanent link">&para;</a></h3>
 <h4 id="hyaadd"><code>hya.add</code><a class="headerlink" href="#hyaadd" title="Permanent link">&para;</a></h4>
 <p>Adds multiple values together.</p>
@@ -1843,10 +1787,12 @@ documentation of the callable for the details.</p>
 <div class="highlight"><pre><span></span><code><span class="n">value</span> <span class="o">=</span> <span class="n">object1</span> <span class="o">*</span> <span class="n">object2</span> <span class="o">*</span> <span class="n">object3</span> <span class="o">*</span> <span class="o">...</span>
 </code></pre></div>
 <p><strong>Note:</strong> The arguments are never modified and are meant to be numbers. Repeating a list of the
-configuration (<code>${hya.mul:${x},2}</code> with <code>x: [1, 2]</code>) is not supported and raises an error. At least
-one argument is required.</p>
+configuration (<code>${hya.mul:${x},2}</code> with <code>x: [1, 2]</code>) is not supported and raises a <code>TypeError</code>: repeat
+the list in your code. At least one argument is required.</p>
 <h4 id="hyaceildiv"><code>hya.ceildiv</code><a class="headerlink" href="#hyaceildiv" title="Permanent link">&para;</a></h4>
-<p>Performs ceiling division (rounds up to nearest integer).</p>
+<p>Performs ceiling division (rounds up). The type of the result follows <code>//</code>: an <code>int</code> for two
+integers (exact, whatever their size) and a <code>float</code> for a float (<code>${hya.ceildiv:11.0,4}</code> is <code>3.0</code>).
+Use <code>${hya.int:${hya.ceildiv:x,y}}</code> to get an <code>int</code>.</p>
 <p><strong>Syntax:</strong> <code>${hya.ceildiv:dividend,divisor}</code></p>
 <p><strong>Example:</strong></p>
 <div class="highlight"><pre><span></span><code><span class="nt">batches</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">${hya.ceildiv:100,32}</span><span class="w"> </span><span class="c1"># Result: 4</span>
@@ -1859,8 +1805,8 @@ one argument is required.</p>
 </code></pre></div>
 <p><strong>Equivalent Python:</strong></p>
 <div class="highlight"><pre><span></span><code><span class="n">value</span> <span class="o">=</span> <span class="o">-</span><span class="p">(</span><span class="n">dividend</span> <span class="o">//</span> <span class="o">-</span><span class="n">divisor</span><span class="p">)</span>  <span class="c1"># Canonical implementation (no floating point)</span>
-<span class="c1"># Alternative (but may have precision issues with large integers):</span>
-<span class="c1"># value = math.ceil(dividend / divisor)</span>
+<span class="c1"># math.ceil(dividend / divisor) gives the same integer for small ints, but it may have</span>
+<span class="c1"># precision issues with large integers and it always returns an int</span>
 </code></pre></div>
 <p><strong>Use Case:</strong> Calculating the number of batches needed to process all samples.</p>
 <h3 id="constants">Constants<a class="headerlink" href="#constants" title="Permanent link">&para;</a></h3>
@@ -1881,7 +1827,8 @@ one argument is required.</p>
 </code></pre></div>
 <h3 id="path-utilities">Path Utilities<a class="headerlink" href="#path-utilities" title="Permanent link">&para;</a></h3>
 <h4 id="hyapath"><code>hya.path</code><a class="headerlink" href="#hyapath" title="Permanent link">&para;</a></h4>
-<p>Converts a string, or a <code>file:</code> URL, to a resolved <code>pathlib.Path</code> object with user expansion.</p>
+<p>Converts a string, a path-like object, or a <code>file:</code> URL, to a resolved <code>pathlib.Path</code> object with
+user expansion.</p>
 <p><strong>Syntax:</strong> <code>${hya.path:path_string}</code></p>
 <p><strong>Example:</strong></p>
 <div class="highlight"><pre><span></span><code><span class="nt">data_dir</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">${hya.path:/data/datasets}</span>
@@ -1890,22 +1837,29 @@ one argument is required.</p>
 <span class="nt">url_decoded</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">${hya.path:file:///data/my%20file.txt}</span><span class="w"> </span><span class="c1"># /data/my file.txt</span>
 </code></pre></div>
 <p><strong>Equivalent Python:</strong></p>
-<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">urllib.parse</span><span class="w"> </span><span class="kn">import</span> <span class="n">unquote</span><span class="p">,</span> <span class="n">urlparse</span>
 
-<span class="k">if</span> <span class="n">path</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">"file:"</span><span class="p">):</span>
-    <span class="n">path</span> <span class="o">=</span> <span class="n">unquote</span><span class="p">(</span><span class="n">urlparse</span><span class="p">(</span><span class="n">path</span><span class="p">)</span><span class="o">.</span><span class="n">path</span><span class="p">)</span>
+<span class="n">path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">fspath</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+<span class="n">url</span> <span class="o">=</span> <span class="n">urlparse</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+<span class="k">if</span> <span class="n">url</span><span class="o">.</span><span class="n">scheme</span> <span class="o">==</span> <span class="s2">"file"</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">url</span><span class="o">.</span><span class="n">netloc</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">""</span><span class="p">,</span> <span class="s2">"localhost"</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"A file URL with a host is not supported: '</span><span class="si">{</span><span class="n">path</span><span class="si">}</span><span class="s2">'"</span><span class="p">)</span>
+    <span class="n">path</span> <span class="o">=</span> <span class="n">unquote</span><span class="p">(</span><span class="n">url</span><span class="o">.</span><span class="n">path</span><span class="p">)</span>
 <span class="n">value</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">path</span><span class="p">)</span><span class="o">.</span><span class="n">expanduser</span><span class="p">()</span><span class="o">.</span><span class="n">resolve</span><span class="p">()</span>
 </code></pre></div>
 <p><strong>Notes:</strong></p>
 <ul>
 <li>Returns a <code>pathlib.Path</code> object, which is useful for path operations in Python.</li>
-<li>Only a string that starts with <code>file:</code> is read as a URL (its percent-encoding is decoded and its
-  query is dropped). Any other string is a plain path, written as is: <code>/data/a?b</code> and <code>/data/a%20b</code>
-  keep the <code>?</code> and the <code>%20</code>.</li>
+<li>Only a string that starts with <code>file:</code> (the scheme is case-insensitive) is read as a URL (its
+  percent-encoding is decoded and its query is dropped). A host other than <code>localhost</code>
+  (<code>file://host/a</code>) raises a <code>ValueError</code>: the host is never dropped silently.</li>
+<li>Any other string is a plain path, written as is: <code>/data/a?b</code> and <code>/data/a%20b</code> keep the <code>?</code> and
+  the <code>%20</code>.</li>
+<li>A <code>pathlib.Path</code> is accepted, so the output of <code>hya.path</code> can be passed to <code>hya.path</code> again.</li>
 <li>A path with a tilde must be quoted in an interpolation: <code>${hya.path:"~/data"}</code>. Unquoted, it is a
   grammar error.</li>
-<li><code>hya.to_path</code> was merged into <code>hya.path</code> in 0.5.0.</li>
 </ul>
 <h4 id="hyaiter_join"><code>hya.iter_join</code><a class="headerlink" href="#hyaiter_join" title="Permanent link">&para;</a></h4>
 <p>Joins elements of an iterable into a string with a separator.</p>
@@ -1988,14 +1942,18 @@ one argument is required.</p>
 <p><strong>Package Required:</strong> <code>numpy&gt;=1.24</code></p>
 <p>Install with: <code>pip install numpy</code></p>
 <h4 id="hyanparray"><code>hya.np.array</code><a class="headerlink" href="#hyanparray" title="Permanent link">&para;</a></h4>
-<p>Converts data to a NumPy array.</p>
-<p><strong>Syntax:</strong> <code>${hya.np.array:data}</code></p>
+<p>Converts data to a NumPy array. The optional second argument is the data type, as a string that
+<code>np.array</code> accepts (a NumPy resolver of the data type is not needed).</p>
+<p><strong>Syntax:</strong> <code>${hya.np.array:data}</code> or <code>${hya.np.array:data,dtype}</code></p>
 <p><strong>Example:</strong></p>
 <div class="highlight"><pre><span></span><code><span class="c1"># 1D array</span>
 <span class="nt">vector</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">${hya.np.array:[1,2,3,4,5]}</span>
 
 <span class="c1"># 2D array</span>
 <span class="nt">matrix</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">${hya.np.array:[[1,2,3],[4,5,6]]}</span>
+
+<span class="c1"># Array with a data type</span>
+<span class="nt">weights</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">${hya.np.array:[1,2,3],float32}</span><span class="w"> </span><span class="c1"># array([1., 2., 3.], dtype=float32)</span>
 
 <span class="c1"># Use in configuration</span>
 <span class="nt">data</span><span class="p">:</span>
@@ -2006,19 +1964,24 @@ one argument is required.</p>
 <div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 
 <span class="n">value</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+<span class="n">value</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">)</span>  <span class="c1"># with a dtype</span>
 </code></pre></div>
 <h3 id="pytorch">PyTorch<a class="headerlink" href="#pytorch" title="Permanent link">&para;</a></h3>
 <p><strong>Package Required:</strong> <code>torch&gt;=2.0</code></p>
 <p>Install with: <code>pip install torch</code></p>
 <h4 id="hyatorchtensor"><code>hya.torch.tensor</code><a class="headerlink" href="#hyatorchtensor" title="Permanent link">&para;</a></h4>
-<p>Converts data to a PyTorch tensor.</p>
-<p><strong>Syntax:</strong> <code>${hya.torch.tensor:data}</code></p>
+<p>Converts data to a PyTorch tensor. The optional second argument is a <code>torch.dtype</code>, for example the
+output of <a href="#hyatorchdtype"><code>hya.torch.dtype</code></a>.</p>
+<p><strong>Syntax:</strong> <code>${hya.torch.tensor:data}</code> or <code>${hya.torch.tensor:data,dtype}</code></p>
 <p><strong>Example:</strong></p>
 <div class="highlight"><pre><span></span><code><span class="c1"># 1D tensor</span>
 <span class="nt">weights</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">${hya.torch.tensor:[0.1,0.2,0.3,0.4]}</span>
 
 <span class="c1"># 2D tensor</span>
 <span class="nt">matrix</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">${hya.torch.tensor:[[1,2],[3,4]]}</span>
+
+<span class="c1"># Tensor with a data type</span>
+<span class="nt">mask</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">${hya.torch.tensor:[1,0,1],${hya.torch.dtype:bool}}</span><span class="w"> </span><span class="c1"># tensor([ True, False,  True])</span>
 
 <span class="c1"># Use in model configuration</span>
 <span class="nt">model</span><span class="p">:</span>
@@ -2028,6 +1991,7 @@ one argument is required.</p>
 <div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
 
 <span class="n">value</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+<span class="n">value</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">)</span>  <span class="c1"># with a dtype</span>
 </code></pre></div>
 <h4 id="hyatorchdtype"><code>hya.torch.dtype</code><a class="headerlink" href="#hyatorchdtype" title="Permanent link">&para;</a></h4>
 <p>Creates a PyTorch dtype from its string representation.</p>
@@ -2080,6 +2044,14 @@ available dtype names, sorted.</p>
 <td><code>max</code>, <code>min</code></td>
 </tr>
 <tr>
+<td><strong>Casts</strong></td>
+<td><code>int</code>, <code>float</code></td>
+</tr>
+<tr>
+<td><strong>Collections</strong></td>
+<td><code>len</code>, <code>sum</code></td>
+</tr>
+<tr>
 <td><strong>Constants</strong></td>
 <td><code>pi</code></td>
 </tr>
@@ -2088,8 +2060,8 @@ available dtype names, sorted.</p>
 <td><code>path</code>, <code>iter_join</code></td>
 </tr>
 <tr>
-<td><strong>Utilities</strong></td>
-<td><code>len</code>, <code>sha256</code></td>
+<td><strong>Hashing</strong></td>
+<td><code>sha256</code></td>
 </tr>
 <tr>
 <td><strong>Optional</strong></td>

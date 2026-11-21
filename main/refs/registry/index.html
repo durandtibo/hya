@@ -281,26 +281,6 @@
   
   
   
-  
-    
-    
-      <li class="md-tabs__item">
-        <a href="../../migration/v0.4_to_v0.5/" class="md-tabs__link">
-          
-  
-  
-  Migration
-
-        </a>
-      </li>
-    
-  
-
-      
-        
-  
-  
-  
     
   
   
@@ -573,65 +553,6 @@
 
               
             
-          </ul>
-        </nav>
-      
-    </li>
-  
-
-    
-      
-      
-  
-  
-  
-  
-    
-    
-    
-    
-      
-      
-    
-    
-    <li class="md-nav__item md-nav__item--nested">
-      
-        
-        
-          
-        
-        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4" >
-        
-          
-          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
-            
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Migration
-  
-
-    
-  </span>
-  
-  
-
-            <span class="md-nav__icon md-icon"></span>
-          </label>
-        
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_4">
-            <span class="md-nav__icon md-icon"></span>
-            
-  
-    Migration
-  
-
-          </label>
-          <ul class="md-nav__list" data-md-scrollfix>
-            
               
                 
   
@@ -639,14 +560,14 @@
   
   
     <li class="md-nav__item">
-      <a href="../../migration/v0.4_to_v0.5/" class="md-nav__link">
+      <a href="../../design/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    Migrate from 0.4 to 0.5
+    Design Choices
   
 
     
@@ -690,10 +611,10 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" checked>
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" checked>
         
           
-          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="">
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="">
             
   
   
@@ -711,8 +632,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="true">
-          <label class="md-nav__title" for="__nav_5">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_4">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -1509,7 +1430,10 @@ resolver will be overridden.</p>
 <p>The module of the resolver is not imported when the resolver is
 registered, but the first time OmegaConf calls the resolver. It
 is useful for the resolvers that need a heavy package, because
-the package is not imported if the resolver is never used.</p>
+the package is not imported if the resolver is never used. The
+registered callable is named after the function of the target and
+its docstring gives the target, so that tracebacks and the state of
+the registry say what it is.</p>
 
 
 <p><span class="doc-section-title">Parameters:</span></p>
@@ -1642,14 +1566,17 @@ the existing resolver will be overridden.</p>
 
         <p>Register the resolvers to OmegaConf.</p>
 <p>This method publishes the registered resolvers to OmegaConf. It is
-idempotent: a resolver already published by this registry is not
-registered again, so calling this method twice changes nothing. A
+idempotent: a resolver already published by this registry, and still
+known by OmegaConf, is not registered again, so calling this method
+twice changes nothing. A resolver removed from OmegaConf (for example
+with <code>OmegaConf.clear_resolvers()</code>) is published again. A
 resolver is not published, and a warning is emitted, if OmegaConf
 already has a resolver for its key (a resolver published before the
 registry changed, or registered by another source) and <code>replace</code> is
 <code>False</code>.</p>
-<p>The resolvers are published with <code>annotation_validation="off"</code>: the
-annotations of the resolvers are not a runtime contract.</p>
+<p>The resolvers are published with <code>annotation_validation="off"</code> when
+OmegaConf validates the annotations (2.4 and later): the annotations of
+the resolvers are not a runtime contract.</p>
 
 
 <p><span class="doc-section-title">Parameters:</span></p>

@@ -1,0 +1,35 @@
+# TOML module workflow.
+# Tests the targets of toml.mk against the files of testdata/ on multiple operating systems.
+
+name: Test toml.mk
+on:
+  workflow_call:
+    inputs:
+      test-matrix:
+        description: "JSON test matrix from lib-get-test-matrix.yaml, loaded once by the caller"
+        required: true
+        type: string
+
+permissions: {}
+
+jobs:
+  test:
+    permissions:
+      contents: read
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 10
+    strategy:
+      max-parallel: 8
+      fail-fast: false
+      matrix:
+        os: ${{ fromJson(inputs.test-matrix).os_matrix }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # ratchet:actions/checkout@v7
+
+      - name: format-toml (installs taplo on demand)
+        run: make -f toml.mk format-toml TOML_FORMAT_PATH=testdata
+
+      - name: format-toml (no matching files)
+        run: make -f toml.mk format-toml TOML_FORMAT_PATH=testdata/no-such-dir

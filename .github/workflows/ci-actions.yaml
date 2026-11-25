@@ -1,0 +1,36 @@
+# GitHub Actions module workflow.
+# Tests the targets of actions.mk: lint-actions against the files of testdata/ and install-zizmor with fake
+# installers (tests/test-actions-mk.sh), on multiple operating systems.
+
+name: Test actions.mk
+on:
+  workflow_call:
+    inputs:
+      test-matrix:
+        description: "JSON test matrix from lib-get-test-matrix.yaml, loaded once by the caller"
+        required: true
+        type: string
+
+permissions: {}
+
+jobs:
+  test:
+    permissions:
+      contents: read
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 10
+    strategy:
+      max-parallel: 8
+      fail-fast: false
+      matrix:
+        os: ${{ fromJson(inputs.test-matrix).os_matrix }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # ratchet:actions/checkout@v7
+
+      - name: lint-actions (installs actionlint on demand)
+        run: make -f actions.mk lint-actions ACTIONS_LINT_PATH=testdata
+
+      - name: install-zizmor installs zizmor only when missing
+        run: tests/test-actions-mk.sh

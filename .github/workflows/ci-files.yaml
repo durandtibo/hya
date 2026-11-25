@@ -1,0 +1,34 @@
+# Files module workflow.
+# Tests that the format/lint targets skip the files ignored by .gitignore, and that USE_GITIGNORE=0
+# turns it off (tests/test-files-mk.sh uses fake tools and does not touch the network) on multiple
+# operating systems.
+
+name: Test files.mk
+on:
+  workflow_call:
+    inputs:
+      test-matrix:
+        description: "JSON test matrix from lib-get-test-matrix.yaml, loaded once by the caller"
+        required: true
+        type: string
+
+permissions: {}
+
+jobs:
+  test:
+    permissions:
+      contents: read
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 10
+    strategy:
+      max-parallel: 8
+      fail-fast: false
+      matrix:
+        os: ${{ fromJson(inputs.test-matrix).os_matrix }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # ratchet:actions/checkout@v7
+
+      - name: Targets skip the files ignored by git
+        run: tests/test-files-mk.sh

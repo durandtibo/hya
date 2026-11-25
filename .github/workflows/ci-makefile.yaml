@@ -1,0 +1,45 @@
+# Makefile module workflow.
+# Tests the targets of makefile.mk on multiple operating systems, including the
+# unit test with a fake checkmake.
+
+name: Test makefile.mk
+on:
+  workflow_call:
+    inputs:
+      test-matrix:
+        description: "JSON test matrix from lib-get-test-matrix.yaml, loaded once by the caller"
+        required: true
+        type: string
+
+permissions: {}
+
+jobs:
+  test:
+    permissions:
+      contents: read
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 10
+    strategy:
+      max-parallel: 8
+      fail-fast: false
+      matrix:
+        os: ${{ fromJson(inputs.test-matrix).os_matrix }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # ratchet:actions/checkout@v7
+
+      - name: lint-makefile (installs checkmake on demand)
+        run: make -f makefile.mk lint-makefile MAKEFILE_LINT_FILES="yaml.mk makefile.mk shell.mk toml.mk markdown.mk"
+
+      - name: format-makefile (installs mbake on demand)
+        run: make -f makefile.mk format-makefile MAKEFILE_FORMAT_FILES="yaml.mk makefile.mk shell.mk toml.mk markdown.mk"
+
+      - name: format-makefile (no matching files)
+        run: make -f makefile.mk format-makefile MAKEFILE_FORMAT_FILES="no-such-dir/*.mk"
+
+      - name: lint-makefile (no matching files)
+        run: make -f makefile.mk lint-makefile MAKEFILE_LINT_FILES="no-such-dir/*.mk"
+
+      - name: lint-makefile (unit test with fake checkmake)
+        run: bash tests/test-makefile-mk.sh

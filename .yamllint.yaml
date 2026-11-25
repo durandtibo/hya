@@ -1,0 +1,17 @@
+extends: default
+
+# Vendored shared-makefiles subtree — not ours to lint.
+ignore: |
+  .make/
+
+rules:
+  comments:
+    min-spaces-from-content: 1 # Prettier-compatible
+  line-length:
+    max: 100
+    level: warning
+  indentation:
+    indent-sequences: consistent
+  document-start: disable
+  truthy:
+    check-keys: false

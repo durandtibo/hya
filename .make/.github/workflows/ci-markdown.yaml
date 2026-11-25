@@ -1,0 +1,42 @@
+# Markdown module workflow.
+# Tests the targets of markdown.mk against the files of testdata/ on multiple operating systems,
+# including the unit test of the glob patterns with fake tools.
+
+name: Test markdown.mk
+on:
+  workflow_call:
+    inputs:
+      test-matrix:
+        description: "JSON test matrix from lib-get-test-matrix.yaml, loaded once by the caller"
+        required: true
+        type: string
+
+permissions: {}
+
+jobs:
+  test:
+    permissions:
+      contents: read
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 10
+    strategy:
+      max-parallel: 8
+      fail-fast: false
+      matrix:
+        os: ${{ fromJson(inputs.test-matrix).os_matrix }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # ratchet:actions/checkout@v7
+
+      - name: lint-markdown (installs markdownlint on demand)
+        run: make -f markdown.mk lint-markdown MARKDOWN_LINT_GLOB=testdata/sample.md
+
+      - name: format-markdown (installs prettier on demand)
+        run: make -f markdown.mk format-markdown MARKDOWN_FORMAT_PATH=testdata/sample.md
+
+      - name: format-markdown (no matching files)
+        run: make -f markdown.mk format-markdown MARKDOWN_FORMAT_PATH="testdata/no-such-dir/*.md"
+
+      - name: lint-markdown (glob patterns, unit test with fake tools)
+        run: bash tests/test-markdown-mk.sh

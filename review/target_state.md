@@ -371,23 +371,23 @@ resolver was thought to be correct; F1 shows it is not (D1).
 
 ## 7. Changes to reach the target state
 
-One branch and one pull request per logical change, each based on `main`: the changes do not depend
-on each other, so they are not stacked. Two pull requests that edit the same page are merged one
-after the other (`origin/main` merged into the second). Each one updates the pages it affects
-(`properties.md`, `design.md`, `resolvers.md`, `user_guide.md`, docstrings), adds its tests, and
-states its behaviour changes. They are listed by value.
+One branch and one pull request per logical change. The pull requests are stacked in the order of
+the table: the changes do not depend on each other, but several edit the same pages. Once one is
+merged, the next one is retargeted to `main` and `origin/main` is merged into it. Each one updates
+the pages it affects (`properties.md`, `design.md`, `resolvers.md`, `user_guide.md`, docstrings),
+adds its tests, and states its behaviour changes. They are listed by value.
 
-| Order | Branch                               | Change                                                                                                                                    | Properties | Breaking |
-| ----- | ------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------- | ---------- | -------- |
-| 1     | `bugfix/resolve-mapping-in-np-array` | F1, F8: `to_plain` and the copy in `to_array_resolver`; add `hya.np.array` to the P16 statement of the pages.                             | P15, P16   | yes      |
-| 2     | `bugfix/replace-published-resolvers` | F2, F11: the loop of `register_resolvers` and its single warning; P2 and P8.                                                              | P2, P8     | yes      |
-| 3     | `bugfix/reject-non-finite-hash`      | F3, F12: `allow_nan=False`; the exact format of the hash and the enum note.                                                               | P17        | yes      |
-| 4     | `bugfix/return-plain-list-from-add`  | F5 to F7: `to_plain` in `add_resolver`; the contract of section 3.1 in `design.md`; P5, P6, P16.                                          | P5, P6     | yes      |
-| 5     | `bugfix/reject-invalid-path`         | F4: section 3.5; P4.                                                                                                                      | P4         | yes      |
-| 6     | `bugfix/validate-registry-arguments` | F9, F10: constructor and `register_lazy`; P7.                                                                                             | P7         | yes      |
-| 7     | `docs/fix-resolver-examples`         | F13 to F15: rename or replace the shape examples, quote `'hya[all]'`, split the YAML blocks.                                              | P12        | no       |
-| 8     | `test/check-resolver-catalogue`      | F16: every default key is in `resolvers.md`; the reference lists every module found with `pkgutil`, except `hya.utils` and its fallbacks. | P12        | no       |
-| 9     | `chore/remove-unused-logger`         | F17.                                                                                                                                      | n/a        | no       |
+| Order    | Branch                               | Change                                                                                                                                    | Properties | Breaking |
+| -------- | ------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------- | ---------- | -------- |
+| 1 (#803) | `bugfix/resolve-mapping-in-np-array` | F1, F8: `to_plain` and the copy in `to_array_resolver`; add `hya.np.array` to the P16 statement of the pages.                             | P15, P16   | yes      |
+| 2        | `bugfix/replace-published-resolvers` | F2, F11: the loop of `register_resolvers` and its single warning; P2 and P8.                                                              | P2, P8     | yes      |
+| 3        | `bugfix/reject-non-finite-hash`      | F3, F12: `allow_nan=False`; the exact format of the hash and the enum note.                                                               | P17        | yes      |
+| 4        | `bugfix/return-plain-list-from-add`  | F5 to F7: `to_plain` in `add_resolver`; the contract of section 3.1 in `design.md`; P5, P6, P16.                                          | P5, P6     | yes      |
+| 5        | `bugfix/reject-invalid-path`         | F4: section 3.5; P4.                                                                                                                      | P4         | yes      |
+| 6        | `bugfix/validate-registry-arguments` | F9, F10: constructor and `register_lazy`; P7.                                                                                             | P7         | yes      |
+| 7        | `docs/fix-resolver-examples`         | F13 to F15: rename or replace the shape examples, quote `'hya[all]'`, split the YAML blocks.                                              | P12        | no       |
+| 8        | `test/check-resolver-catalogue`      | F16: every default key is in `resolvers.md`; the reference lists every module found with `pkgutil`, except `hya.utils` and its fallbacks. | P12        | no       |
+| 9        | `chore/remove-unused-logger`         | F17.                                                                                                                                      | n/a        | no       |
 
 After they are merged and CI is green, the maintainer sets the version `0.5.0` and creates the exact
 tag `v0.5.0` with the release notes of section 5.

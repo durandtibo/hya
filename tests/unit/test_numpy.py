@@ -1,16 +1,21 @@
 from __future__ import annotations
 
+from typing import Any
 from unittest.mock import patch
 
 import pytest
 from omegaconf import OmegaConf
+from omegaconf.errors import MissingMandatoryValue
 
-from hya.imports import is_numpy_available
+from hya.imports import is_numpy_available, is_torch_available
 from hya.numpy import to_array_resolver
-from hya.testing import numpy_available
+from hya.testing import numpy_available, torch_available
 
 if is_numpy_available():
     import numpy as np
+
+if is_torch_available():
+    import torch
 
 
 @numpy_available
@@ -61,6 +66,106 @@ def test_to_array_resolver_incorrect_dtype() -> None:
 def test_to_array_resolver_resolver_with_dtype() -> None:
     result = OmegaConf.create({"key": "${hya.np.array:[1, 2],float32}"}).key
     assert result.dtype == np.float32
+
+
+@numpy_available
+@pytest.mark.parametrize("data", [OmegaConf.create({"a": 1}), {"a": 1}])
+def test_to_array_resolver_mapping(data: Any) -> None:
+    assert to_array_resolver(data).item() == {"a": 1}
+
+
+@numpy_available
+def test_to_array_resolver_mapping_node_is_an_object_array() -> None:
+    assert to_array_resolver(OmegaConf.create({"a": 1})).dtype == object
+
+
+@numpy_available
+def test_to_array_resolver_mapping_node_is_not_modified() -> None:
+    conf = OmegaConf.create({"a": 1, "x": {"b": "${a}"}})
+    to_array_resolver(conf.x)
+    assert OmegaConf.to_container(conf.x) == {"b": "${a}"}
+
+
+@numpy_available
+def test_to_array_resolver_list_node() -> None:
+    result = to_array_resolver(OmegaConf.create([[1, 2], [3, 4]]))
+    assert result.tolist() == [[1, 2], [3, 4]]
+
+
+@numpy_available
+def test_to_array_resolver_empty_list_node() -> None:
+    assert to_array_resolver(OmegaConf.create([])).shape == (0,)
+
+
+@numpy_available
+def test_to_array_resolver_nested_interpolation() -> None:
+    conf = OmegaConf.create({"a": 1, "x": [["${a}"]]})
+    assert to_array_resolver([conf.x]).tolist() == [[[1]]]
+
+
+@numpy_available
+@pytest.mark.parametrize(
+    "data",
+    [
+        OmegaConf.create(["???"]),
+        OmegaConf.create({"a": "???"}),
+        [OmegaConf.create({"a": "???"})],
+        {"a": OmegaConf.create(["???"])},
+    ],
+)
+def test_to_array_resolver_missing_value(data: Any) -> None:
+    with pytest.raises(MissingMandatoryValue, match=r"Missing mandatory value"):
+        to_array_resolver(data)
+
+
+@numpy_available
+@pytest.mark.parametrize("dtype", [None, "int64"])
+def test_to_array_resolver_array_is_copied(dtype: str | None) -> None:
+    data = np.array([1, 2], dtype=np.int64)
+    assert not np.shares_memory(to_array_resolver(data, dtype), data)
+
+
+@numpy_available
+def test_to_array_resolver_array_is_not_modified() -> None:
+    data = np.array([1, 2])
+    to_array_resolver(data)[0] = 5
+    assert data.tolist() == [1, 2]
+
+
+@numpy_available
+def test_to_array_resolver_keeps_the_memory_order() -> None:
+    result = to_array_resolver(np.asfortranarray([[1, 2], [3, 4]]))
+    assert result.flags.f_contiguous
+
+
+@numpy_available
+@torch_available
+def test_to_array_resolver_tensor() -> None:
+    result = to_array_resolver(torch.tensor([1.0, 2.0]))
+    assert np.array_equal(result, np.array([1.0, 2.0], dtype=np.float32))
+
+
+@numpy_available
+@torch_available
+def test_to_array_resolver_tensor_with_dtype() -> None:
+    result = to_array_resolver(torch.tensor([1, 2]), "float64")
+    assert result.dtype == np.float64
+
+
+@numpy_available
+@torch_available
+@pytest.mark.parametrize("dtype", [None, "int64"])
+def test_to_array_resolver_tensor_is_copied(dtype: str | None) -> None:
+    data = torch.tensor([1, 2])
+    to_array_resolver(data, dtype)[0] = 5
+    assert data.tolist() == [1, 2]
+
+
+@numpy_available
+@torch_available
+def test_to_array_resolver_tensor_with_gradient() -> None:
+    with pytest.raises(RuntimeError, match=r"Can't call numpy\(\) on Tensor that requires grad"):
+        to_array_resolver(torch.tensor([1.0], requires_grad=True))
 
 
 @pytest.mark.parametrize("dtype", [None, "float32"])

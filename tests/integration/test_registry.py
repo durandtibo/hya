@@ -167,6 +167,32 @@ def test_register_resolvers_error_is_raised_by_omegaconf() -> None:
         _ = conf.key
 
 
+#######################################
+#     Tests for the accepted keys     #
+#######################################
+
+
+@pytest.fixture(
+    params=[
+        "hya_test",
+        "_hya_test",
+        "HyaTest2",
+        "hya_test.a",
+        "hya_test._a_2.B",
+        "_._",
+    ]
+)
+def accepted_key(request: pytest.FixtureRequest) -> Generator[str, None, None]:
+    """Give a key of each accepted form and remove it from OmegaConf."""
+    yield request.param
+    OmegaConf.clear_resolver(request.param)
+
+
+def test_every_accepted_key_form_resolves(accepted_key: str) -> None:
+    ResolverRegistry({accepted_key: double}).register_resolvers()
+    assert OmegaConf.create({"key": f"${{{accepted_key}:5}}"}).key == 10
+
+
 ############################
 #     Tests for import     #
 ############################

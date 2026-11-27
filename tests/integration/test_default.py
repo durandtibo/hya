@@ -8,10 +8,13 @@ import pytest
 from hya import get_default_registry
 from hya.testing import braceexpand_available, numpy_available, torch_available
 
+# torch warns at import if NumPy is not installed, which is a supported setup (see pyproject.toml)
+IGNORE_MISSING_NUMPY = "ignore:Failed to initialize NumPy:UserWarning"
+
 
 def run_python(code: str) -> subprocess.CompletedProcess[str]:
     return subprocess.run(  # noqa: S603
-        [sys.executable, "-W", "error", "-c", code],
+        [sys.executable, "-W", "error", "-W", IGNORE_MISSING_NUMPY, "-c", code],
         capture_output=True,
         text=True,
         check=False,

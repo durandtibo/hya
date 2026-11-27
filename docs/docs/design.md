@@ -45,6 +45,10 @@ calls the resolver for the first time (`ResolverRegistry.register_lazy`).
 - **If it does not fit:** call the resolver once at start up, or check the package with
   `hya.imports` before you load the configuration.
 
+A lazy resolver cannot receive the special parameters of OmegaConf (`_root_`, `_parent_`,
+`_node_`): OmegaConf reads them from the signature of the function, which is not known before the
+import. Register such a resolver with `register`.
+
 A missing package raises a `RuntimeError` that says how to install it
 (`'torch' package is required but not installed. ... pip install torch`).
 
@@ -71,6 +75,18 @@ Built-in keys start with `hya.`, and optional ones are grouped by package (`hya.
 
 Hydra has a plugin mechanism that could remove the import. `hya` does not use it: it needs a
 `hydra_plugins` namespace package and a dependency on Hydra internals for the gain of one line.
+
+## The registry rejects what cannot work
+
+Every entry of a `ResolverRegistry` is added by `register`, including the ones of the constructor
+and of `register_lazy`. It raises at once for a value that is not callable, a key that is not a
+string (`@registry.register` used without a key) and a key that is not made of names joined by dots.
+
+- **Benefit:** the error points at the line that registers, not at a configuration that fails to
+  parse later, and `register_resolvers()` cannot stop half way because of an entry.
+- **Cost:** a key such as `my-key`, which OmegaConf 2.3 and later can interpolate, is rejected,
+  because OmegaConf 2.2 cannot interpolate it and `hya` behaves the same on all of them.
+- **If it does not fit:** register such a resolver with `OmegaConf` directly.
 
 ## The registry is explicit about replacing
 

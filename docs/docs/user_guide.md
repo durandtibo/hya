@@ -190,6 +190,11 @@ hyperparameters:
   clipped_dropout: ${clip:${hyperparameters.dropout},0.0,0.5}
 ```
 
+A key is made of names joined by dots (`double`, `my.clip_2`), where a name is made of ASCII
+letters, digits and `_` and does not start with a digit. Any other key, such as `my-clip`, raises a
+`ValueError` when it is registered, and a resolver that is not callable raises a `TypeError`. The
+decorator needs the key: `@registry.register` alone raises a `TypeError`.
+
 ### Overriding Existing Resolvers
 
 You can override a resolver of the registry with the keyword-only `exist_ok` parameter. The
@@ -245,7 +250,9 @@ registry.register_resolvers()
 ```
 
 A target that is not formatted as `"module:function"` raises a `ValueError` when it is registered.
-An unknown module or function raises an error on the first call of the resolver.
+An unknown module or function raises an error on the first call of the resolver. A lazy resolver
+cannot receive the special parameters of OmegaConf (`_root_`, `_parent_`, `_node_`): register such
+a resolver with `register`.
 
 ### Creating Isolated Registries
 
@@ -557,6 +564,12 @@ def my_resolver(x):
 OmegaConf already has a resolver for this key and `register_resolvers()` did not replace it.
 
 **Solution:** Use `registry.register_resolvers(replace=True)` to replace it.
+
+### Invalid Resolver Key
+
+**Error:** `ValueError: Invalid resolver key 'my-key': use names made of letters, digits and _, ...`
+
+**Solution:** Use names joined by dots, for example `my_key` or `my.key`.
 
 ### Type Errors in Resolvers
 

@@ -427,9 +427,19 @@ data:
 ```python
 import numpy as np
 
-value = np.array(data)
-value = np.array(data, dtype=dtype)  # with a dtype
+# data is the resolved content of the argument, without configuration nodes
+value = np.asarray(data).copy(order="K")
+value = np.asarray(data, dtype=dtype).copy(order="K")  # with a dtype
 ```
+
+**Notes:**
+
+- The interpolations of the data are resolved at any depth, and a missing value (`???`) is an
+  error.
+- A mapping is converted as NumPy converts a dictionary, to an array of the data type `object`.
+  Use `${oc.dict.keys:x}` or `${oc.dict.values:x}` for an array of its keys or of its values.
+- An array and a tensor (on the CPU and without gradient) are accepted. They are copied: the result
+  does not share memory with them.
 
 ### PyTorch
 

@@ -371,11 +371,11 @@ resolver was thought to be correct; F1 shows it is not (D1).
 
 ## 7. Changes to reach the target state
 
-One branch and one pull request per logical change, each based on `main`: the changes do not depend
-on each other, so they are not stacked. Two pull requests that edit the same page are merged one
-after the other (`origin/main` merged into the second). Each one updates the pages it affects
-(`properties.md`, `design.md`, `resolvers.md`, `user_guide.md`, docstrings), adds its tests, and
-states its behaviour changes. They are listed by value.
+One branch and one pull request per logical change. The pull requests are stacked in the order of
+the table: the changes do not depend on each other, but several edit the same pages. Once one is
+merged, the next one is retargeted to `main` and `origin/main` is merged into it. Each one updates
+the pages it affects (`properties.md`, `design.md`, `resolvers.md`, `user_guide.md`, docstrings),
+adds its tests, and states its behaviour changes. They are listed by value.
 
 | Order | Branch                               | Change                                                                                                                                    | Properties | Breaking |
 | ----- | ------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------- | ---------- | -------- |

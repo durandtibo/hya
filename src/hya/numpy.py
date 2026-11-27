@@ -13,6 +13,7 @@ __all__ = ["to_array_resolver"]
 from typing import TYPE_CHECKING
 
 from hya.imports import is_numpy_available, validate_numpy
+from hya.utils.config import to_plain
 
 if TYPE_CHECKING or is_numpy_available():
     import numpy as np
@@ -28,17 +29,25 @@ def to_array_resolver(data: ArrayLike, dtype: str | None = None) -> np.ndarray:
     ``numpy.ndarray``.
 
     Args:
-        data: Specifies the data to transform in ``numpy.ndarray``.
-            This value should be compatible with ``numpy.array``
+        data: Specifies the data to transform in ``numpy.ndarray``: an
+            array, a tensor (on the CPU and without gradient), or any
+            other value compatible with ``numpy.array``. The
+            configuration nodes of a value are resolved first, at any
+            depth, so a mapping node gives the same array as a literal
+            mapping (an array of the data type ``object``).
         dtype: The data type of the array, as a string that
             ``numpy.array`` accepts (for example ``"float32"``).
             ``None`` lets NumPy infer the data type from the data.
 
     Returns:
-        The input in a ``numpy.ndarray`` object.
+        The input in a ``numpy.ndarray`` object. It is a copy: it does
+        not share memory with an array or a tensor given as input, and
+        it keeps the memory order of such an input.
 
     Raises:
         TypeError: If ``dtype`` is not a valid NumPy data type.
+        omegaconf.errors.MissingMandatoryValue: If a node contains a
+            missing value (``???``).
 
     Example:
         ```pycon
@@ -50,8 +59,13 @@ def to_array_resolver(data: ArrayLike, dtype: str | None = None) -> np.ndarray:
         >>> conf = OmegaConf.create({"key": "${hya.np.array:[1, 2, 3],float32}"})
         >>> conf.key
         array([1., 2., 3.], dtype=float32)
+        >>> # The interpolations of the data are resolved
+        >>> conf = OmegaConf.create({"a": 1, "x": ["${a}", 2], "key": "${hya.np.array:${x}}"})
+        >>> conf.key
+        array([1, 2])
 
         ```
     """
     validate_numpy()
-    return np.array(data, dtype=dtype)
+    # ``asarray`` does not pass the ``copy`` argument that ``Tensor.__array__`` does not accept
+    return np.asarray(to_plain(data), dtype=dtype).copy(order="K")

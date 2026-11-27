@@ -35,12 +35,30 @@
 ## Overview
 
 `hya` is a library of custom [OmegaConf](https://github.com/omry/omegaconf) resolvers designed to be
-used with [Hydra](https://github.com/facebookresearch/hydra). It provides a comprehensive set of
-resolvers for mathematical operations, path manipulation, data type conversions, and more.
+used with [Hydra](https://github.com/facebookresearch/hydra). A resolver is a function that a
+configuration calls with the syntax `${key:argument,...}`. With `hya`, a configuration can compute
+values (arithmetic and math functions), build paths and identifiers, and create NumPy arrays or
+PyTorch tensors, instead of repeating hand-computed values.
+
+## How it works
+
+1. `import hya` registers the resolvers with OmegaConf. No other call is needed.
+2. A configuration calls a resolver by its key, which starts with `hya.`.
+3. OmegaConf calls the resolver when the value is accessed, with the referenced values of the
+   configuration as arguments.
+
+The required dependency is `omegaconf`. A few resolvers need an optional package (NumPy, PyTorch or
+braceexpand), which is imported only when one of them is called.
 
 ## Quick Start
 
-The default resolvers are automatically registered when you import `hya`:
+Install the library:
+
+```shell
+pip install hya
+```
+
+Then import `hya` and use the resolvers in a configuration:
 
 ```python
 import hya
@@ -103,9 +121,12 @@ if __name__ == "__main__":
     main()
 ```
 
+See [Using with Hydra](hydra.md) for multiple configuration files, command line overrides and the
+supported Python versions.
+
 ## Registering Custom Resolvers
 
-You can extend `hya` with your own custom resolvers:
+You can extend `hya` with your own resolvers:
 
 ```python
 from hya import get_default_registry
@@ -127,26 +148,37 @@ conf = OmegaConf.create({"result": "${multiply:5,3}"})
 print(conf.result)  # Output: 15
 ```
 
+See [Custom Resolvers](custom_resolvers.md) to override, load lazily and test your resolvers.
+
 ## Available Resolvers
 
 `hya` provides 24 built-in resolvers, plus 4 that need an optional package. All keys start with
 `hya.`:
 
-- **Arithmetic**: `add`, `sub`, `mul`, `truediv`, `floordiv`, `ceildiv`, `neg`, `pow`, `sum`
-- **Math functions**: `sqrt`, `exp`, `log`, `log10`, `sinh`, `asinh`
-- **Comparison**: `max`, `min`
-- **Casts**: `int`, `float`
-- **Constants**: `pi`
-- **Paths and strings**: `path`, `iter_join`, `sha256`
-- **Collections**: `len`
-- **Optional (with dependencies)**:
-  - NumPy: `np.array`
-  - PyTorch: `torch.tensor`, `torch.dtype`
-  - Braceexpand: `braceexpand`
+| Category           | Resolvers                                                    |
+| ------------------ | ------------------------------------------------------------ |
+| **Arithmetic**     | `add`, `sub`, `mul`, `truediv`, `floordiv`, `ceildiv`, `neg` |
+| **Math Functions** | `pow`, `sqrt`, `exp`, `log`, `log10`, `sinh`, `asinh`        |
+| **Comparison**     | `max`, `min`                                                 |
+| **Casts**          | `int`, `float`                                               |
+| **Collections**    | `len`, `sum`                                                 |
+| **Constants**      | `pi`                                                         |
+| **Paths**          | `path`, `iter_join`                                          |
+| **Hashing**        | `sha256`                                                     |
+| **Optional**       | `braceexpand`, `np.array`, `torch.tensor`, `torch.dtype`     |
 
-See the [Resolvers](resolvers.md) page for the documentation of every resolver, the
-[Properties](properties.md) page for the rules `hya` guarantees, and the
-[Design Choices](design.md) page for the reasons behind the design and its trade-offs.
+## Where to go next
+
+| Page                                    | Content                                          |
+| --------------------------------------- | ------------------------------------------------ |
+| [Get Started](get_started.md)           | Installation and optional dependencies           |
+| [User Guide](user_guide.md)             | Syntax, common use cases and values in Python    |
+| [Resolvers](resolvers.md)               | Reference of every resolver                      |
+| [Custom Resolvers](custom_resolvers.md) | Add your own resolvers to a registry             |
+| [Using with Hydra](hydra.md)            | Hydra applications, overrides and multiple files |
+| [Troubleshooting](troubleshooting.md)   | Common errors and their solutions                |
+| [Design Choices](design.md)             | How `hya` is designed, why, and the trade-offs   |
+| [Properties](properties.md)             | The rules `hya` guarantees, and what it does not |
 
 ## API stability
 

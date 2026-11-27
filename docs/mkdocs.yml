@@ -22,8 +22,12 @@ nav:
   - User Guide:
       - user_guide.md
       - Resolvers: resolvers.md
-      - Properties: properties.md
+      - Custom Resolvers: custom_resolvers.md
+      - Using with Hydra: hydra.md
+      - Troubleshooting: troubleshooting.md
+  - Design:
       - Design Choices: design.md
+      - Properties: properties.md
   - Reference:
       - refs/index.md
       - refs/registry.md

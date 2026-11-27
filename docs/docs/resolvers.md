@@ -5,17 +5,32 @@
 ## Overview
 
 `hya` provides 24 built-in resolvers and 4 optional resolvers for use in OmegaConf/Hydra
-configurations. Resolvers are organized into the following categories (see the
-[summary](#resolver-categories-summary) at the end of this page):
+configurations. All keys start with `hya.`:
 
-- **Standard library resolvers**: the callable itself, with its own behaviour and errors
-- **Arithmetic**: `hya.add`, `hya.mul`, `hya.ceildiv`
-- **Constants**: `hya.pi`
-- **Paths and strings**: `hya.path`, `hya.iter_join`, `hya.sha256`
-- **Optional resolvers**: need an additional package (braceexpand, NumPy, PyTorch)
+| Category           | Resolvers                                                    |
+| ------------------ | ------------------------------------------------------------ |
+| **Arithmetic**     | `add`, `sub`, `mul`, `truediv`, `floordiv`, `ceildiv`, `neg` |
+| **Math Functions** | `pow`, `sqrt`, `exp`, `log`, `log10`, `sinh`, `asinh`        |
+| **Comparison**     | `max`, `min`                                                 |
+| **Casts**          | `int`, `float`                                               |
+| **Collections**    | `len`, `sum`                                                 |
+| **Constants**      | `pi`                                                         |
+| **Paths**          | `path`, `iter_join`                                          |
+| **Hashing**        | `sha256`                                                     |
+| **Optional**       | `braceexpand`, `np.array`, `torch.tensor`, `torch.dtype`     |
 
-All resolvers are automatically available after importing `hya`. The optional resolvers are
-registered too; the package they need is imported when they are called.
+There are two kinds of resolvers:
+
+- [Standard library resolvers](#standard-library-resolvers) are the callable itself, with its own
+  behaviour and errors.
+- The other resolvers are written by `hya`. They are documented one by one below.
+
+All resolvers are available after importing `hya`. The optional resolvers are registered too; the
+package they need is imported when they are called. See
+[Interpolation Syntax](user_guide.md#interpolation-syntax) for the rules to write the arguments.
+
+An error raised by a resolver is reported by OmegaConf as an `InterpolationResolutionError` whose
+message names the original error. The errors listed below are the original ones.
 
 ## Default Resolvers
 
@@ -111,6 +126,7 @@ value = value1 + value2 + value3 + ...
 - The interpolations of the values are resolved at any depth, and a missing value (`???`) is an
   error. The result holds the resolved values, no interpolation.
 - At least one argument is required.
+- Values that cannot be added, such as a number and a string, raise a `TypeError`.
 
 #### `hya.mul`
 
@@ -140,9 +156,12 @@ model:
 value = object1 * object2 * object3 * ...
 ```
 
-**Note:** The arguments are never modified and are meant to be numbers. Repeating a list of the
-configuration (`${hya.mul:${x},2}` with `x: [1, 2]`) is not supported and raises a `TypeError`: repeat
-the list in your code. At least one argument is required.
+**Notes:**
+
+- The arguments are never modified and are meant to be numbers. Repeating a list of the
+  configuration (`${hya.mul:${x},2}` with `x: [1, 2]`) is not supported and raises a `TypeError`:
+  repeat the list in your code.
+- At least one argument is required.
 
 #### `hya.ceildiv`
 
@@ -171,6 +190,9 @@ value = -(dividend // -divisor)  # Canonical implementation (no floating point)
 # math.ceil(dividend / divisor) gives the same integer for small ints, but it may have
 # precision issues with large integers and it always returns an int
 ```
+
+**Errors:** `ZeroDivisionError` for a divisor of zero, and `TypeError` for a value that is not a
+number.
 
 **Use Case:** Calculating the number of batches needed to process all samples.
 
@@ -263,6 +285,10 @@ value = Path(path).expanduser().resolve()
 - A `pathlib.Path` is accepted, so the output of `hya.path` can be passed to `hya.path` again.
 - A path with a tilde must be quoted in an interpolation: `${hya.path:"~/data"}`. Unquoted, it is a
   grammar error.
+- A value that is not a string or a path raises a `TypeError`, and a `~user` path of an unknown
+  user raises a `RuntimeError`.
+- A relative path is resolved against the working directory of the process when the value is
+  accessed. Hydra can change this directory (`hydra.job.chdir`).
 
 #### `hya.iter_join`
 
@@ -308,6 +334,10 @@ value = separator.join(map(str, iterable))
 - The resolver is `separator.join` over the iterable: a string is joined character by character
   (`${hya.iter_join:abc,-}` is `a-b-c`) and a mapping gives its keys joined (use
   `${oc.dict.values:x}` for its values).
+- Quote a separator that holds a comma or a significant space: `${hya.iter_join:[a,b],', '}` is
+  `a, b`.
+- A first argument that is not iterable raises a `TypeError`, and a separator that is not a string,
+  such as a number, raises an `AttributeError`.
 
 **Use Case:** Dynamically constructing file paths, experiment names, or configuration strings.
 
@@ -415,8 +445,10 @@ names: ${hya.iter_join:${hya.braceexpand:"a{1..3}"},-} # Result: "a1-a2-a3"
 
 **Notes:**
 
-- The pattern must be quoted (or its braces escaped) in an interpolation: unquoted, the braces are
-  a grammar error of OmegaConf.
+- Quote the pattern in an interpolation: unquoted, the braces are a grammar error of OmegaConf.
+  Escaping works too (`\{1..4\}`), but each comma must be escaped as well (`a\{1\,2\}`), as an
+  unquoted comma separates two arguments.
+- A pattern with unbalanced braces raises a `ValueError`.
 - The resolver returns a `list`, not an iterator: it has a length, can be indexed and can be read
   several times. The whole expansion is built at once.
 
@@ -471,6 +503,8 @@ value = np.asarray(data, dtype=dtype).copy(order="K")  # with a dtype
   Use `${oc.dict.keys:x}` or `${oc.dict.values:x}` for an array of its keys or of its values.
 - An array and a tensor (on the CPU and without gradient) are accepted. They are copied: the result
   does not share memory with them.
+- An unknown data type raises a `TypeError`, and data that cannot be converted (nested lists of
+  different lengths, a string with a numeric data type) raise a `ValueError`.
 
 ### PyTorch
 
@@ -523,6 +557,8 @@ value = data.detach().to(dtype=data.dtype if dtype is None else dtype, copy=True
 - A tensor is accepted, for example the output of another `hya.torch.tensor`. It is copied: the
   result does not share memory with it and does not require a gradient. Without a data type, the
   copy keeps the data type of the tensor.
+- An unknown data type name raises a `ValueError`, and so do nested lists of different lengths.
+  Data that PyTorch does not support, such as a string, raise a `TypeError`.
 
 #### `hya.torch.dtype`
 
@@ -564,54 +600,3 @@ value = torch.float32  # for dtype_name="float32"
 **Note:** An unknown name raises a `ValueError` whose message lists the available dtype names,
 sorted. Through an interpolation, OmegaConf reports it as an `InterpolationResolutionError`, as for
 the error of any other resolver.
-
-## Resolver Categories Summary
-
-| Category           | Resolvers                                                    |
-| ------------------ | ------------------------------------------------------------ |
-| **Arithmetic**     | `add`, `sub`, `mul`, `truediv`, `floordiv`, `ceildiv`, `neg` |
-| **Math Functions** | `pow`, `sqrt`, `exp`, `log`, `log10`, `sinh`, `asinh`        |
-| **Comparison**     | `max`, `min`                                                 |
-| **Casts**          | `int`, `float`                                               |
-| **Collections**    | `len`, `sum`                                                 |
-| **Constants**      | `pi`                                                         |
-| **Paths**          | `path`, `iter_join`                                          |
-| **Hashing**        | `sha256`                                                     |
-| **Optional**       | `braceexpand`, `np.array`, `torch.tensor`, `torch.dtype`     |
-
-## Quick Reference Examples
-
-### Configuration Calculations
-
-```yaml
-training:
-  total_samples: 60000
-  batch_size: 64
-  num_batches: ${hya.ceildiv:${training.total_samples},${training.batch_size}}
-  learning_rate: ${hya.pow:10,-3}
-```
-
-### Path Construction
-
-```yaml
-paths:
-  base: /data
-  project: myproject
-  full_path: ${hya.iter_join:[${paths.base},${paths.project},models],/}
-```
-
-### Data Type Configuration
-
-```yaml
-model:
-  dtype: ${hya.torch.dtype:float32}
-  input_tensor: ${hya.torch.tensor:[1,2,3]}
-```
-
-### Experiment Versioning
-
-```yaml
-experiment:
-  name: resnet50_cifar10
-  hash: ${hya.sha256:${experiment.name}}
-```

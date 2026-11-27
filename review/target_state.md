@@ -1,286 +1,309 @@
-# hya: target state and the changes to reach it
+# `hya`: target state and the changes to reach it
 
-This document describes the design `hya` should have, then the changes to make to the current code
-(`main`, `00798b1`, 0.5.0a0) to get there. It replaces the previous review (PRs #753 to #765). The
-plan of that review is now implemented (PRs #766 to #774), so this version starts from what the code
-does today and lists only the distance that is left. The design follows the properties of
-`docs/docs/properties.md` and the rules of `CLAUDE.md`. Its aim is a small package that is easy to
-maintain: **one registry, one registration rule, thin resolvers, nothing heavy at import time, and
-an install that works next to Hydra**. Breaking changes are accepted and the future state matters
-more than the past one.
-
-Evidence comes from probes run on `main` (Python 3.14 in `.venv`; Python 3.11 and 3.12 and OmegaConf
-2.2.3 and 2.3.0 in throw-away environments; scripts and the prototype of section 6 kept outside the
-repository). Items are tagged **[verified]** (reproduced) or **[reading]** (from the code or the
-documentation). Nothing in `src`, `tests` or `docs` was changed by this review.
-
-**The finding in one sentence:** `main` already is the target architecture; what is left is two
-statements of the documentation that are false, one missing feature (a `dtype` for the array and
-tensor resolvers), one quality gate that reports a false result, stale docstrings, and tests for the
-properties that nothing enforces yet. No architectural change and no new breaking change is needed
-(section 3.6 lists the breaking changes that were considered and rejected).
-
----
+This document defines the properties `hya` should guarantee, the design that gives them, and the
+changes to make to the current code (`main`, `6fa9b2f`, 0.5.0a0) to get there. The latest release
+is `v0.4.0`. It replaces the previous review, whose plan is implemented (PRs #776 to #780).
 
 ## 1. Properties of the package
 
-These are the rules the package guarantees. Each one is enforced by code or by a test (section 6.2
-lists the test of each property and the ones to add). The numbers are those of
-`docs/docs/properties.md`. Rows marked **changed** or **new** differ from that page; section 2 says
-why.
+These are the rules `hya` guarantees in the target state. Each one is made true by the code and
+checked by a test (section 8.2). The numbers are those of `docs/docs/properties.md`. The last column
+compares with that page: **kept** (same statement, true today), **changed** (the statement or the
+behaviour changes) or **new**.
 
-| #   | Property                   | Statement                                                                                                                                                                                                                                                                                              |
-| --- | -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| P1  | **Import is enough**       | `import hya` publishes every default resolver to OmegaConf. No other call is needed, and `register_resolvers()` publishes them again after `OmegaConf.clear_resolvers()`.                                                                                                                              |
-| P2  | **Cheap import**           | `import hya` imports neither `numpy`, `torch` nor `braceexpand` (nor the `hya` modules that import them), does not look for them on disk, and emits no warning. The module of an optional resolver is imported on the first call of that resolver.                                                     |
-| P3  | **Namespaced**             | Every built-in key starts with `hya.`. Optional ones are grouped (`hya.np.*`, `hya.torch.*`). Nothing is registered outside this namespace.                                                                                                                                                            |
-| P4  | **Thin resolvers**         | A resolver is a standard library callable or a function of a few lines with one documented behaviour. No hidden state, no I/O beyond what its name says (`hya.path` touches the file system).                                                                                                          |
-| P5  | **Pure**                   | A resolver never modifies its arguments. Interpolating a config node into a resolver cannot change the config.                                                                                                                                                                                         |
-| P6  | **Deterministic output**   | The same arguments give the same output, including inside error messages (sorted, no set order). A hash does not depend on the process (no `hash()`).                                                                                                                                                  |
-| P7  | **Explicit registry**      | A `ResolverRegistry` is a plain key to callable map. `register` adds, `register_resolvers` publishes to OmegaConf. Registries are independent of each other.                                                                                                                                           |
-| P8  | **Replace is explicit**    | `register_resolvers()` is idempotent and never silently keeps a stale resolver: a key that changed in the registry since it was published, or that another source registered **before** the registry published it, is skipped with a warning unless `replace=True` (**changed**: "before").            |
-| P9  | **One default registry**   | `get_default_registry()` returns one process-wide registry holding the built-in resolvers. It holds the same keys on every machine, whatever packages are installed. Users extend it or create their own registry.                                                                                     |
-| P10 | **Errors are OmegaConf's** | A failing resolver surfaces as `InterpolationResolutionError`. The message names the original exception and the original exception is in its `__context__` chain, **not** its `__cause__` (**changed**). `hya` adds no wrapper. A missing optional package gives an error that says how to install it. |
-| P11 | **Any value out**          | A resolver may return any Python object (`Path`, `ndarray`, `Tensor`, `dtype`, list). Such values are for use in code and are not meant for `OmegaConf.to_yaml`.                                                                                                                                       |
-| P12 | **Typed and documented**   | `py.typed`, `pyright --verifytypes` at 100 %, every public name documented with a doctest, every resolver listed in `docs/` with its signature and one example.                                                                                                                                        |
-| P13 | **Keyword-only options**   | The options of the Python API are keyword-only (`exist_ok`, `replace`). The arguments of a resolver are positional: the interpolation grammar has no keyword syntax. An optional argument of a resolver comes last and has a default (**changed**: clarified).                                         |
-| P14 | **Installs next to Hydra** | `hya` accepts every OmegaConf release that a Hydra release accepts (`omegaconf >=2.2,<3.0`), on Python 3.11 and later. CI runs the tests on the oldest and the newest OmegaConf.                                                                                                                       |
-| P15 | **Composable**             | A resolver accepts the values OmegaConf gives it (`str`, `int`, `float`, `bool`, `None`, `list`, `dict`, `ListConfig`, `DictConfig`) and the output of another `hya` resolver (a `Path` for `hya.path`, a `torch.dtype` for `hya.torch.tensor`) (**new**).                                             |
+| #   | Property                      | Statement                                                                                                                                                                                                                                                                              | Enforced by                           | Status  |
+| --- | ----------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------- | ------- |
+| P1  | **Import is enough**          | `import hya` publishes every default resolver to OmegaConf. No other call is needed, and `register_resolvers()` publishes them again after `OmegaConf.clear_resolvers()`.                                                                                                              | `hya/__init__.py`, `ResolverRegistry` | kept    |
+| P2  | **Cheap import**              | `import hya` imports neither `numpy`, `torch` nor `braceexpand`, and emits no warning. The module of an optional resolver is imported on the first call of that resolver.                                                                                                              | `register_lazy`, import contracts     | kept    |
+| P3  | **Namespaced**                | Every built-in key starts with `hya.`. Optional ones are grouped (`hya.np.*`, `hya.torch.*`). Nothing is registered outside this namespace.                                                                                                                                            | `hya.default`                         | kept    |
+| P4  | **Thin resolvers**            | A resolver is a standard library callable or a function of a few lines with one documented behaviour. No hidden state, no I/O beyond what its name says (`hya.path` touches the file system).                                                                                          | code review                           | kept    |
+| P5  | **Pure**                      | A resolver never modifies its arguments. A returned value can be an argument itself or one of its elements (`hya.add` of one value, `hya.max` of lists), exactly as `${x}` returns the node `x`: copy it before you mutate it.                                                         | the resolvers                         | changed |
+| P6  | **Deterministic output**      | The same resolved arguments give the same output, including error messages (sorted, no set order), on every process and OmegaConf release. `hya.path` also depends on the file system (working directory, home directory, symbolic links), which is its purpose.                       | the resolvers                         | changed |
+| P7  | **Explicit, strict registry** | A `ResolverRegistry` is a key to callable map. `register` adds, `register_resolvers` publishes. Every entry, from `register`, `register_lazy` or the constructor, has a callable value and a key that every supported OmegaConf can interpolate; anything else raises at registration. | `ResolverRegistry.register`           | changed |
+| P8  | **Replace is explicit**       | `register_resolvers()` is idempotent. A key that changed since it was published, or that another source registered before the registry published it, is skipped with a warning unless `replace=True`.                                                                                  | `register_resolvers`                  | kept    |
+| P9  | **One default registry**      | `get_default_registry()` returns one process-wide registry holding the built-in resolvers. It holds the same keys on every machine, whatever packages are installed. Users extend it or create their own registry.                                                                     | `functools.cache`                     | kept    |
+| P10 | **Errors are OmegaConf's**    | A resolver raises standard exceptions only, so a failure surfaces as `InterpolationResolutionError` whose message names the original exception, found in the `__context__` chain (`__cause__` is `None`). A missing optional package says how to install it.                           | the resolvers                         | changed |
+| P11 | **Any value out**             | A resolver may return any Python object (`Path`, `ndarray`, `Tensor`, `dtype`, list). Such values are for use in code: `OmegaConf.resolve` needs the `allow_objects` flag and `to_yaml` does not support them.                                                                         | documentation                         | changed |
+| P12 | **Typed and documented**      | `py.typed`, `pyright --verifytypes` at 100 %, every public function, class, method and property documented with a doctest and shown in the reference, every resolver listed in `docs/resolvers.md`, and the documentation says nothing false.                                          | CI, tests                             | changed |
+| P13 | **Keyword-only options**      | The options of the Python API are keyword-only (`exist_ok`, `replace`). The arguments of a resolver are positional (the grammar has no keyword syntax); an optional argument comes last and has a default.                                                                             | signatures                            | kept    |
+| P14 | **Installs next to Hydra**    | `hya` accepts every OmegaConf release that a Hydra release accepts (`omegaconf>=2.2,<3.0`) and behaves the same on all of them. CI runs the tests on the oldest and the newest.                                                                                                        | `_publish`, CI matrix                 | changed |
+| P15 | **Composable**                | A resolver accepts the values OmegaConf gives it and the output of another `hya` resolver. In particular `hya.torch.tensor` takes a tensor, an array, and a data type as a `torch.dtype` or as its name.                                                                               | the resolvers                         | changed |
+| P16 | **Resolved input**            | A resolver that reads a whole value (`hya.sha256`, `hya.iter_join`, `hya.np.array`, `hya.torch.tensor`) reads its **resolved** content: interpolations are resolved at any depth, and a missing value (`???`) raises `MissingMandatoryValue`.                                          | `hya.utils.config.to_plain`           | new     |
+| P17 | **Faithful hash**             | `hya.sha256` hashes the whole content of a value: a string as is, any other value as canonical JSON (sorted keys). Two such values with different JSON forms have different hashes, and a value without a JSON form raises instead of being hashed from a summary.                     | `sha256_resolver`                     | new     |
 
-**Not guaranteed:** thread-safety of registering while OmegaConf resolves (OmegaConf's registry is a
-global dict); caching of resolver outputs (OmegaConf default: none); support of
-`OmegaConf.to_yaml(resolve=True)` for object-valued resolvers (P11); detection of a resolver that
-another source registered **after** `hya` published the same key (section 2.2, G5); the textual form
-of `hya.sha256` for an input whose `str()` OmegaConf changes (the hash is of `str(obj)`, so two
-mappings with the same items in another order have different hashes).
+**Not guaranteed**, and documented as such:
+
+- **Thread-safety** of registering while OmegaConf resolves (OmegaConf's resolver table is a global
+  dictionary).
+- **Detection of a registration made after `hya`'s.** A resolver that another source registers for a
+  key `hya` already published is not detected: it needs the private `BaseContainer._resolvers`.
+- **Type-tagged hashes.** `hya.sha256` of the string `[1]` equals the hash of the list `[1]`, an
+  integer key equals the same string key, and a path or an enum equals its string in JSON. A mapping
+  that mixes key types cannot be sorted and raises.
+- **Special parameters of lazy resolvers.** A resolver registered with `register_lazy` cannot
+  receive `_root_`, `_parent_` or `_node_`: OmegaConf reads them from the signature, which is not
+  known before the import.
+- **Caching.** OmegaConf calls the resolver at every access.
+
+### Constraints of the design
+
+1. **Simple and easy to maintain.** One registry, one registration rule, thin resolvers, one shared
+   helper. No change adds a class or a layer.
+2. **Breaking changes are accepted.** The future state matters more than the past one: no alias, no
+   deprecation period. The release notes list the changes (section 5).
+3. **The rules of `CLAUDE.md`**: lazy optional packages with fallbacks, shared helpers public in
+   `hya.utils`, keyword-only options, no ignored lint or type issue.
+4. **Behaviour before size.** A change is kept only if it fixes a reproduced defect or makes a
+   property true.
 
 ---
 
 ## 2. Where `main` stands
 
-### 2.1 Done since the previous review
+Items are tagged **[verified]** (reproduced) or **[reading]** (from the code or documentation).
+Probes ran on Python 3.14 with OmegaConf 2.4.0; the ones that depend on OmegaConf were repeated on
+2.2.1 or 2.2.3, 2.3.0 or 2.3.1 as noted, in throw-away environments. Scripts and the prototype of
+section 6 are not part of the repository. This review changes no file of `src`, `tests` or `docs`.
 
-| Item of the previous plan                                        | State                                                            |
-| ---------------------------------------------------------------- | ---------------------------------------------------------------- |
-| Accept `omegaconf >=2.2,<3.0`; one `_publish` for 2.2 to 2.4     | done (#766); CI matrix `2.2.3`, `2.3.0`, `2.4.0` in `dev/config` |
-| `register_resolvers()` publishes again after `clear_resolvers()` | done (#767), regression test                                     |
-| `hya.path` accepts a path-like, checks the host of a file URL    | done (#768)                                                      |
-| `__all__` and docstring of `hya.numpy`                           | done (#769)                                                      |
-| Optional resolvers always registered, same keys everywhere       | done (#770): 28 keys on every machine, no `find_spec` at import  |
-| Defaults published in `__init__.py`, named lazy resolvers        | done (#771)                                                      |
-| `hya.int`, `hya.float`, `hya.sum`                                | done (#773)                                                      |
-| Override example of the user guide                               | done (#774)                                                      |
+**The finding in one sentence:** the architecture is right and every gate is green, but the resolvers
+that read whole values can return a **wrong result without any error**, the registry accepts entries
+that cannot work, and a few statements of the documentation are false.
 
-Gates on `main` **[verified]**: 283 tests pass, 6 are skipped (the tests of the missing-package
-case: all three optional packages are installed), coverage of `src` is 100 %, `ruff check` and `ty`
-pass, 25 doctests pass. `import hya`
-takes 66 ms in total (27 ms of it is OmegaConf) and imports no optional package. `src` is 1,058
-lines, about 200 of them executable; the rest is docstrings. `hya` works with OmegaConf 2.2.3,
-2.3.0 and 2.4.0 and with Python 3.11, 3.12 and 3.14 under `python -W error` **[verified]**.
+Gates on `main` **[verified]**: 316 tests pass and 6 are skipped (missing-package cases), coverage of
+`src` is 100 %, 25 doctests pass, `ruff`, `ty` and `pyright --verifytypes` (100 %) pass, the 5
+import contracts hold, `tests/package/checks.py --extra all` passes, `inv doc.build` and
+`inv test.doctest-markdown` pass. So no existing gate sees the findings below.
 
-Probed and **correct**, so not to be touched: the 28 keys resolve for the documented inputs, with
-config nodes as input (`ListConfig` into `hya.np.array`, `hya.torch.tensor`, `hya.max`, `hya.sum`,
-`hya.len`, `hya.iter_join`, `hya.sha256`, `hya.add`), `hya.add` returns a new list and leaves
-`conf.x` unchanged, `hya.path` accepts a `Path` and a `file://localhost/` URL, errors of the standard
-library resolvers are the errors of the standard library, the dtype error lists the sorted names.
+### 2.1 Wrong results
 
-### 2.2 What is still wrong
+| #   | Finding                                                                                                                                                                                                                                                                                              | Property | Status                                    |
+| --- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------- | ----------------------------------------- |
+| F1  | **`hya.sha256` does not hash interpolated values.** With `x: ["${a}"]`, `${hya.sha256:${x}}` is the same hash for `a: 1` and `a: 2`, because `str(node)` prints the unresolved text. The same holds for a mapping. An experiment identifier built this way does not change when the experiment does. | P16, P17 | **[verified]** 2.2.1, 2.2.3, 2.3.0, 2.4.0 |
+| F2  | **`hya.sha256` collides on large arrays and tensors.** Two arrays of 2,000 values that differ at index 1,000 have the same hash, with `hya.np.array` and with `hya.torch.tensor`: `str()` summarizes them with `...`. The hash also depends on the print options of NumPy and PyTorch.               | P6, P17  | **[verified]**                            |
+| F3  | **`hya.sha256` silently hashes a missing value.** `x: ["???"]` gives a hash.                                                                                                                                                                                                                         | P16      | **[verified]**                            |
+| F4  | **`hya.sha256` of a mapping depends on the key order**: `{a: 1, b: 2}` and `{b: 2, a: 1}` differ. Documented as a limit today, but it makes the hash of a configuration fragile.                                                                                                                     | P17      | **[verified]**                            |
+| F5  | **`hya.iter_join` prints unresolved interpolations** of nested values: with `x: [["${a}"], 2]` the result is `['${a}']-2`. A literal list `[${x}]` does the same. Flat lists are resolved.                                                                                                           | P16      | **[verified]**                            |
+| F6  | **`hya.path` drops the query and the fragment of a file URL**: `file:///data/run#1` gives `/data/run`. The module refuses to drop a host for this reason; a `#` in a file name loses data the same way.                                                                                              | P4       | **[verified]**                            |
 
-#### False statements of the documentation
+### 2.2 Values that cannot be composed
 
-- **G1. P10 says "the original error as cause", and it is not [verified].** For
-  `${hya.ceildiv:1,0}`, OmegaConf raises `InterpolationResolutionError` with `__cause__ is None`;
-  the chain is `InterpolationResolutionError` (`__context__`) → `InterpolationResolutionError`
-  (`__context__`) → `ZeroDivisionError`. The message does name the original type ("ZeroDivisionError
-  raised while resolving interpolation"). The sentence is in `docs/docs/properties.md` (P10) and in
-  the "Error Handling" section of `docs/docs/user_guide.md`. No test checks it (`grep cause tests`
-  is empty). Violates P10 as written.
-- **G2. `hya.ceildiv` says it is `math.ceil(dividend / divisor)` [verified].** For ints it is (and
-  exact for big ints). For floats it returns a float: `${hya.ceildiv:11.0,4}` is `3.0`, while
-  `math.ceil(11.0 / 4)` is `3`. The docstring and `docs/docs/resolvers.md` should say that the type
-  of the result follows `//`.
-- **G3. Two module docstrings describe the registration of before #770 [reading].**
-  `hya/torch.py` ("The resolvers are registered only if the `torch` package is available") and
-  `hya/braceexpand.py` ("The resolver is registered only if the `braceexpand` package is
-  available"). The resolvers are always registered. `hya/numpy.py` was fixed, these two were
-  missed. They are rendered by mkdocstrings in the reference.
-- **G4. P8 promises more than the code can do [verified].** After `OmegaConf.clear_resolvers()`, if
-  another source registers `hya.add` and then `get_default_registry().register_resolvers()` runs,
-  the registry sees `_published["hya.add"] is resolver` and `OmegaConf.has_resolver` true, and
-  skips the key **silently**: the other source's resolver stays, with no warning. Detecting it
-  needs the private `BaseContainer._resolvers` of OmegaConf (the public API has no
-  `get_resolver` in 2.4 and the stored value is a wrapper, not the function). The case needs a
-  `clear_resolvers()` and an unrelated registration of a `hya.*` key between two `hya` calls;
-  the registration made **before** `hya` is detected and warned (test
-  `test_register_resolvers_key_of_another_source_is_not_replaced`). The fix is the wording of P8,
-  not code (decision D5).
+| #   | Finding                                                                                                                                                                                                                                      | Property | Status         |
+| --- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------- | -------------- |
+| F7  | `hya.np.array` takes `float32`, `hya.torch.tensor` refuses it (`argument 'dtype' must be torch.dtype, not str`). The two sibling resolvers have different contracts.                                                                         | P15      | **[verified]** |
+| F8  | `${hya.torch.tensor:${t}}` with `t` a tensor emits the "To copy construct from a tensor" `UserWarning`; with warnings as errors the interpolation fails.                                                                                     | P2, P15  | **[verified]** |
+| F9  | `hya.torch.tensor` of a list with `???` fails with `could not determine the shape of object type 'ListConfig'` instead of saying that a value is missing (`hya.np.array` says it).                                                           | P16      | **[verified]** |
+| F10 | `hya.torch.dtype` raises `InterpolationResolutionError` itself, the only resolver that raises an OmegaConf error: the message names no original exception, and a direct Python call raises an interpolation error outside any interpolation. | P10      | **[reading]**  |
 
-#### Missing feature
+### 2.3 A registry that accepts what cannot work
 
-- **G5. The array and tensor resolvers cannot take a dtype [verified].**
-  `${hya.torch.tensor:[1,2],${hya.torch.dtype:float32}}` raises
-  `TypeError: to_tensor_resolver() takes 1 positional argument but 2 were given`. `hya.torch.dtype`
-  exists next to `hya.torch.tensor` for this use, yet the two cannot be combined; a config that
-  needs a `float32` tensor has to cast in code. The grammar has no keyword argument
-  (`${hya.np.array:[1,2],dtype=float}` is a `GrammarParseError`), so the dtype must be a second
-  positional argument. The change is not breaking: one argument is added after `data`, with a
-  default.
+| #   | Finding                                                                                                                                                                                                                                                      | Property | Status                                   |
+| --- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | -------- | ---------------------------------------- |
+| F11 | **`@registry.register` without a key does nothing, silently.** The function becomes the inner `wrap`, nothing is registered, and no error is raised until the interpolation fails elsewhere.                                                                 | P7       | **[verified]**                           |
+| F12 | `ResolverRegistry({"a": 1})` accepts a non-callable: the constructor bypasses the check of `register`. The error appears in `register_resolvers()`, after the keys before it have been published.                                                            | P7       | **[verified]** / **[reading]** (partial) |
+| F13 | `register` accepts keys that no interpolation can use (`bad key`, `1a`, `a..b`, `a:b`), published without error; the failure is a grammar error in a configuration. The accepted set also differs: `a-b` works on 2.3.0 and 2.4.0 and not on 2.2.1 or 2.2.3. | P7, P14  | **[verified]**                           |
+| F14 | `register_lazy("k", "a:b:c")` is accepted and fails on the first call.                                                                                                                                                                                       | P7       | **[verified]**                           |
 
-#### Gates and tests
+### 2.4 False or missing documentation
 
-- **G6. `pyright --verifytypes` reports a false result as documented [verified].**
-  `.venv/bin/pyright --verifytypes hya --ignoreexternal` (the command of `CLAUDE.md`) prints
-  `error: No py.typed file found`, `Symbols exported by "hya": 0` and a score of 0 %, although
-  `src/hya/py.typed` exists. The same command with the environment activated
-  (`VIRTUAL_ENV=$PWD/.venv PATH=$PWD/.venv/bin:$PATH`) finds `src/hya`, exports 38 symbols and scores
-  100 %; a non-editable install in another environment gives the same 100 %. `--pythonpath` does not
-  help. So P12 holds, but the documented command does not prove it. Whether `inv types.check
---complete` (the CI job) runs `--verifytypes` with an activated environment is **not verified**:
-  `invoke-tasklib` has no `verifytypes` string in the installed package.
-- **G7. Four properties have no test that would fail if they were broken [reading, `grep` of
-  `tests/`].** P3 (every key starts with `hya.`), P10 (the chain of G1), P15 (a `hya` output as
-  the input of a `hya` resolver; only `hya.path` of `hya.path` is in the doctest), and P5 for
-  the resolvers other than `hya.add` (`hya.mul`, `hya.iter_join`, `hya.sha256` on a config node).
+| #   | Finding                                                                                                                                                                                            | Status         |
+| --- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------- |
+| F15 | The user guide announces the error `Circular reference detected`; OmegaConf says `Recursive interpolation detected` (2.2.3 and 2.4.0).                                                             | **[verified]** |
+| F16 | The "Registering Custom Resolvers" snippet of `index.md` uses `OmegaConf` without importing it: run alone, it raises a `NameError`.                                                                | **[verified]** |
+| F17 | `get_started.md` and `CONTRIBUTING.md` give `make conda`, `make install` and `make unit-test-cov`: none of these targets exists. `CONTRIBUTING.md` also asks for `black .`; the project uses ruff. | **[verified]** |
+| F18 | `CLAUDE.md` says that resolvers are registered with the `ResolverRegistry` of their module (`hya.numpy`, `hya.torch`): these modules have no registry, the keys are in `hya.default`.              | **[reading]**  |
+| F19 | P12 does not hold: `ResolverRegistry.state` has no doctest, and the reference pages omit `hya.imports` and `hya.testing`.                                                                          | **[verified]** |
+| F20 | P11 and the limits name `to_yaml` only. `OmegaConf.resolve(cfg)` also fails (`UnsupportedValueType`) for an array, a tensor or a dtype unless `cfg` has the `allow_objects` flag.                  | **[verified]** |
 
-### 2.3 Must not regress
+### 2.5 Right today, must not regress
 
-All current keys keep working for the documented inputs. `import hya` stays free of warnings and of
-optional imports (P2). The default registry stays a singleton with the same keys on every machine
-(P9); a custom `ResolverRegistry` stays independent of it (P7). The doctests keep running.
+All the keys resolve for the documented inputs. `import hya` is free of warnings and of optional
+imports (84 ms in total, 35 ms of it OmegaConf). The default registry is a singleton with the same
+keys on every machine. `register_resolvers()` is idempotent and publishes again after
+`clear_resolvers()`. `hya.add` and `hya.mul` do not modify their arguments. `hya.np.array` already
+resolves nested interpolations and reports a missing value. The multi-config Hydra example of the
+user guide resolves with `hydra-core` 1.3.2 **[verified]**.
 
 ---
 
 ## 3. Target architecture
 
-### 3.1 Module layout
-
-Unchanged. The package is small and each module has one role.
+The architecture does not change. One module is added for the one rule that several resolvers share.
 
 ```text
 src/hya/
-├── __init__.py       # exports ResolverRegistry, get_default_registry; publishes the defaults (P1)
-├── registry.py       # ResolverRegistry, _publish (the only place that knows the OmegaConf version)
-├── default.py        # get_default_registry + the two tables (built-in, optional)
-├── resolvers.py      # the resolvers with a hya behaviour: add, mul, ceildiv, pi, iter_join, sha256, path
-├── braceexpand.py    # braceexpand_resolver (guarded import + fallback)             [docstring]
-├── numpy.py          # to_array_resolver (guarded import + fallback)                [dtype]
-├── torch.py          # to_tensor_resolver, torch_dtype_resolver (guarded import)    [dtype, docstring]
-├── imports.py        # check_*/is_*_available
-├── testing.py        # pytest markers for the optional packages (test support, imports pytest)
+├── __init__.py        # exports; publishes the default resolvers (P1)
+├── registry.py        # ResolverRegistry, _publish (only place that knows the OmegaConf version)   [strict]
+├── default.py         # get_default_registry + the two tables (built-in, optional)
+├── resolvers.py       # add, mul, ceildiv, pi, iter_join, sha256, path                              [changed]
+├── braceexpand.py     # braceexpand_resolver
+├── numpy.py           # to_array_resolver
+├── torch.py           # to_tensor_resolver, torch_dtype_resolver                                    [changed]
+├── imports.py         # validate_*/is_*_available
+├── testing.py         # pytest markers for the optional packages
 ├── py.typed
-└── utils/fallback/   # fake modules for the guarded imports
+└── utils/
+    ├── config.py      # to_plain                                                                    [new]
+    └── fallback/      # fake modules for the guarded imports
 ```
 
-The guarded import with a fallback module in the three optional modules stays: it is a rule of
-`CLAUDE.md`, and the modules are imported without their package by the documentation build
-(mkdocstrings) and by a user who imports `hya.numpy` directly. The three mechanisms
-(`is_*_available`, `check_*`, fallback) have each one job: choose the import, give the install hint,
-keep the module importable (decision D6).
+### 3.1 One rule for reading configuration values
 
-### 3.2 `ResolverRegistry`
-
-The public API is final: `register`, `register_lazy`, `register_resolvers`, `has_resolver`, `state`
-(read-only). Nothing changes in the code. The rules that the code follows:
-
-1. `register(key, *, exist_ok=False)` is a decorator factory, so `registry.register("k")(fn)` is
-   also the call form. A second registration of a key raises `RuntimeError` unless `exist_ok=True`.
-2. `register_lazy(key, target, *, exist_ok=False)` registers a named callable that imports
-   `"module:function"` on its first call. The callable takes `*args`: the arity is checked by the
-   target at the call, which is why the signature does not show it (accepted: OmegaConf does not
-   read it, because `annotation_validation` is `"off"`).
-3. `register_resolvers(*, replace=False)` is idempotent and publishes through `_publish`, the single
-   function that depends on the OmegaConf version (`register_resolver(..., annotation_validation=
-"off")` from 2.4, `register_new_resolver` before). It skips a key that is unchanged and still in
-   OmegaConf, skips with a warning a key that OmegaConf has from another source, and replaces only
-   with `replace=True` (P8).
-
-The wording of P8 changes to say "registered before" (G4); the limit is listed in "Not guaranteed".
-
-### 3.3 Default registry
-
-Unchanged: `_BUILTINS` (24 keys: 17 standard library callables, 7 functions of `resolvers.py`) and
-`_OPTIONAL` (4 lazy keys) are two tables; `get_default_registry()` is a `@cache` function that builds
-the registry from them; `hya/__init__.py` publishes it. The complete catalogue of the target:
-
-| Group              | Keys                                                                                                                        | Implementation                                  |
-| ------------------ | --------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------- |
-| Operators          | `hya.sub`, `hya.truediv`, `hya.floordiv`, `hya.neg`, `hya.pow`                                                              | `operator.*`                                    |
-| Math               | `hya.sqrt`, `hya.exp`, `hya.log`, `hya.log10`, `hya.sinh`, `hya.asinh`                                                      | `math.*`                                        |
-| Builtins           | `hya.max`, `hya.min`, `hya.len`, `hya.sum`, `hya.int`, `hya.float`                                                          | the builtin itself                              |
-| Behaviour of `hya` | `hya.add`, `hya.mul` (do not modify the first argument), `hya.ceildiv`, `hya.pi`, `hya.iter_join`, `hya.sha256`, `hya.path` | functions of `resolvers.py`, 3 to 10 lines each |
-| Optional (lazy)    | `hya.braceexpand`, `hya.np.array`, `hya.torch.tensor`, `hya.torch.dtype`                                                    | `hya.braceexpand`, `hya.numpy`, `hya.torch`     |
-
-A resolver is added to this catalogue when a configuration needs it **and** no composition of the
-existing keys gives it (decision D2 applies this rule to `abs`, `round`, `ceil`, `floor`, `mod`).
-Every key costs one table row, one row of `docs/docs/resolvers.md` and one row of the integration
-table of `tests/integration/test_resolvers.py` (which fails if a key is undocumented).
-
-### 3.4 Resolvers with a `hya` behaviour
-
-Unchanged, except the docstring of `hya.ceildiv` (G2):
+OmegaConf gives a resolver the configuration node itself (`ListConfig`, `DictConfig`), and a literal
+such as `[${x}]` is a plain list that **contains** nodes. `str`, `json` and `torch` do not resolve
+the interpolations of a node. One public helper does it, and every resolver that reads a whole value
+as text or data goes through it:
 
 ```python
-def ceildiv_resolver(dividend: float, divisor: float) -> float:
-    r"""Compute the ceiling division of two numbers.
-
-    The type of the result follows ``//``: an ``int`` for two integers (exact, whatever their size)
-    and a ``float`` if one of them is a float (``11.0, 4`` gives ``3.0``).
-    """
-    return -(dividend // -divisor)
+# hya/utils/config.py
+def to_plain(value: Any) -> Any:
+    """Return ``value`` with its configuration nodes converted to plain, resolved objects."""
+    if OmegaConf.is_config(value):
+        return OmegaConf.to_container(value, resolve=True, throw_on_missing=True)
+    if isinstance(value, list):
+        return [to_plain(item) for item in value]
+    if isinstance(value, dict):
+        return {key: to_plain(item) for key, item in value.items()}
+    return value
 ```
 
-### 3.5 Optional resolvers: a `dtype` argument (G5, P13, P15)
+It returns new containers, so the input is never modified (P5). Other objects (tensors, paths,
+tuples built by user code) pass through unchanged.
 
-The array and tensor resolvers take the dtype as an optional second argument. `dtype=None` is the
-current behaviour, so the change is not breaking.
+`hya.np.array` does **not** use it: NumPy reads a node item by item, which already resolves and
+reports missing values, and converting first is 2.4 times slower (252 ms against 105 ms for 100,000
+values **[verified]**). For `hya.torch.tensor` the conversion is faster than today (255 ms against
+397 ms) and fixes F9. The test of P16 checks all four resolvers, whatever their implementation.
+
+### 3.2 `hya.sha256` (F1 to F4)
 
 ```python
-# hya/numpy.py
-def to_array_resolver(data: ArrayLike, dtype: str | None = None) -> np.ndarray:
-    validate_numpy()
-    return np.array(data, dtype=dtype)
+def sha256_resolver(obj: Any) -> str:
+    value = to_plain(obj)
+    if not isinstance(value, str):
+        value = json.dumps(value, sort_keys=True, separators=(",", ":"), default=_encode_value)
+    return hashlib.sha256(value.encode("utf-8")).hexdigest()
 
 
-# hya/torch.py
-def to_tensor_resolver(data: Any, dtype: torch.dtype | None = None) -> torch.Tensor:
+def _encode_value(value: object) -> str:
+    if isinstance(value, (PurePath, Enum)):
+        return str(value)
+    msg = f"hya.sha256 cannot hash a value of type {type(value).__name__}"
+    raise TypeError(msg)
+```
+
+- A **string** is hashed as is: the result is the SHA-256 of the text, the same as other tools give,
+  and every hash of a string is unchanged.
+- **Anything else** is hashed from its canonical JSON: sorted keys, no space. The hash no longer
+  depends on `repr`, on print options or on the OmegaConf release.
+- An **array, tensor, dtype, set or bytes** raises a `TypeError`. A user who needs to hash an array
+  hashes the list it is built from.
+
+| Input            | Hash today (prefix) | Target (prefix) |
+| ---------------- | ------------------- | --------------- |
+| `mystring`       | `bd3ff475`          | unchanged       |
+| `1`              | `6b86b273`          | unchanged       |
+| `1.5`            | `9f29a130`          | unchanged       |
+| `true`           | `3cbc87c7`          | `b5bea41b`      |
+| `null`           | `dc937b59`          | `74234e98`      |
+| `[1,2]`          | `3a316d6d`          | `49a64717`      |
+| `{b: 2, a: 1}`   | `46e391c4`          | `43258cff`      |
+| `${hya.path:/a}` | `6a50dc85`          | `54b379c9`      |
+
+### 3.3 `hya.iter_join` (F5)
+
+```python
+def iter_join_resolver(iterable: Iterable[Any], separator: str) -> str:
+    return separator.join(map(str, to_plain(iterable)))
+```
+
+The elements are still converted with `str` (P4): a nested list is printed as a Python list, now
+with its resolved values. A missing value raised already for a flat list; it now raises at any depth.
+
+### 3.4 `hya.torch.tensor` and `hya.torch.dtype` (F7 to F10)
+
+```python
+def to_tensor_resolver(data: Any, dtype: torch.dtype | str | None = None) -> torch.Tensor:
     validate_torch()
-    return torch.tensor(data, dtype=dtype)
+    if isinstance(dtype, str):
+        dtype = torch_dtype_resolver(dtype)
+    if isinstance(data, torch.Tensor):
+        return data.detach().to(dtype=data.dtype if dtype is None else dtype, copy=True)
+    return torch.tensor(to_plain(data), dtype=dtype)
+
+
+def torch_dtype_resolver(target: str) -> torch.dtype:
+    validate_torch()
+    dtype = getattr(torch, target, None)
+    if isinstance(dtype, torch.dtype):
+        return dtype
+    msg = f"Incorrect dtype {target}. The available dtypes are {_dtype_names()}"
+    raise ValueError(msg)
 ```
 
-```yaml
-weights: ${hya.np.array:[1,2,3],float32} # array([1., 2., 3.], dtype=float32)
-mask: ${hya.torch.tensor:[1,0,1],${hya.torch.dtype:bool}} # tensor([ True, False,  True])
+- `${hya.torch.tensor:[1,2],float32}` now works, like `hya.np.array`. A `torch.dtype` still works.
+- A tensor input is copied without a warning (P5: the result does not share memory).
+- `hya.torch.dtype` raises a `ValueError`; through an interpolation it is still an
+  `InterpolationResolutionError`, now of the same form as every other resolver error (P10).
+
+### 3.5 `hya.path` (F6)
+
+A `file:` URL with a query or a fragment raises, as a URL with a host does:
+
+```python
+if url.netloc not in ("", "localhost") or url.query or url.fragment:
+    msg = f"A file URL with a host, a query or a fragment is not supported: '{path}'"
+    raise ValueError(msg)
 ```
 
-For numpy the dtype is the string that `np.array(dtype=...)` accepts, so no `hya.np.dtype` resolver
-is needed. For torch the dtype is a `torch.dtype`, which is the output of `hya.torch.dtype`
-(P15): the two resolvers compose and nothing else is added. `hya.torch.dtype` keeps its contract:
-the name of an attribute of `torch` (`float32`, not `torch.float32`), the error lists the sorted
-names (decision D3). `hya.braceexpand` and `hya.np.array`/`hya.torch.tensor` without `dtype` are
-unchanged. The module docstrings of `hya.torch` and `hya.braceexpand` stop saying that the
-resolvers are registered only if the package is available (G3).
+A literal `#` or `?` is written `%23` or `%3F` in a URL, or the path is given without `file:`.
 
-### 3.6 Breaking changes considered and rejected
+### 3.6 `ResolverRegistry` (F11 to F14)
 
-The brief allows breaking changes; none improves the package enough to pay its migration cost.
+The public members stay: `register`, `register_lazy`, `register_resolvers`, `has_resolver`, `state`.
+Every entry goes through `register`, which is the only place that validates:
 
-| Candidate                                                       | Why not                                                                                                                                |
-| --------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
-| `register(key, "module:function")` instead of `register_lazy`   | One function with two behaviours chosen by the type of an argument; the error messages of both get worse. `register_lazy` is 10 lines. |
-| Remove `has_resolver` (use `key in registry.state`)             | It mirrors `OmegaConf.has_resolver`, costs 3 lines and is in the user guide. Removing it breaks code for no maintenance gain.          |
-| Remove `check_*`, `is_*_available` and `utils.fallback`         | The install hint of P10 and the importable modules of section 3.1 need them; the rule is in `CLAUDE.md`.                               |
-| Wrap resolver errors in a `hya` exception                       | Violates P10 and adds a layer between the user and the real error.                                                                     |
-| Canonical (key-sorted) form for `hya.sha256` of a mapping       | The resolver is `str(obj)` on purpose (P4). A user who needs order-insensitivity sorts the keys in the configuration.                  |
-| A `hya.np.dtype` resolver                                       | The string accepted by numpy is enough (section 3.5).                                                                                  |
-| Eager registration of built-ins and lazy only for optional ones | Already the design; making the built-ins lazy too would cost an indirection per resolver for no import time gain (they are stdlib).    |
+```python
+# A name that every supported OmegaConf can interpolate: identifiers joined by dots
+_KEY = re.compile(r"[A-Za-z_]\w*(\.[A-Za-z_]\w*)*", re.ASCII)
 
-### 3.7 Dependencies and CI
 
-Unchanged: `dependencies = ["omegaconf >=2.2,<3.0"]`, optional extras `braceexpand`, `numpy`,
-`torch` read from `pyproject.toml`, the matrix of `dev/config/package_versions.json`
-(`omegaconf` 2.2.3, 2.3.0, 2.4.0). One change in the gates (G6, section 5, PR 3): the
-`--verifytypes` command must run with an activated environment, in `CLAUDE.md` and in the
-`inv types.check --complete` job.
+class ResolverRegistry:
+    def __init__(self, state: Mapping[str, Callable[..., Any]] | None = None) -> None:
+        self._state: dict[str, Callable[..., Any]] = {}
+        self._published: dict[str, Callable[..., Any]] = {}
+        for key, resolver in (state or {}).items():
+            self.register(key)(resolver)
+
+    def register(self, key: str, *, exist_ok: bool = False) -> Callable[[F], F]:
+        if not isinstance(key, str):
+            msg = (
+                f"The key must be a string, but received {type(key).__name__}. "
+                "Use the decorator as @registry.register('my_key')."
+            )
+            raise TypeError(msg)
+        if not _KEY.fullmatch(key):
+            msg = f"Invalid resolver key '{key}': use names made of letters, digits and _, joined by dots"
+            raise ValueError(msg)
+        ...  # unchanged
+```
+
+`register_lazy` requires `function_name.isidentifier()` (F14). `register_resolvers` is unchanged:
+with every entry valid, a publication cannot stop half way because of an entry.
+
+### 3.7 Default registry and catalogue
+
+Unchanged: 24 built-in keys and 4 lazy optional keys.
+
+| Group              | Keys                                                                                     |
+| ------------------ | ---------------------------------------------------------------------------------------- |
+| Operators          | `hya.sub`, `hya.truediv`, `hya.floordiv`, `hya.neg`, `hya.pow`                           |
+| Math               | `hya.sqrt`, `hya.exp`, `hya.log`, `hya.log10`, `hya.sinh`, `hya.asinh`                   |
+| Builtins           | `hya.max`, `hya.min`, `hya.len`, `hya.sum`, `hya.int`, `hya.float`                       |
+| Behaviour of `hya` | `hya.add`, `hya.mul`, `hya.ceildiv`, `hya.pi`, `hya.iter_join`, `hya.sha256`, `hya.path` |
+| Optional (lazy)    | `hya.braceexpand`, `hya.np.array`, `hya.torch.tensor`, `hya.torch.dtype`                 |
+
+A resolver is added when a configuration needs it **and** no composition of the existing keys gives
+it.
 
 ---
 
@@ -289,89 +312,125 @@ Unchanged: `dependencies = ["omegaconf >=2.2,<3.0"]`, optional extras `braceexpa
 ```python
 import hya
 
-hya.ResolverRegistry
+hya.ResolverRegistry(state=None)  # entries are validated
 hya.get_default_registry()
 
-registry = hya.get_default_registry()
-registry.register(key, *, exist_ok=False)          # decorator factory
+registry.register(key, *, exist_ok=False)  # decorator factory, validates the key
 registry.register_lazy(key, target, *, exist_ok=False)
 registry.register_resolvers(*, replace=False)
 registry.has_resolver(key)
-registry.state                                      # read-only mapping
+registry.state  # read-only mapping
+
+hya.utils.config.to_plain(value)  # new
 ```
 
-| Item                         | Before                      | After                                                            |
-| ---------------------------- | --------------------------- | ---------------------------------------------------------------- |
-| `hya.np.array`               | `${hya.np.array:[1,2]}`     | same, and `${hya.np.array:[1,2],float32}`                        |
-| `hya.torch.tensor`           | `${hya.torch.tensor:[1,2]}` | same, and `${hya.torch.tensor:[1,2],${hya.torch.dtype:float32}}` |
-| `hya.np.array` signature     | `(data)`                    | `(data, dtype=None)`                                             |
-| `hya.torch.tensor` signature | `(data)`                    | `(data, dtype=None)`                                             |
-| Everything else              | unchanged                   | unchanged                                                        |
+## 5. Behaviour changes for users
 
-No key is removed, renamed or changed in behaviour. The migration page (`v0.4_to_v0.5.md`) gets one
-row for the new `dtype` argument and no other row.
+| Change                                                                     | Before                            | After                                        | What the user does                   | Breaking |
+| -------------------------------------------------------------------------- | --------------------------------- | -------------------------------------------- | ------------------------------------ | -------- |
+| `hya.sha256` of a value that is not a string, an integer or a finite float | hash of `str(obj)`                | hash of canonical JSON of the resolved value | recompute stored identifiers         | yes      |
+| `hya.sha256` of an array, tensor, dtype, set, bytes                        | a hash (possibly colliding)       | `TypeError`                                  | hash the source list or string       | yes      |
+| `hya.sha256`, `hya.iter_join`, `hya.torch.tensor` with a nested `???`      | a result, or an unclear error     | `MissingMandatoryValue`                      | set the value                        | yes      |
+| `hya.iter_join` of nested nodes                                            | unresolved text                   | resolved values                              | nothing                              | yes      |
+| `hya.path` of a file URL with `?` or `#`                                   | text silently dropped             | `ValueError`                                 | percent-encode, or pass a plain path | yes      |
+| `hya.torch.tensor` second argument                                         | `torch.dtype`                     | `torch.dtype` or its name                    | nothing                              | no       |
+| `hya.torch.tensor` of a tensor                                             | copy with a warning               | copy                                         | nothing                              | no       |
+| Unknown name in `hya.torch.dtype`, direct Python call                      | `InterpolationResolutionError`    | `ValueError`                                 | catch `ValueError`                   | yes      |
+| Registry key outside `identifier(.identifier)*`, for example `a-b`         | accepted                          | `ValueError`                                 | rename the key (for example `a_b`)   | yes      |
+| Non-string key, non-callable value in the constructor                      | accepted, fails later or silently | `TypeError` at registration                  | fix the call                         | yes      |
 
----
-
-## 5. Changes to reach the target state
-
-One branch and one pull request per logical change, each small and independent (no stack): they
-touch different files, except the properties page, which only PR 1 edits.
-
-| PR  | Branch                           | Change                                                                                                                                                                                                                                                                                                                                                               |
-| --- | -------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 1   | `docs/fix-false-statements`      | G1: P10 of `properties.md` and the "Error Handling" section of `user_guide.md` (message names the exception, `__context__` chain). G2: docstring of `ceildiv_resolver` and its entry in `resolvers.md`. G3: module docstrings of `hya.torch` and `hya.braceexpand`. G4: wording of P8 and "Not guaranteed". P13 clarification, new P15, P12 (`--verifytypes` 100 %). |
-| 2   | `test/enforce-properties`        | G7: the tests of section 6.2 (P3, P10, P15, P5). No change in `src`. Run them against `main` first: they must pass, because the code is right and only the documentation was wrong (the P10 test asserts the chain, so it fails if OmegaConf changes it).                                                                                                            |
-| 3   | `feat/add-dtype-to-array-tensor` | G5: `dtype` argument of `to_array_resolver` and `to_tensor_resolver`, docstrings with a doctest, rows in `resolvers.md` and the user guide ("Data Type Specifications"), one row in the migration page, unit and integration tests of section 6.1.                                                                                                                   |
-| 4   | `chore/verify-types-gate`        | G6: fix the command in `CLAUDE.md` (activated environment), and check what `inv types.check --complete` runs; if it does not run `--verifytypes` against an activated environment, make it do so. The PR description says which of the two cases it found.                                                                                                           |
-| 5   | `chore/release-0-5-0`            | Version `0.5.0` in `pyproject.toml`, final migration page, tag `v0.5.0` (an exact tag; no floating tag). Done by the maintainer after PRs 1 to 4 are merged and CI is green.                                                                                                                                                                                         |
-
-PRs 1 and 2 can be merged in any order; PR 3 should follow PR 1 (it edits the same docs pages).
+The release notes of `v0.5.0` take this table.
 
 ---
 
-## 6. Tests and gates
+## 6. Evidence: a prototype of the changes
 
-### 6.1 Tests for PR 3 (`dtype`)
+The code of section 3 (with minimal docstrings) was applied to a throw-away copy of `src/hya` and
+`tests`. **[verified]**
 
-Unit tests, one behaviour each, in `tests/unit/test_numpy.py` and `tests/unit/test_torch.py`:
+| Check                                                    | Result                                                                                   |
+| -------------------------------------------------------- | ---------------------------------------------------------------------------------------- |
+| Probes of F1 to F9, F11 to F13 with `python -W error`    | fixed, OmegaConf 2.4.0 (all) and 2.2.1, 2.2.3, 2.3.1 (those that need no NumPy or torch) |
+| Hashes of `sha256` edge inputs on the four releases      | identical                                                                                |
+| Existing unit and integration tests                      | 315 pass, 6 skipped, 1 fails                                                             |
+| The failing test                                         | `test_path_resolver_file_url_with_a_host_raises`: it matches the old message (3.5)       |
+| Existing doctests                                        | 25 pass                                                                                  |
+| `ruff check`, `ruff format --check`, `ty check` on `src` | pass, with no `noqa` (the `dtype` check is written to satisfy rule `TRY004`)             |
+| Size of the change in `src`                              | 47 lines added, 15 removed, 1 new module                                                 |
 
-- `to_array_resolver([1, 2])` has the default dtype (`int64`), `dtype=None` gives the same array.
-- `to_array_resolver([1, 2], "float32")` has dtype `float32`, and the whole array equals
-  `array([1.0, 2.0], dtype=float32)`.
-- `to_array_resolver([1, 2], "nope")` raises `TypeError` (`match=r"data type 'nope' not understood"`).
-- `to_tensor_resolver([1, 2])` has dtype `torch.int64`; with `torch.float32` it has `torch.float32`.
-- Without the package, both raise the `RuntimeError` of `check_*` whatever `dtype` is (existing tests,
-  patched `is_*_available`).
+`pyright --verifytypes` and the import contracts were not run on the prototype.
 
-Integration tests (real OmegaConf, no patching) in `tests/integration/`:
+Cost, per access of an interpolation over a list of 10,000 values (OmegaConf calls the resolver at
+each access):
 
-- `${hya.np.array:[1,2],float32}` resolves to a `float32` array.
-- `${hya.torch.tensor:[1,2],${hya.torch.dtype:float32}}` resolves to a `float32` tensor (the test
-  that fails on `main` with the `TypeError` of G5; check it fails with `git stash push src`).
-- `${hya.torch.tensor:${x},${hya.torch.dtype:float64}}` with `x: [1, 2]` does not modify `conf.x`.
+| Resolver               | `main`  | Prototype |
+| ---------------------- | ------- | --------- |
+| `hya.sha256` (list)    | 1.2 ms  | 25 ms     |
+| `hya.iter_join` (list) | 11 ms   | 25 ms     |
+| `hya.sha256` (string)  | 0.14 ms | 0.14 ms   |
 
-### 6.2 Test of each property
+The cost is that of resolving about 2.5 µs per value, which `main` skips and is why its hash is wrong.
+It is accepted: configurations of this size are rare, and correctness comes first.
 
-| #   | Existing test (file `tests/integration/` unless said)                                                                                                                                   | To add (PR 2)                                                          |
-| --- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------- |
-| P1  | `test_registry::test_register_default_resolvers_after_clear_resolvers`, `test_default::test_import_hya_publishes_the_default_resolvers`                                                 |                                                                        |
-| P2  | `test_default::test_import_hya_does_not_import_optional_packages`, `..._modules`, `test_registry::test_import_hya_emits_no_warning`                                                     |                                                                        |
-| P3  |                                                                                                                                                                                         | every key of the default registry starts with `hya.`                   |
-| P4  | review (a resolver of more than a few lines needs a reason in the PR)                                                                                                                   |                                                                        |
-| P5  | `test_resolvers::test_add_resolver_does_not_modify_config_list`                                                                                                                         | `hya.mul`, `hya.iter_join`, `hya.sha256` leave the node unchanged      |
-| P6  | `test_torch::test_dtype_resolver_error_lists_the_sorted_names`                                                                                                                          |                                                                        |
-| P7  | `tests/unit/test_registry.py::test_resolver_registry_register_resolvers_registries_are_independent`                                                                                     |                                                                        |
-| P8  | `test_registry::test_register_resolvers_override_warns`, `..._replace`, `..._twice_is_silent`, `..._key_of_another_source_is_not_replaced`                                              |                                                                        |
-| P9  | `test_default::test_default_registry_keys_do_not_depend_on_the_installed_packages`                                                                                                      |                                                                        |
-| P10 | `test_default::test_missing_package_error_says_how_to_install_it`, `test_resolvers::test_stdlib_resolver_error_is_the_error_of_the_stdlib`                                              | the original exception is in the `__context__` chain of the error      |
-| P11 | `test_braceexpand::test_braceexpand_resolver_can_be_dumped` (the list case)                                                                                                             |                                                                        |
-| P12 | `test_resolvers::test_default_resolvers_are_documented`, `test_documented_resolvers_exist`, the doctests, `--verifytypes`                                                               |                                                                        |
-| P13 | `tests/unit/test_registry.py::test_resolver_registry_register_exist_ok_is_keyword_only`, `..._register_lazy_exist_ok_is_keyword_only`, `..._register_resolvers_replace_is_keyword_only` |                                                                        |
-| P14 | CI matrix `ci-test-deps` (OmegaConf 2.2.3, 2.3.0, 2.4.0)                                                                                                                                |                                                                        |
-| P15 | `hya.path` of `hya.path` (doctest)                                                                                                                                                      | `hya.add` of two config lists; `hya.torch.tensor` of `hya.torch.dtype` |
+---
 
-### 6.3 Gates (all of `CLAUDE.md`)
+## 7. Changes to reach the target state
+
+One branch and one pull request per logical change. Each pull request updates the pages it affects
+(`properties.md`, `design.md`, `resolvers.md`, `user_guide.md`, docstrings), adds its tests, and
+states its behaviour changes. Stacked pull requests are based on the previous branch.
+
+| PR  | Branch                               | Base | Change                                                                                                                                                                                                                                                           | Breaking |
+| --- | ------------------------------------ | ---- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------- |
+| 1   | `docs/fix-false-statements`          | main | F15 to F20: error message of the guide, import in the `index.md` snippet, commands of `get_started.md` and `CONTRIBUTING.md` (`inv env.install`, `inv test.unit`, ...), sentence of `CLAUDE.md`, doctest of `state`, reference pages, wording of P5, P6 and P11. | no       |
+| 2   | `bugfix/hash-resolved-values`        | main | F1 to F4: `hya.utils.config.to_plain`, canonical `sha256`; P16 and P17; rewrite the `sha256` notes of `design.md` and the limits.                                                                                                                                | yes      |
+| 3   | `bugfix/join-resolved-values`        | PR 2 | F5: `iter_join` uses `to_plain`.                                                                                                                                                                                                                                 | yes      |
+| 4   | `bugfix/copy-tensor-input`           | PR 2 | F8, F9: tensor input and `to_plain` in `to_tensor_resolver`.                                                                                                                                                                                                     | yes      |
+| 5   | `feat/accept-dtype-name-in-tensor`   | PR 4 | F7: the `dtype` name; P15.                                                                                                                                                                                                                                       | no       |
+| 6   | `bugfix/raise-value-error-for-dtype` | PR 5 | F10: `ValueError` in `torch_dtype_resolver`; P10.                                                                                                                                                                                                                | yes      |
+| 7   | `bugfix/validate-registry-entries`   | main | F11 to F14: validation in `register`, constructor, `register_lazy`; P7, P14; the new limit on lazy resolvers.                                                                                                                                                    | yes      |
+| 8   | `bugfix/reject-file-url-query`       | main | F6: query and fragment of a file URL.                                                                                                                                                                                                                            | yes      |
+
+PR 2 is first by value: it is the only family of silent wrong results used for identifiers. After the
+eight pull requests are merged and CI is green, the maintainer sets the version `0.5.0` and creates
+the exact tag `v0.5.0` with the table of section 5 in the release notes.
+
+---
+
+## 8. Tests and gates
+
+### 8.1 Tests of each change
+
+Unit tests mirror the source tree, with one behaviour per test and literal expected values. Each bug
+fix has a regression test that fails with `git stash push src`.
+
+| PR  | Unit tests                                                                                                                                                                                                                                                     | Integration tests (real OmegaConf, no patching)                                                           |
+| --- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------- |
+| 2   | `tests/unit/utils/test_config.py`: node, nested node in a list and in a dict, scalar and object passthrough, empty containers, missing value, input not modified. `_encode_value`: path, enum, other type. `sha256`: literals per type, key order, mixed keys. | hash changes with an interpolated value (flat, mapping, literal `[${x}]`); `???` raises; an array raises. |
+| 3   | nested node resolved, empty iterable, string iterable unchanged.                                                                                                                                                                                               | `x: [["${a}"], 2]` gives `[1]-2`; nested `???` raises.                                                    |
+| 4   | tensor input keeps the dtype, takes a new one, does not share memory, no warning.                                                                                                                                                                              | tensor of `${hya.torch.tensor:...}` under `filterwarnings=error`; `???` raises `MissingMandatoryValue`.   |
+| 5   | name, `torch.dtype`, `None`, unknown name.                                                                                                                                                                                                                     | `${hya.torch.tensor:[1,2],float32}`.                                                                      |
+| 6   | direct call raises `ValueError` with the sorted names.                                                                                                                                                                                                         | the interpolation error names `ValueError`.                                                               |
+| 7   | parametrised valid and invalid keys; key that is a function; constructor with a non-callable and with an invalid key; invalid lazy targets; state unchanged after an error.                                                                                    | every accepted key form resolves, on each OmegaConf of the CI matrix (P14).                               |
+| 8   | query, fragment, `%23` accepted.                                                                                                                                                                                                                               | the interpolation raises.                                                                                 |
+
+The tests of a missing optional package keep their behaviour: `validate_torch()` runs first.
+
+### 8.2 Test of each property
+
+| #                 | Test                                                                                              |
+| ----------------- | ------------------------------------------------------------------------------------------------- |
+| P1, P2, P3, P9    | existing: `tests/integration/test_default.py`, `test_registry.py`, `tests/unit/test_default.py`   |
+| P4                | code review                                                                                       |
+| P5, P10, P12, P13 | existing: `tests/integration/test_resolvers.py`, unit tests, CI; PRs 1, 4 and 6 add their cases   |
+| P6, P17           | PR 2: literal hashes, so a change of the canonical form fails a test on every CI job              |
+| P7, P14           | PR 7, and the `omegaconf` matrix of `dev/config/package_versions.json`                            |
+| P8                | existing: `tests/integration/test_registry.py`                                                    |
+| P11               | existing doctests; PR 1 adds the `allow_objects` case                                             |
+| P15               | PRs 4 and 5                                                                                       |
+| P16               | PRs 2 to 4, plus one parametrised test over the four resolvers (`???` and a nested interpolation) |
+
+### 8.3 Gates (all of `CLAUDE.md`)
 
 ```shell
 .venv/bin/ruff check src tests && .venv/bin/ruff format src tests
@@ -381,88 +440,50 @@ VIRTUAL_ENV=$PWD/.venv PATH=$PWD/.venv/bin:$PATH .venv/bin/pyright --verifytypes
 .venv/bin/python -m pytest --xdoctest src/hya
 ```
 
-Expected after the five PRs: ruff and ty clean, `--verifytypes` at 100 % (38 symbols, no new
-public name), coverage 100 %, doctests pass, and the tests of PR 2 and PR 3 added. The CI matrix
-runs the unit tests on OmegaConf 2.2.3, 2.3.0 and 2.4.0.
+Expected after each pull request: all green, coverage 100 %, no `noqa`, no `pragma: no cover` added.
+The five import contracts hold (`hya.utils.config` imports only OmegaConf).
 
 ---
 
-## 7. Evidence: a prototype of the `dtype` change
+## 9. Decisions for the maintainers
 
-Throw-away copy of `src/hya` with the two edits of section 3.5, run with `python -W error`:
+Each has a recommendation; the target state assumes it.
 
-| OmegaConf | Python | `${hya.np.array:${x},float32}` | `${hya.torch.tensor:${x},${hya.torch.dtype:float32}}` | `${hya.np.array:[1,2]}` (no dtype) |
-| --------- | ------ | ------------------------------ | ----------------------------------------------------- | ---------------------------------- |
-| 2.2.3     | 3.12   | `float32` array                | `tensor([1., 2.])`                                    | `int64` array                      |
-| 2.3.0     | 3.12   | `float32` array                | `tensor([1., 2.])`                                    | `int64` array                      |
-| 2.4.0     | 3.14   | `float32` array                | `tensor([1., 2.])`                                    | `int64` array                      |
-
-The size of the change is 2 changed signatures and 2 changed return lines. The real `src` also
-passes `python -W error` on OmegaConf 2.2.3 with Python 3.11 (`hya.add`, `hya.int`, `hya.max`).
-
-Probes behind section 2.2 (Python 3.14, OmegaConf 2.4.0):
-
-| Probe                                                            | Result                                                                                 |
-| ---------------------------------------------------------------- | -------------------------------------------------------------------------------------- |
-| `${hya.ceildiv:1,0}`, then walk `__cause__` and `__context__`    | `__cause__` is `None`; chain: 2 × `InterpolationResolutionError` → `ZeroDivisionError` |
-| `${hya.ceildiv:11.0,4}`                                          | `3.0` (`float`)                                                                        |
-| `${hya.torch.tensor:[1,2],${hya.torch.dtype:float32}}` on `main` | `TypeError ... takes 1 positional argument but 2 were given`                           |
-| `${hya.np.array:[1,2],dtype=float}`                              | `GrammarParseError` at `=`: the grammar has no keyword argument                        |
-| `hya.add` registered by another source after `clear_resolvers()` | `register_resolvers()` is silent, the other resolver stays                             |
-| `pyright --verifytypes hya --ignoreexternal` as in `CLAUDE.md`   | `No py.typed file found`, 0 symbols, 0 %                                               |
-| same command with `VIRTUAL_ENV` and `PATH` set to `.venv`        | `src/hya` found, 38 symbols, 100 %                                                     |
-| `${hya.torch.dtype:nope}`                                        | error of 685 characters listing 56 sorted dtype names                                  |
+| #   | Question                                                                             | Recommendation                                                                                                                                                                                                   |
+| --- | ------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| D1  | Hash a string as is, or as JSON too?                                                 | **As is.** It keeps every hash of a string and matches other SHA-256 tools. JSON for strings would remove the `[1]` string and list collision, but changes the most common identifiers.                          |
+| D2  | Should `hya.sha256` hash arrays and tensors from their bytes?                        | **No.** It needs a format for dtype and shape and two optional packages in a standard library resolver. Raise, and hash the source value.                                                                        |
+| D3  | Which keys does the registry accept?                                                 | **`identifier(.identifier)*`, ASCII**, the set that 2.2 to 2.4 all interpolate. Accepting `-` would make a key work or not according to the installed release (P14).                                             |
+| D4  | Remove `ResolverRegistry` and publish with `OmegaConf` directly?                     | **No.** It would delete most of `registry.py`, but P7 to P9, publishing again after `clear_resolvers()` and the lazy optional resolvers are the value of the package beyond a list of functions.                 |
+| D5  | Make `register` publish at once, so `register_resolvers()` is not needed?            | **No.** Two explicit steps are P7 and P8; the error of a forgotten call names the missing key.                                                                                                                   |
+| D6  | Remove `has_resolver` (`key in registry.state`)?                                     | **No.** It costs three lines and mirrors OmegaConf; removing it improves nothing.                                                                                                                                |
+| D7  | Require two arguments in `hya.add` and `hya.mul` so the result is never an argument? | **No.** It would not cover `hya.max` and would differ from `${x}`; P5 states the behaviour.                                                                                                                      |
+| D8  | Convert the input of `hya.np.array` with `to_plain` too, for uniformity?             | **No.** It is already correct and the conversion is 2.4 times slower; the property test of P16 protects it.                                                                                                      |
+| D9  | Move `pytest` out of the `all` extra (the built metadata of `hya[all]` requires it)? | **No for now.** The extra is generated from all extras by `hatchling-autoextras-hook`; removing the `testing` extra would break the use of `hya.testing`. Say in `get_started.md` that `all` includes it (PR 1). |
+| D10 | Add `hya.abs`, `hya.round`, `hya.mod`, or expose `use_cache`?                        | **No.** Nothing in the documentation needs them; apply the rule of section 3.7 when a configuration does.                                                                                                        |
 
 ---
 
-## 8. Decisions for the maintainers
+## 10. Not covered
 
-Each has a recommendation; the target state above assumes the recommended answer.
-
-| #   | Question                                                                          | Recommendation                                                                                                                                                    |
-| --- | --------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| D1  | Add the `dtype` argument to `hya.np.array` and `hya.torch.tensor`?                | **Yes.** Not breaking, 4 changed lines, and it makes `hya.torch.dtype` useful next to `hya.torch.tensor`.                                                         |
-| D2  | Add `hya.abs`, `hya.round`, `hya.ceil`, `hya.floor`, `hya.mod`?                   | **No for now.** Each is one stdlib callable, but nothing in the documentation needs one. Apply the rule of section 3.3 when a configuration does.                 |
-| D3  | Should `hya.torch.dtype` also accept `torch.float32`?                             | **No.** Two spellings for one thing break P4; the error already lists the valid names.                                                                            |
-| D4  | Should `hya.ceildiv` always return an `int`?                                      | **No.** `-(a // -b)` is exact and follows `//`; document the type (G2). `${hya.int:${hya.ceildiv:x,y}}` gives an `int` for floats.                                |
-| D5  | Detect a resolver registered by another source after `hya` published?             | **No.** It needs the private `BaseContainer._resolvers`, which changes between OmegaConf releases (P14). Reword P8 and list it in "Not guaranteed".               |
-| D6  | Drop `check_*` and the fallback modules?                                          | **No** (section 3.6). Revisit if `CLAUDE.md` stops requiring the guarded import.                                                                                  |
-| D7  | Register the resolvers through a Hydra plugin so that `import hya` is not needed? | **Not now.** It adds a `hydra_plugins` namespace package and a dependency on Hydra internals for a gain of one import line; P1 (import is enough) is already met. |
-| D8  | Where does the `--verifytypes` fix live (G6)?                                     | In `CLAUDE.md` and in the `inv types.check` task, whichever PR 4 finds missing. Do not add a `type: ignore` or lower the score: the 0 % is a wrong invocation.    |
-
----
-
-## 9. Not covered
-
-- **Thread-safety.** OmegaConf's resolver registry is a global dictionary; `hya` does not lock it.
-- **Windows.** The package classifiers are Linux and macOS; `hya.path` is tested with POSIX paths.
-- **YAML dump of object-valued resolvers (P11).** Use the value in code or
-  `OmegaConf.to_container(cfg, resolve=True)`.
-- **Resolver output cache.** OmegaConf caches resolved nodes; `replace=True` does not clear the
-  cache of existing configurations (`OmegaConf.clear_cache(cfg)`), documented.
-- **Keyword arguments in an interpolation.** The grammar of OmegaConf has none; positional only.
-- **The Hydra release matrix.** P14 is checked against OmegaConf releases (2.2.3, 2.3.0, 2.4.0), not
-  against Hydra itself; the Hydra examples of the user guide are not run in CI.
-- **Performance.** A resolver is called once per resolution; nothing in `hya` is on a hot path, and
-  no benchmark was made.
+- **Thread-safety** of OmegaConf's global resolver table.
+- **Windows.** The classifiers are Linux and macOS; `hya.path` and the hashes of paths are checked
+  with POSIX paths only. A path hashes to its string, which differs between platforms.
+- **The Hydra release matrix.** P14 is checked against OmegaConf releases; only one Hydra example
+  was run (1.3.2), and Hydra is not tested in CI.
+- **The documentation snippets.** `inv test.doctest-markdown` runs `pycon` examples only, so F16 was
+  invisible to it. Running every `python` block needs a fixture for files and Hydra; not proposed.
+- **CI workflows, release process and tooling configuration**, aligned with `coola` in #787 to #789.
 
 ---
 
 ## Appendix: size of the package
 
-| Item                         | Lines  | Note                                               |
-| ---------------------------- | ------ | -------------------------------------------------- |
-| `registry.py`                | 263    | `_publish`, `ResolverRegistry` (5 public members)  |
-| `resolvers.py`               | 266    | 7 functions                                        |
-| `imports.py`                 | 142    | 6 functions (3 packages)                           |
-| `torch.py`                   | 113    | 3 functions                                        |
-| `default.py`                 | 96     | 2 tables, `get_default_registry`                   |
-| `braceexpand.py`, `numpy.py` | 65, 48 | 1 function each                                    |
-| `testing.py`, `__init__.py`  | 46, 19 | pytest markers, exports                            |
-| Top-level modules, total     | 1,058  | about 200 executable lines, the rest is docstrings |
+| Item               | Lines today | Change                                       |
+| ------------------ | ----------- | -------------------------------------------- |
+| Top-level modules  | 1,081       | validation, `_encode_value`, tensor branches |
+| `utils/config.py`  | 0           | new, one function and its docstring          |
+| Executable lines   | about 200   | about 30 more (47 added, 15 removed)         |
+| Public names added | n/a         | `to_plain`                                   |
 
-`utils/` adds 6 lines and the three fallback modules about a dozen each. After the change: +2
-signatures, +0 modules.
-
-The target adds no module and no public name; the work is the correctness of the documentation, one
-optional argument, and tests.
+The prototype counts exclude the docstrings that the pull requests add.

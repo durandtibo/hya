@@ -69,8 +69,7 @@ model:
 `hya.int` casts the float of a computation back to an integer, and `hya.sum` adds the elements of a
 list (`hya.add` takes values: `${hya.add:${model.layer_sizes}}` returns a copy of the list). `bool`
 and `str` have no resolver: `bool("false")` is `True`, and `str` is what an interpolation already
-does. See
-[Design Choices](design.md) for why these resolvers have no wrapper.
+does. See [Design Choices](design.md) for why these resolvers have no wrapper.
 
 ### Arithmetic Operations
 

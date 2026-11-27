@@ -258,11 +258,7 @@ include_external_packages = false
 [[tool.importlinter.contracts]]
 name = "Core modules must not import feature modules"
 type = "forbidden"
-source_modules = [
-  "hya.imports",
-  "hya.registry",
-  "hya.utils",
-]
+source_modules = ["hya.imports", "hya.registry", "hya.utils"]
 forbidden_modules = [
   "hya.braceexpand",
   "hya.default",
@@ -306,17 +302,9 @@ forbidden_modules = ["hya.testing"]
 name = "The default registry must import the optional modules lazily"
 type = "forbidden"
 source_modules = ["hya.default"]
-forbidden_modules = [
-  "hya.braceexpand",
-  "hya.numpy",
-  "hya.torch",
-]
+forbidden_modules = ["hya.braceexpand", "hya.numpy", "hya.torch"]
 
 [[tool.importlinter.contracts]]
 name = "Optional modules must be independent"
 type = "independence"
-modules = [
-  "hya.braceexpand",
-  "hya.numpy",
-  "hya.torch",
-]
+modules = ["hya.braceexpand", "hya.numpy", "hya.torch"]

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import math
+import re
 from enum import Enum
 from pathlib import Path, PurePosixPath
 from typing import Any
@@ -280,9 +281,46 @@ def test_path_resolver_file_scheme_is_case_insensitive_without_slashes() -> None
 
 def test_path_resolver_file_url_with_a_host_raises() -> None:
     with pytest.raises(
-        ValueError, match=r"A file URL with a host is not supported: 'file://host/a'"
+        ValueError,
+        match=r"A file URL with a host, a query or a fragment is not supported: 'file://host/a'",
     ):
         path_resolver("file://host/a")
+
+
+@pytest.mark.parametrize(
+    "url",
+    [
+        "file:///data/run#1",
+        "file:///data/run?a=1",
+        "file:///data/run?a#b",
+        "file:///data/run#",
+        "file:///data/run?",
+        "file:/data/run#1",
+        "file:data/run?1",
+        "file://localhost/data/run#1",
+        "FILE:///data/run#1",
+    ],
+)
+def test_path_resolver_file_url_with_a_query_or_a_fragment_raises(url: str) -> None:
+    with pytest.raises(
+        ValueError,
+        match=re.escape(f"A file URL with a host, a query or a fragment is not supported: '{url}'"),
+    ):
+        path_resolver(url)
+
+
+@pytest.mark.parametrize(
+    ("url", "expected"),
+    [
+        ("file:///data/run%231", "/data/run#1"),
+        ("file:///data/run%3F1", "/data/run?1"),
+        ("file:///data/a%23b%3F", "/data/a#b?"),
+    ],
+)
+def test_path_resolver_file_url_with_an_encoded_query_or_fragment_character(
+    url: str, expected: str
+) -> None:
+    assert path_resolver(url) == Path(expected)
 
 
 def test_path_resolver_file_url_with_a_host_raises_in_an_interpolation() -> None:

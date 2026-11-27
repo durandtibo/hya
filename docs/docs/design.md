@@ -182,7 +182,8 @@ built from.
   have the same contract, and also a `torch.dtype`, such as the output of `hya.torch.dtype`.
 - **`hya.path` reads `file:` URLs only.** A string that starts with `file:` is decoded as a URL; any
   other string is a plain path, so `/data/a%20b` keeps its `%20`. A file URL with a host other than
-  `localhost` raises a `ValueError` instead of dropping the host.
+  `localhost`, a query or a fragment raises a `ValueError` instead of dropping it: write a `?` or a
+  `#` of a file name as `%3F` or `%23`.
 - **`hya.braceexpand` returns a list.** It has a length, can be indexed and can be read several
   times, at the cost of building the whole expansion at once.
 

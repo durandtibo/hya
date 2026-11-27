@@ -188,8 +188,10 @@ def path_resolver(path: str | os.PathLike[str]) -> Path:
     path to an absolute path. A string that starts with ``file:`` (the
     scheme is case-insensitive) is read as a file URL: the path of the URL
     is used, with its percent-encoding (for example ``%20`` for a space)
-    decoded. Any other string is a plain path, written as is: ``?`` and
-    ``%`` are not interpreted.
+    decoded. In a URL, ``?`` and ``#`` start a query and a fragment, so a
+    file name that contains them is written ``%3F`` and ``%23``. Any
+    other string is a plain path, written as is: ``?``, ``#`` and ``%``
+    are not interpreted.
 
     Args:
         path: The target path as a string or a path-like object, or a
@@ -201,8 +203,9 @@ def path_resolver(path: str | os.PathLike[str]) -> Path:
 
     Raises:
         ValueError: If a ``file:`` URL has a host other than ``localhost``
-            (for example ``file://host/a``): the host would be dropped
-            silently.
+            (for example ``file://host/a``), a query or a fragment (any
+            ``?`` or ``#``, for example ``file:///data/run#1``): they
+            would be dropped silently.
 
     Note:
         Within an OmegaConf interpolation, a path with a tilde (~)
@@ -232,8 +235,10 @@ def path_resolver(path: str | os.PathLike[str]) -> Path:
     path = os.fspath(path)
     url = urlparse(path)
     if url.scheme == "file":
-        if url.netloc not in ("", "localhost"):
-            msg = f"A file URL with a host is not supported: '{path}'"
+        # The characters are checked: ``url.query`` and ``url.fragment`` are empty for a
+        # trailing "?" or "#", which would be dropped too
+        if url.netloc not in ("", "localhost") or "?" in path or "#" in path:
+            msg = f"A file URL with a host, a query or a fragment is not supported: '{path}'"
             raise ValueError(msg)
         path = unquote(url.path)
     return Path(path).expanduser().resolve()

@@ -356,3 +356,18 @@ def test_iter_join_resolver_nested_missing_value_in_a_literal_list() -> None:
     conf = OmegaConf.create({"x": [["???"]], "key": "${hya.iter_join:[${x}],-}"})
     with pytest.raises(InterpolationResolutionError, match=r"MissingMandatoryValue"):
         _ = conf.key
+
+
+@pytest.mark.parametrize(
+    "expression",
+    ['${hya.path:"file:///data/run#1"}', '${hya.path:"file:///data/run?a"}'],
+)
+def test_path_resolver_file_url_with_a_query_or_a_fragment_is_an_error(expression: str) -> None:
+    conf = OmegaConf.create({"key": expression})
+    with pytest.raises(InterpolationResolutionError, match=r"a query or a fragment"):
+        _ = conf.key
+
+
+def test_path_resolver_file_url_with_an_encoded_fragment_character() -> None:
+    conf = OmegaConf.create({"key": "${hya.path:file:///data/run%231}"})
+    assert conf.key == Path("/data/run#1").resolve()

@@ -14,8 +14,6 @@ __all__ = ["to_tensor_resolver", "torch_dtype_resolver"]
 
 from typing import TYPE_CHECKING, Any
 
-from omegaconf.errors import InterpolationResolutionError
-
 from hya.imports import is_torch_available, validate_torch
 from hya.utils.config import to_plain
 
@@ -46,8 +44,8 @@ def to_tensor_resolver(data: Any, dtype: torch.dtype | str | None = None) -> tor
         require a gradient.
 
     Raises:
-        InterpolationResolutionError: If ``dtype`` is a string that is
-            not the name of a torch dtype.
+        ValueError: If ``dtype`` is a string that is not the name of a
+            torch dtype.
         omegaconf.errors.MissingMandatoryValue: If a node contains a
             missing value (``???``).
 
@@ -98,9 +96,10 @@ def torch_dtype_resolver(target: str) -> torch.dtype:
         The corresponding torch.dtype object.
 
     Raises:
-        InterpolationResolutionError: If the target string doesn't
-            correspond to a valid torch dtype. The message lists the
-            available dtype names, sorted.
+        ValueError: If the target string doesn't correspond to a valid
+            torch dtype. The message lists the available dtype names,
+            sorted. Through an interpolation, OmegaConf reports it as an
+            ``InterpolationResolutionError``.
 
     Example:
         ```pycon
@@ -116,10 +115,11 @@ def torch_dtype_resolver(target: str) -> torch.dtype:
         ```
     """
     validate_torch()
-    if not hasattr(torch, target) or not isinstance(getattr(torch, target), torch.dtype):
-        msg = f"Incorrect dtype {target}. The available dtypes are {_dtype_names()}"
-        raise InterpolationResolutionError(msg)
-    return getattr(torch, target)
+    dtype = getattr(torch, target, None)
+    if isinstance(dtype, torch.dtype):
+        return dtype
+    msg = f"Incorrect dtype {target}. The available dtypes are {_dtype_names()}"
+    raise ValueError(msg)
 
 
 def _dtype_names() -> list[str]:

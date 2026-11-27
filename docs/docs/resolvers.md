@@ -516,8 +516,9 @@ import torch
 value = torch.float32  # for dtype_name="float32"
 ```
 
-**Note:** An unknown name raises an `InterpolationResolutionError` whose message lists the
-available dtype names, sorted.
+**Note:** An unknown name raises a `ValueError` whose message lists the available dtype names,
+sorted. Through an interpolation, OmegaConf reports it as an `InterpolationResolutionError`, as for
+the error of any other resolver.
 
 ## Resolver Categories Summary
 

@@ -44,11 +44,19 @@ def braceexpand_resolver(pattern: str) -> list[str]:
         length, can be indexed and can be read several times. The
         whole expansion is built at once.
 
+    Raises:
+        RuntimeError: If the ``braceexpand`` package is not installed.
+        TypeError: If ``pattern`` is not a string.
+        ValueError: If the braces of the pattern are not balanced
+            (``braceexpand.UnbalancedBracesError``, a subclass of
+            ``ValueError``).
+
     Note:
         When using brace expansion patterns in OmegaConf, you need
         to quote the pattern string (``${hya.braceexpand:"a{1,2}"}``)
-        or to escape the braces to avoid conflicts with OmegaConf's
-        own syntax for curly braces.
+        to avoid conflicts with OmegaConf's own syntax for curly
+        braces and commas. Without quotes, the braces and the commas
+        must all be escaped.
 
     Example:
         ```pycon

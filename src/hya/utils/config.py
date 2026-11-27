@@ -31,6 +31,9 @@ def to_plain(value: Any) -> Any:
     Raises:
         omegaconf.errors.MissingMandatoryValue: If a node contains a
             missing value (``???``).
+        omegaconf.errors.InterpolationResolutionError: If an
+            interpolation of a node cannot be resolved, for example a
+            reference to a key that does not exist.
 
     Example:
         ```pycon

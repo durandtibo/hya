@@ -9,7 +9,7 @@
       
       
       
-        <link rel="prev" href="../design/">
+        <link rel="prev" href="../properties/">
       
       
         <link rel="next" href="registry/">
@@ -281,6 +281,26 @@
   
   
   
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../design/" class="md-tabs__link">
+          
+  
+  
+  Design
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
     
   
   
@@ -532,14 +552,14 @@
   
   
     <li class="md-nav__item">
-      <a href="../properties/" class="md-nav__link">
+      <a href="../custom_resolvers/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    Properties
+    Custom Resolvers
   
 
     
@@ -560,6 +580,121 @@
   
   
     <li class="md-nav__item">
+      <a href="../hydra/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Using with Hydra
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../troubleshooting/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Troubleshooting
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Design
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Design
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../design/" class="md-nav__link">
         
   
@@ -568,6 +703,34 @@
     
   
     Design Choices
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../properties/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Properties
   
 
     
@@ -611,10 +774,10 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" checked>
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" checked>
         
           
-          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="">
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="">
             
   
   
@@ -632,8 +795,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="true">
-          <label class="md-nav__title" for="__nav_4">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_5">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -1083,6 +1246,8 @@
 
 
 <h1 id="main-functions">Main functions<a class="headerlink" href="#main-functions" title="Permanent link">&para;</a></h1>
+<p>The package, the resolver registry and the default registry. See
+<a href="../custom_resolvers/">Custom Resolvers</a> to learn how to use them.</p>
 
 
 <div class="doc doc-object doc-module">
@@ -1098,7 +1263,21 @@
     <div class="doc doc-contents first">
 
         <p>Contain the main features of the <code>hya</code> package.</p>
+<p>Importing <code>hya</code> publishes the default resolvers to OmegaConf, so a
+configuration can use them without any other call. The package exposes
+<code>ResolverRegistry</code> and <code>get_default_registry</code> to add your own
+resolvers.</p>
 
+
+<details class="example" open>
+  <summary>Example</summary>
+  <div class="highlight"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">hya</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">omegaconf</span><span class="w"> </span><span class="kn">import</span> <span class="n">OmegaConf</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">conf</span> <span class="o">=</span> <span class="n">OmegaConf</span><span class="o">.</span><span class="n">create</span><span class="p">({</span><span class="s2">"steps"</span><span class="p">:</span> <span class="s2">"${hya.ceildiv:1000,32}"</span><span class="p">})</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">conf</span><span class="o">.</span><span class="n">steps</span>
+<span class="go">32</span>
+</code></pre></div>
+</details>
 
 
 
@@ -1134,8 +1313,11 @@
 
 
         <p>Implement a resolver registry.</p>
-<p>This class manages a collection of resolver functions that can be registered
-with keys and later used with OmegaConf.</p>
+<p>A registry maps keys to resolvers. <code>register</code> and
+<code>register_lazy</code> add a resolver to the registry, and
+<code>register_resolvers</code> publishes the registry to OmegaConf, so that
+configurations can use the keys. A registry is independent of the
+other registries.</p>
 
 
 <p><span class="doc-section-title">Parameters:</span></p>
@@ -1158,9 +1340,10 @@ with keys and later used with OmegaConf.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>Optional initial state mapping containing key-resolver pairs.
-If provided, a copy is made to prevent external modifications.
-Each pair is added with <code>register</code>, so it is validated.</p>
+                <p>Optional initial state mapping containing key-resolver pairs,
+or <code>None</code> for an empty registry. A copy is made to prevent
+external modifications. Each pair is added with <code>register</code>,
+so it is validated.</p>
               </div>
             </td>
             <td>
@@ -1186,8 +1369,8 @@ Each pair is added with <code>register</code>, so it is validated.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>If a key of <code>state</code> is not a string, or a value is
-not callable.</p>
+                <p>If <code>state</code> is not a mapping or <code>None</code>, if a key of
+<code>state</code> is not a string, or if a value is not callable.</p>
               </div>
             </td>
           </tr>
@@ -1208,12 +1391,17 @@ by dots (see <code>register</code>).</p>
 
 <details class="example" open>
   <summary>Example</summary>
-  <div class="highlight"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">hya.registry</span><span class="w"> </span><span class="kn">import</span> <span class="n">ResolverRegistry</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">registry</span> <span class="o">=</span> <span class="n">ResolverRegistry</span><span class="p">()</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="nd">@registry</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="s2">"my_key"</span><span class="p">)</span>
-<span class="gp">... </span><span class="k">def</span><span class="w"> </span><span class="nf">my_resolver</span><span class="p">(</span><span class="n">value</span><span class="p">):</span>
-<span class="gp">... </span>    <span class="k">pass</span>
+  <div class="highlight"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">omegaconf</span><span class="w"> </span><span class="kn">import</span> <span class="n">OmegaConf</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">hya.registry</span><span class="w"> </span><span class="kn">import</span> <span class="n">ResolverRegistry</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">registry</span> <span class="o">=</span> <span class="n">ResolverRegistry</span><span class="p">({</span><span class="s2">"demo.upper"</span><span class="p">:</span> <span class="nb">str</span><span class="o">.</span><span class="n">upper</span><span class="p">})</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nd">@registry</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="s2">"demo.double"</span><span class="p">)</span>
+<span class="gp">... </span><span class="k">def</span><span class="w"> </span><span class="nf">double_resolver</span><span class="p">(</span><span class="n">value</span><span class="p">):</span>
+<span class="gp">... </span>    <span class="k">return</span> <span class="n">value</span> <span class="o">*</span> <span class="mi">2</span>
 <span class="gp">...</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">registry</span><span class="o">.</span><span class="n">register_resolvers</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">conf</span> <span class="o">=</span> <span class="n">OmegaConf</span><span class="o">.</span><span class="n">create</span><span class="p">({</span><span class="s2">"x"</span><span class="p">:</span> <span class="s2">"$</span><span class="si">{demo.double:4}</span><span class="s2">"</span><span class="p">,</span> <span class="s2">"y"</span><span class="p">:</span> <span class="s2">"${demo.upper:abc}"</span><span class="p">})</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">conf</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">conf</span><span class="o">.</span><span class="n">y</span>
+<span class="go">(8, 'ABC')</span>
 </code></pre></div>
 </details>
 
@@ -1595,8 +1783,11 @@ Must be unique unless <code>exist_ok</code> is <code>True</code>.</p>
             <td>
               <div class="doc-md-description">
                 <p>The resolver to import, as <code>"module:function"</code>, for
-example <code>"hya.numpy:to_array_resolver"</code>. The function
-is the name of an attribute of the module.</p>
+example <code>"hya.numpy:to_array_resolver"</code>. The module is
+an absolute module name: ASCII names joined by dots, as a
+key. The function is the name of an attribute of the
+module (a Python identifier). That they exist is checked
+on the first call.</p>
               </div>
             </td>
             <td>
@@ -1640,7 +1831,7 @@ the existing resolver will be overridden.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>If the key is not a string.</p>
+                <p>If the key or <code>target</code> is not a string.</p>
               </div>
             </td>
           </tr>
@@ -1673,6 +1864,15 @@ joined by dots.</p>
 
 <details class="note" open>
   <summary>Note</summary>
+  <p>The first call of the resolver raises a
+<code>ModuleNotFoundError</code> if the module does not exist, and an
+<code>AttributeError</code> if the module has no such function.
+Through an interpolation, OmegaConf reports it as an
+<code>InterpolationResolutionError</code>.</p>
+</details>
+
+<details class="note" open>
+  <summary>Note</summary>
   <p>A resolver registered lazily cannot receive the special
 parameters of OmegaConf (<code>_root_</code>, <code>_parent_</code> or
 <code>_node_</code>): OmegaConf reads them from the signature, which
@@ -1683,9 +1883,11 @@ is not known before the import.</p>
   <summary>Example</summary>
   <div class="highlight"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">hya.registry</span><span class="w"> </span><span class="kn">import</span> <span class="n">ResolverRegistry</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">registry</span> <span class="o">=</span> <span class="n">ResolverRegistry</span><span class="p">()</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">registry</span><span class="o">.</span><span class="n">register_lazy</span><span class="p">(</span><span class="s2">"hya.np.array"</span><span class="p">,</span> <span class="s2">"hya.numpy:to_array_resolver"</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">registry</span><span class="o">.</span><span class="n">has_resolver</span><span class="p">(</span><span class="s2">"hya.np.array"</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">registry</span><span class="o">.</span><span class="n">register_lazy</span><span class="p">(</span><span class="s2">"demo.sqrt"</span><span class="p">,</span> <span class="s2">"math:sqrt"</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">registry</span><span class="o">.</span><span class="n">has_resolver</span><span class="p">(</span><span class="s2">"demo.sqrt"</span><span class="p">)</span>
 <span class="go">True</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">registry</span><span class="o">.</span><span class="n">state</span><span class="p">[</span><span class="s2">"demo.sqrt"</span><span class="p">](</span><span class="mi">16</span><span class="p">)</span>
+<span class="go">4.0</span>
 </code></pre></div>
 </details>
 
@@ -1708,14 +1910,20 @@ is not known before the import.</p>
 
         <p>Register the resolvers to OmegaConf.</p>
 <p>This method publishes the registered resolvers to OmegaConf. It is
-idempotent: a resolver already published by this registry, and still
-known by OmegaConf, is not registered again, so calling this method
-twice changes nothing. A resolver removed from OmegaConf (for example
-with <code>OmegaConf.clear_resolvers()</code>) is published again. A
-resolver is not published, and a warning is emitted, if OmegaConf
-already has a resolver for its key (a resolver published before the
-registry changed, or registered by another source) and <code>replace</code> is
-<code>False</code>.</p>
+idempotent: calling it twice changes nothing. A resolver removed
+from OmegaConf (for example with <code>OmegaConf.clear_resolvers()</code>)
+is published again.</p>
+<p>Without <code>replace</code>, a resolver already published by this registry,
+and whose key OmegaConf still knows, is not registered again. A key
+is skipped if OmegaConf already has a resolver for it that this
+registry did not publish (registered by another source), or if the
+registry changed since it was published. One warning lists the
+skipped keys, after the other keys are published, so no key is left
+out when warnings are errors. A resolver that another source
+registers over a published key is not detected: it is kept without
+a warning.</p>
+<p>With <code>replace=True</code>, every key of the registry is published,
+whatever OmegaConf holds.</p>
 <p>The resolvers are published with <code>annotation_validation="off"</code> when
 OmegaConf validates the annotations (2.4 and later): the annotations of
 the resolvers are not a runtime contract.</p>
@@ -1743,11 +1951,36 @@ the resolvers are not a runtime contract.</p>
               <div class="doc-md-description">
                 <p>If <code>True</code>, the resolvers replace the resolvers that
 OmegaConf already has for the same keys. If <code>False</code>, these
-keys are skipped with a warning.</p>
+keys are skipped, with a warning for the ones that this
+registry did not publish.</p>
               </div>
             </td>
             <td>
                   <code>False</code>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<p><span class="doc-section-title">Raises:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="UserWarning">UserWarning</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>If a key is skipped and the warnings are turned
+into errors. The other keys are published first.</p>
+              </div>
             </td>
           </tr>
       </tbody>
@@ -1805,17 +2038,17 @@ to clear it.</p>
     <div class="doc doc-contents ">
 
         <p>Get or create the default global resolver registry.</p>
-<p>Returns a singleton registry instance using a simple singleton pattern.
-The registry initially contains the default resolvers and can be
-extended with custom resolvers. The registry has the same keys on every
-machine: the resolvers that need an optional package (<code>braceexpand</code>,
-<code>numpy</code> or <code>torch</code>) are always registered. The module of such a
-resolver is imported on its first call, not when <code>hya</code> is imported, and
-the call raises an error that says how to install the package if it is
-missing.</p>
-<p>This function uses a singleton pattern to ensure the same registry instance
-is returned on subsequent calls, which is efficient and maintains consistency
-across an application.</p>
+<p>The first call creates the registry, and the next calls return the
+same instance. The registry initially contains the default resolvers
+and can be extended with custom resolvers. It has the same keys on
+every machine: the resolvers that need an optional package
+(<code>braceexpand</code>, <code>numpy</code> or <code>torch</code>) are always registered. The
+module of such a resolver is imported on its first call, not when
+<code>hya</code> is imported, and the call raises an error that says how to
+install the package if it is missing.</p>
+<p>Importing <code>hya</code> publishes the default resolvers to OmegaConf. A
+resolver added to the registry afterwards is published by the next
+call to <code>register_resolvers</code>.</p>
 
 
     <p><span class="doc-section-title">Returns:</span></p>
@@ -1833,7 +2066,7 @@ across an application.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>A ResolverRegistry instance</p>
+                <p>The default <code>ResolverRegistry</code> of the process.</p>
               </div>
             </td>
           </tr>
@@ -1843,19 +2076,25 @@ across an application.</p>
 
 <details class="notes" open>
   <summary>Notes</summary>
-  <p>The singleton pattern means modifications to the returned registry
-affect all future calls to this function. If you need an isolated
-registry, create a new ResolverRegistry instance directly.</p>
+  <p>A modification of the returned registry affects all the future
+calls to this function. If you need an isolated registry, create
+a new <code>ResolverRegistry</code> instance.</p>
 </details>
 
 <details class="example" open>
   <summary>Example</summary>
-  <div class="highlight"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">hya</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_default_registry</span>
+  <div class="highlight"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">omegaconf</span><span class="w"> </span><span class="kn">import</span> <span class="n">OmegaConf</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">hya</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_default_registry</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">registry</span> <span class="o">=</span> <span class="n">get_default_registry</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">registry</span><span class="o">.</span><span class="n">has_resolver</span><span class="p">(</span><span class="s2">"hya.add"</span><span class="p">)</span>
+<span class="go">True</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nd">@registry</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="s2">"my_key"</span><span class="p">)</span>
 <span class="gp">... </span><span class="k">def</span><span class="w"> </span><span class="nf">my_resolver</span><span class="p">(</span><span class="n">value</span><span class="p">):</span>
-<span class="gp">... </span>    <span class="k">pass</span>
+<span class="gp">... </span>    <span class="k">return</span> <span class="n">value</span> <span class="o">*</span> <span class="mi">2</span>
 <span class="gp">...</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">registry</span><span class="o">.</span><span class="n">register_resolvers</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">OmegaConf</span><span class="o">.</span><span class="n">create</span><span class="p">({</span><span class="s2">"key"</span><span class="p">:</span> <span class="s2">"$</span><span class="si">{my_key:21}</span><span class="s2">"</span><span class="p">})</span><span class="o">.</span><span class="n">key</span>
+<span class="go">42</span>
 </code></pre></div>
 </details>
 

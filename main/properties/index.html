@@ -9,10 +9,10 @@
       
       
       
-        <link rel="prev" href="../resolvers/">
+        <link rel="prev" href="../design/">
       
       
-        <link rel="next" href="../design/">
+        <link rel="next" href="../refs/">
       
       
         
@@ -261,17 +261,37 @@
   
   
   
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../user_guide/" class="md-tabs__link">
+          
+  
+  
+  User Guide
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
     
   
   
     
     
       <li class="md-tabs__item md-tabs__item--active">
-        <a href="../user_guide/" class="md-tabs__link">
+        <a href="../design/" class="md-tabs__link">
           
   
   
-  User Guide
+  Design
 
         </a>
       </li>
@@ -421,29 +441,26 @@
       
   
   
-    
   
   
-  
     
     
     
     
       
-        
-        
-      
       
     
     
-    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--nested">
       
         
-        
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" checked>
         
           
-          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
             
   
   
@@ -461,7 +478,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="true">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
           <label class="md-nav__title" for="__nav_3">
             <span class="md-nav__icon md-icon"></span>
             
@@ -515,6 +532,180 @@
     
   
     Resolvers
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../custom_resolvers/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Custom Resolvers
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../hydra/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Using with Hydra
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../troubleshooting/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Troubleshooting
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Design
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Design
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../design/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Design Choices
   
 
     
@@ -595,13 +786,257 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#details" class="md-nav__link">
+  <a href="#import-and-registry" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Details
+        Import and registry
       
     </span>
   </a>
+  
+    <nav class="md-nav" aria-label="Import and registry">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#p1-import-is-enough" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        P1: Import is enough
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#p2-cheap-import" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        P2: Cheap import
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#p3-namespaced" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        P3: Namespaced
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#p7-explicit-strict-registry" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        P7: Explicit, strict registry
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#p8-replace-is-explicit" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        P8: Replace is explicit
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#p9-one-default-registry" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        P9: One default registry
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#behaviour-of-the-resolvers" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Behaviour of the resolvers
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Behaviour of the resolvers">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#p4-thin-resolvers" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        P4: Thin resolvers
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#p5-pure" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        P5: Pure
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#p6-deterministic-output" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        P6: Deterministic output
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#p16-resolved-input" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        P16: Resolved input
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#p17-faithful-hash" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        P17: Faithful hash
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#p15-composable" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        P15: Composable
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#values-and-errors" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Values and errors
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Values and errors">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#p10-errors-are-omegaconfs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        P10: Errors are OmegaConf's
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#p11-any-value-out" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        P11: Any value out
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#python-api-and-compatibility" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Python API and compatibility
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Python API and compatibility">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#p13-keyword-only-options" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        P13: Keyword-only options
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#p12-typed-and-documented" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        P12: Typed and documented
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#p14-installs-next-to-hydra" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        P14: Installs next to Hydra
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -620,34 +1055,6 @@
   
 </nav>
       
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../design/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Design Choices
-  
-
-    
-  </span>
-  
-  
-
-      </a>
     </li>
   
 
@@ -680,10 +1087,10 @@
         
           
         
-        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4" >
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_5" >
         
           
-          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
             
   
   
@@ -701,8 +1108,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_4">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -885,13 +1292,257 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#details" class="md-nav__link">
+  <a href="#import-and-registry" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Details
+        Import and registry
       
     </span>
   </a>
+  
+    <nav class="md-nav" aria-label="Import and registry">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#p1-import-is-enough" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        P1: Import is enough
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#p2-cheap-import" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        P2: Cheap import
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#p3-namespaced" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        P3: Namespaced
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#p7-explicit-strict-registry" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        P7: Explicit, strict registry
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#p8-replace-is-explicit" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        P8: Replace is explicit
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#p9-one-default-registry" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        P9: One default registry
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#behaviour-of-the-resolvers" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Behaviour of the resolvers
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Behaviour of the resolvers">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#p4-thin-resolvers" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        P4: Thin resolvers
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#p5-pure" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        P5: Pure
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#p6-deterministic-output" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        P6: Deterministic output
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#p16-resolved-input" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        P16: Resolved input
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#p17-faithful-hash" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        P17: Faithful hash
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#p15-composable" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        P15: Composable
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#values-and-errors" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Values and errors
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Values and errors">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#p10-errors-are-omegaconfs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        P10: Errors are OmegaConf's
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#p11-any-value-out" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        P11: Any value out
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#python-api-and-compatibility" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Python API and compatibility
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Python API and compatibility">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#p13-keyword-only-options" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        P13: Keyword-only options
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#p12-typed-and-documented" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        P12: Typed and documented
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#p14-installs-next-to-hydra" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        P14: Installs next to Hydra
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -927,148 +1578,153 @@
 
 
 <h1 id="properties">Properties<a class="headerlink" href="#properties" title="Permanent link">&para;</a></h1>
-<p>These are the rules <code>hya</code> guarantees. Each one is enforced by the code or by a test of the
-repository. The <a href="../design/">Design Choices</a> page explains the reasons and the trade-offs.</p>
+<p>These are the rules <code>hya</code> guarantees. The <a href="../design/">Design Choices</a> page explains the reasons and
+the trade-offs, and the <a href="#limits">limits</a> list what <code>hya</code> does not guarantee. Each rule has a
+number, so that other pages can refer to it.</p>
 <table>
 <thead>
 <tr>
-<th>#</th>
-<th>Property</th>
-<th>Statement</th>
+<th>Group</th>
+<th>Properties</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td>P1</td>
-<td><strong>Import is enough</strong></td>
-<td><code>import hya</code> registers every available default resolver with OmegaConf. No other call is needed, and <code>register_resolvers()</code> publishes them again after <code>OmegaConf.clear_resolvers()</code>.</td>
+<td>Import and registry</td>
+<td>P1 Import is enough, P2 Cheap import, P3 Namespaced, P7 Explicit, strict registry, P8 Replace is explicit, P9 One default registry</td>
 </tr>
 <tr>
-<td>P2</td>
-<td><strong>Cheap import</strong></td>
-<td><code>import hya</code> imports neither <code>numpy</code>, <code>torch</code> nor <code>braceexpand</code>, and emits no warning. The module of an optional resolver is imported on the first call of that resolver.</td>
+<td>Behaviour of the resolvers</td>
+<td>P4 Thin resolvers, P5 Pure, P6 Deterministic output, P16 Resolved input, P17 Faithful hash, P15 Composable</td>
 </tr>
 <tr>
-<td>P3</td>
-<td><strong>Namespaced</strong></td>
-<td>Every built-in key starts with <code>hya.</code>. Optional ones are grouped (<code>hya.np.*</code>, <code>hya.torch.*</code>). Nothing is registered outside this namespace.</td>
+<td>Values and errors</td>
+<td>P10 Errors are OmegaConf's, P11 Any value out</td>
 </tr>
 <tr>
-<td>P4</td>
-<td><strong>Thin resolvers</strong></td>
-<td>A resolver is a standard library callable or a function of a few lines with one documented behaviour. No hidden state, no I/O beyond what its name says (<code>hya.path</code> touches the file system).</td>
-</tr>
-<tr>
-<td>P5</td>
-<td><strong>Pure</strong></td>
-<td>A resolver never modifies its arguments. A returned value can be an argument itself or one of its elements (<code>hya.add</code> of one value, <code>hya.max</code> of several values), exactly as <code>${x}</code> returns the node <code>x</code>: copy it before you mutate it.</td>
-</tr>
-<tr>
-<td>P6</td>
-<td><strong>Deterministic output</strong></td>
-<td>The same resolved arguments give the same output, including error messages (sorted, no set order), on every process and OmegaConf release. <code>hya.path</code> also depends on the file system (working directory, home directory, symbolic links), which is its purpose.</td>
-</tr>
-<tr>
-<td>P7</td>
-<td><strong>Explicit, strict registry</strong></td>
-<td>A <code>ResolverRegistry</code> is a key to callable map. <code>register</code> adds, <code>register_resolvers</code> publishes. Every entry, from <code>register</code>, <code>register_lazy</code> or the constructor, has a callable value and a key that every supported OmegaConf can interpolate; anything else raises at registration.</td>
-</tr>
-<tr>
-<td>P8</td>
-<td><strong>Replace is explicit</strong></td>
-<td><code>register_resolvers()</code> is idempotent. It never silently keeps a stale resolver: a key that changed since it was published, or that another source registered before the registry published it, is skipped with a warning unless <code>replace=True</code>.</td>
-</tr>
-<tr>
-<td>P9</td>
-<td><strong>One default registry</strong></td>
-<td><code>get_default_registry()</code> returns one process-wide registry holding the built-in resolvers. It holds the same keys on every machine, whatever packages are installed. Users extend it or create their own registry.</td>
-</tr>
-<tr>
-<td>P10</td>
-<td><strong>Errors are OmegaConf's</strong></td>
-<td>A resolver raises standard exceptions only, so a failure surfaces as <code>InterpolationResolutionError</code> whose message names the original exception, found in the <code>__context__</code> chain (<code>__cause__</code> is <code>None</code>). A missing optional package says how to install it.</td>
-</tr>
-<tr>
-<td>P11</td>
-<td><strong>Any value out</strong></td>
-<td>A resolver may return any Python object (<code>Path</code>, <code>ndarray</code>, <code>Tensor</code>, <code>dtype</code>, list). Such values are for use in code: for an array, a tensor or a data type, <code>OmegaConf.resolve</code> needs the <code>allow_objects</code> flag and <code>to_yaml</code> does not support them.</td>
-</tr>
-<tr>
-<td>P12</td>
-<td><strong>Typed and documented</strong></td>
-<td>The package has a <code>py.typed</code> file, <code>pyright --verifytypes</code> scores 100 %, every public function, class, method and property is documented with a doctest and shown in the reference, every resolver is listed in the <a href="../resolvers/">resolvers</a> page, and the documentation says nothing false.</td>
-</tr>
-<tr>
-<td>P13</td>
-<td><strong>Keyword-only options</strong></td>
-<td>The options of the Python API are keyword-only (<code>exist_ok</code>, <code>replace</code>). The arguments of a resolver are positional, because the interpolation grammar has no keyword syntax; an optional argument of a resolver comes last and has a default.</td>
-</tr>
-<tr>
-<td>P14</td>
-<td><strong>Installs next to Hydra</strong></td>
-<td><code>hya</code> accepts every OmegaConf release that a Hydra release accepts (<code>omegaconf&gt;=2.2,&lt;3.0</code>) and behaves the same on all of them. CI runs the tests on the oldest and the newest.</td>
-</tr>
-<tr>
-<td>P15</td>
-<td><strong>Composable</strong></td>
-<td>A resolver accepts the values OmegaConf gives it (<code>str</code>, <code>int</code>, <code>float</code>, <code>bool</code>, <code>None</code>, <code>list</code>, <code>dict</code>, <code>ListConfig</code>, <code>DictConfig</code>) and the output of another <code>hya</code> resolver (a <code>Path</code> for <code>hya.path</code>, a tensor, an array or a <code>torch.dtype</code> for <code>hya.torch.tensor</code>). In particular <code>hya.torch.tensor</code> takes a tensor, an array, and a data type as a <code>torch.dtype</code> or as its name.</td>
-</tr>
-<tr>
-<td>P16</td>
-<td><strong>Resolved input</strong></td>
-<td>A resolver that reads a whole value (<code>hya.sha256</code>, <code>hya.iter_join</code>, <code>hya.np.array</code>, <code>hya.torch.tensor</code>) reads its <strong>resolved</strong> content: interpolations are resolved at any depth, and a missing value (<code>???</code>) raises <code>MissingMandatoryValue</code>.</td>
-</tr>
-<tr>
-<td>P17</td>
-<td><strong>Faithful hash</strong></td>
-<td><code>hya.sha256</code> hashes the whole content of a value: a string as is, any other value as canonical JSON (sorted keys). Two such values with different JSON forms have different hashes, and a value without a JSON form raises instead of being hashed from a summary.</td>
+<td>Python API and compatibility</td>
+<td>P13 Keyword-only options, P12 Typed and documented, P14 Installs next to Hydra</td>
 </tr>
 </tbody>
 </table>
-<h2 id="details">Details<a class="headerlink" href="#details" title="Permanent link">&para;</a></h2>
-<ul>
-<li><strong>P2.</strong> The optional resolvers are registered lazily (<code>ResolverRegistry.register_lazy</code>): the key
-  is always in the registry, and the module is imported when OmegaConf calls the resolver for the
-  first time. <code>import hya</code> does not look for the packages on disk.</li>
-<li><strong>P7.</strong> A key is made of names joined by dots, where a name is made of ASCII letters, digits and
-  <code>_</code> and does not start with a digit. OmegaConf 2.3 and later can interpolate a <code>-</code> too, but
-  OmegaConf 2.2 cannot, so <code>hya</code> rejects it (P14). A registry is independent of the other
-  registries.</li>
-<li><strong>P8.</strong> After <code>import hya</code>, the default resolvers are already published, so
-  <code>registry.register_resolvers()</code> is silent. Overriding a built-in
-  (<code>registry.register("hya.add", exist_ok=True)</code>) warns until <code>register_resolvers(replace=True)</code> is
-  called. OmegaConf caches the resolved nodes of a configuration: <code>replace=True</code> does not clear the
-  cache of the existing configurations (<code>OmegaConf.clear_cache(cfg)</code>).</li>
-<li><strong>P9.</strong> The optional keys are registered whether or not the package is installed, so the registry
-  has the same keys on every machine.</li>
-<li><strong>P10.</strong> A missing configuration value (<code>???</code>) is reported by the exceptions of OmegaConf
-  (<code>MissingMandatoryValue</code>, which the message names). <code>hya</code> adds no exception class of its own and
-  no wrapper.</li>
-<li><strong>P10.</strong> With a missing package, the resolver raises a <code>RuntimeError</code> that says how to install it
-  (<code>pip install torch</code>); OmegaConf reports it as an <code>InterpolationResolutionError</code>.</li>
-<li><strong>P10.</strong> With OmegaConf 2.4 and later, the validation of the annotations is off for the resolvers
-  published by <code>hya</code>: the annotations are documentation for readers and type checkers, not a runtime
-  contract.</li>
-<li><strong>P11.</strong> Use such a value in code (<code>cfg.key</code>, or <code>OmegaConf.to_container(cfg, resolve=True)</code>).
-  To resolve a whole configuration in place, give it the <code>allow_objects</code> flag, when you create it
-  (<code>OmegaConf.create(..., flags={"allow_objects": True})</code>) or around the call
-  (<code>with flag_override(cfg, "allow_objects", True): OmegaConf.resolve(cfg)</code>, with
-  <code>from omegaconf import flag_override</code>).</li>
-</ul>
+<h2 id="import-and-registry">Import and registry<a class="headerlink" href="#import-and-registry" title="Permanent link">&para;</a></h2>
+<h3 id="p1-import-is-enough">P1: Import is enough<a class="headerlink" href="#p1-import-is-enough" title="Permanent link">&para;</a></h3>
+<p><code>import hya</code> registers every available default resolver with OmegaConf. No other call is needed, and
+<code>register_resolvers()</code> publishes them again after <code>OmegaConf.clear_resolvers()</code>.</p>
+<h3 id="p2-cheap-import">P2: Cheap import<a class="headerlink" href="#p2-cheap-import" title="Permanent link">&para;</a></h3>
+<p><code>import hya</code> imports neither <code>numpy</code>, <code>torch</code> nor <code>braceexpand</code>, and emits no warning when no other
+source has registered a <code>hya.</code> key. The module of an optional resolver is imported on the first call
+of that resolver.</p>
+<p>The optional resolvers are registered with <code>ResolverRegistry.register_lazy</code>, and <code>import hya</code> does
+not look for their packages on disk.</p>
+<h3 id="p3-namespaced">P3: Namespaced<a class="headerlink" href="#p3-namespaced" title="Permanent link">&para;</a></h3>
+<p>Every built-in key starts with <code>hya.</code>. Optional ones are grouped (<code>hya.np.*</code>, <code>hya.torch.*</code>).
+Nothing is registered outside this namespace.</p>
+<h3 id="p7-explicit-strict-registry">P7: Explicit, strict registry<a class="headerlink" href="#p7-explicit-strict-registry" title="Permanent link">&para;</a></h3>
+<p>A <code>ResolverRegistry</code> is a key to callable map. <code>register</code> adds, <code>register_resolvers</code> publishes. The
+constructor takes a mapping or <code>None</code>. Every entry has a callable value and a key that every
+supported OmegaConf can interpolate, and every lazy target is <code>module:function</code> made of names;
+anything else raises at registration.</p>
+<p>A key is made of names joined by dots, where a name is made of ASCII letters, digits and <code>_</code> and
+does not start with a digit. OmegaConf 2.3 and later can interpolate a <code>-</code> too, but OmegaConf 2.2
+cannot, so <code>hya</code> rejects it (P14). The module of a lazy target follows the rule of the keys (so it
+cannot be relative, as <code>.numpy</code>) and its function is a Python identifier. That they exist is checked
+on the first call. A registry is independent of the other registries.</p>
+<h3 id="p8-replace-is-explicit">P8: Replace is explicit<a class="headerlink" href="#p8-replace-is-explicit" title="Permanent link">&para;</a></h3>
+<p><code>register_resolvers()</code> is idempotent. A key that changed since it was published, or that another
+source registered before the registry published it, is skipped unless <code>replace=True</code>; one warning
+lists the skipped keys, after the other keys are published. With <code>replace=True</code>, every key of the
+registry is published, whatever OmegaConf holds.</p>
+<p>After <code>import hya</code>, the default resolvers are already published, so <code>registry.register_resolvers()</code>
+is silent. Overriding a built-in (<code>registry.register("hya.add", exist_ok=True)</code>) warns until
+<code>register_resolvers(replace=True)</code> is called. OmegaConf caches the resolved nodes of a
+configuration: <code>replace=True</code> does not clear the cache of the existing configurations
+(<code>OmegaConf.clear_cache(cfg)</code>).</p>
+<h3 id="p9-one-default-registry">P9: One default registry<a class="headerlink" href="#p9-one-default-registry" title="Permanent link">&para;</a></h3>
+<p><code>get_default_registry()</code> returns one process-wide registry holding the built-in resolvers. It holds
+the same keys on every machine, whatever packages are installed. Users extend it or create their own
+registry.</p>
+<h2 id="behaviour-of-the-resolvers">Behaviour of the resolvers<a class="headerlink" href="#behaviour-of-the-resolvers" title="Permanent link">&para;</a></h2>
+<h3 id="p4-thin-resolvers">P4: Thin resolvers<a class="headerlink" href="#p4-thin-resolvers" title="Permanent link">&para;</a></h3>
+<p>A resolver is a standard library callable or a function of a few lines with one documented
+behaviour. No hidden state, no I/O beyond what its name says (<code>hya.path</code> touches the file system). A
+resolver written by <code>hya</code> raises on an input it cannot honour instead of guessing or dropping a part
+of it.</p>
+<h3 id="p5-pure">P5: Pure<a class="headerlink" href="#p5-pure" title="Permanent link">&para;</a></h3>
+<p>A resolver never modifies its arguments. A resolver written by <code>hya</code> returns a new list, dictionary
+or array and never a container of an argument; <code>hya.torch.tensor</code> returns a copy (<code>hya.add</code> of a
+single other object returns it, and so does <code>hya.mul</code>, which takes numbers, of its single argument).
+A standard library callable can return an argument or one of its elements (<code>hya.max</code> of several
+values), as <code>${x}</code> returns the node <code>x</code>: copy it before you mutate it.</p>
+<h3 id="p6-deterministic-output">P6: Deterministic output<a class="headerlink" href="#p6-deterministic-output" title="Permanent link">&para;</a></h3>
+<p>The same resolved arguments give the same output, including error messages (sorted, no set order),
+on every process and OmegaConf release. The type of the result of a resolver written by <code>hya</code> does
+not depend on how an argument is written (a literal or a reference), as long as it takes the
+argument (<code>hya.mul</code> takes numbers). <code>hya.path</code> also depends on the file system (working directory,
+home directory, symbolic links), which is its purpose.</p>
+<h3 id="p16-resolved-input">P16: Resolved input<a class="headerlink" href="#p16-resolved-input" title="Permanent link">&para;</a></h3>
+<p>A resolver written by <code>hya</code> that reads a list or a mapping (<code>hya.add</code>, <code>hya.sha256</code>,
+<code>hya.iter_join</code>, <code>hya.np.array</code>, <code>hya.torch.tensor</code>) reads its <strong>resolved</strong> content: interpolations
+are resolved at any depth, and a missing value (<code>???</code>) raises <code>MissingMandatoryValue</code>.</p>
+<h3 id="p17-faithful-hash">P17: Faithful hash<a class="headerlink" href="#p17-faithful-hash" title="Permanent link">&para;</a></h3>
+<p><code>hya.sha256</code> hashes the whole content of a value: a string as is, any other value as canonical JSON
+(sorted keys, no space, non-ASCII escaped). Two such values with different JSON forms have different
+hashes, and a value without a JSON form (a non-finite float included) raises.</p>
+<h3 id="p15-composable">P15: Composable<a class="headerlink" href="#p15-composable" title="Permanent link">&para;</a></h3>
+<p>A resolver written by <code>hya</code> accepts the values OmegaConf gives it (<code>str</code>, <code>int</code>, <code>float</code>, <code>bool</code>,
+<code>None</code>, <code>list</code>, <code>dict</code>, <code>ListConfig</code>, <code>DictConfig</code>), from a writable or a read-only configuration,
+and the output of another <code>hya</code> resolver of a type it takes (a <code>Path</code> for <code>hya.path</code>, a
+<code>torch.dtype</code> for <code>hya.torch.tensor</code>), without a warning. <code>hya.np.array</code> and <code>hya.torch.tensor</code> take
+a tensor (on the CPU, without gradient for NumPy) and an array, and <code>hya.torch.tensor</code> takes a data
+type as a <code>torch.dtype</code> or as its name.</p>
+<h2 id="values-and-errors">Values and errors<a class="headerlink" href="#values-and-errors" title="Permanent link">&para;</a></h2>
+<h3 id="p10-errors-are-omegaconfs">P10: Errors are OmegaConf's<a class="headerlink" href="#p10-errors-are-omegaconfs" title="Permanent link">&para;</a></h3>
+<p>A resolver raises standard exceptions only, so a failure surfaces as <code>InterpolationResolutionError</code>
+whose message names the original exception, found in the <code>__context__</code> chain (<code>__cause__</code> is
+<code>None</code>). A missing optional package says how to install it.</p>
+<p>A missing configuration value (<code>???</code>) is reported by the exceptions of OmegaConf
+(<code>MissingMandatoryValue</code>, which the message names). <code>hya</code> adds no exception class of its own and no
+wrapper. With OmegaConf 2.4 and later, the annotations of the resolvers published by <code>hya</code> are not
+validated at call time.</p>
+<h3 id="p11-any-value-out">P11: Any value out<a class="headerlink" href="#p11-any-value-out" title="Permanent link">&para;</a></h3>
+<p>A resolver may return any Python object (<code>Path</code>, <code>ndarray</code>, <code>Tensor</code>, <code>dtype</code>, list). Such values
+are for use in code: for an array, a tensor or a data type, <code>OmegaConf.resolve</code> needs the
+<code>allow_objects</code> flag and <code>to_yaml</code> does not support them.</p>
+<p>Use such a value in code (<code>cfg.key</code>, or <code>OmegaConf.to_container(cfg, resolve=True)</code>). To resolve a
+whole configuration in place, give it the <code>allow_objects</code> flag, when you create it
+(<code>OmegaConf.create(..., flags={"allow_objects": True})</code>) or around the call
+(<code>with flag_override(cfg, "allow_objects", True): OmegaConf.resolve(cfg)</code>, with
+<code>from omegaconf import flag_override</code>).</p>
+<h2 id="python-api-and-compatibility">Python API and compatibility<a class="headerlink" href="#python-api-and-compatibility" title="Permanent link">&para;</a></h2>
+<h3 id="p13-keyword-only-options">P13: Keyword-only options<a class="headerlink" href="#p13-keyword-only-options" title="Permanent link">&para;</a></h3>
+<p>The options of the Python API are keyword-only (<code>exist_ok</code>, <code>replace</code>). The arguments of a resolver
+are positional, because the interpolation grammar has no keyword syntax; an optional argument of a
+resolver comes last and has a default.</p>
+<h3 id="p12-typed-and-documented">P12: Typed and documented<a class="headerlink" href="#p12-typed-and-documented" title="Permanent link">&para;</a></h3>
+<p>The package has a <code>py.typed</code> file and its public types are complete (<code>pyright --verifytypes</code> scores
+100 %). Every public function, class, method and property has a docstring with an example and is
+shown in the reference, and every default key is listed in the <a href="../resolvers/">resolvers</a> page.</p>
+<h3 id="p14-installs-next-to-hydra">P14: Installs next to Hydra<a class="headerlink" href="#p14-installs-next-to-hydra" title="Permanent link">&para;</a></h3>
+<p><code>hya</code> accepts every OmegaConf release that a Hydra release accepts (<code>omegaconf&gt;=2.2,&lt;3.0</code>) and
+behaves the same on all of them. CI runs the tests on the oldest and the newest.</p>
 <h2 id="limits">Limits<a class="headerlink" href="#limits" title="Permanent link">&para;</a></h2>
 <p><code>hya</code> does not provide the following.</p>
 <ul>
 <li><strong>Thread-safety</strong> of registering resolvers while OmegaConf resolves interpolations. The resolver
   table of OmegaConf is a global dictionary.</li>
-<li><strong>Detection of a conflicting registration.</strong> A resolver that another source registers after <code>hya</code>
-  published the same key is not detected: it needs the private <code>BaseContainer._resolvers</code> of
-  OmegaConf, which changes between releases.</li>
+<li><strong>Detection of a conflicting registration.</strong> <code>register_resolvers()</code> without <code>replace=True</code> keeps
+  silently a resolver that another source registered over a published key: detecting it needs the
+  private <code>BaseContainer._resolvers</code> of OmegaConf, which changes between releases.
+  <code>register_resolvers(replace=True)</code> publishes the key again.</li>
 <li><strong>Type-tagged hashes.</strong> <code>hya.sha256</code> of the string <code>[1]</code> equals the hash of the list <code>[1]</code>, an
-  integer key equals the same string key, and a path or an enum equals its string in JSON. A mapping
-  that mixes key types cannot be sorted and raises.</li>
+  integer key equals the same string key, a path or an enum equals its string in JSON, and an enum
+  that is also an <code>int</code>, a <code>float</code> or a <code>str</code> equals its value. A mapping that mixes key types cannot
+  be sorted and raises.</li>
 <li><strong>Special parameters of lazy resolvers.</strong> A resolver registered with <code>register_lazy</code> cannot
   receive <code>_root_</code>, <code>_parent_</code> or <code>_node_</code>: OmegaConf reads them from the signature, which is not
   known before the import.</li>
+<li><strong>Warnings of the libraries</strong> for inputs they discourage, for example <code>torch.tensor</code> of a list of
+  NumPy arrays.</li>
 <li><strong>Caching of the output of the resolvers.</strong> OmegaConf does not cache it: every access of an
   interpolation calls the resolver again.</li>
 <li><strong>Export of objects.</strong> <code>OmegaConf.to_yaml(resolve=True)</code> does not support an array, a tensor or

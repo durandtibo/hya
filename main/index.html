@@ -285,6 +285,26 @@
     
     
       <li class="md-tabs__item">
+        <a href="design/" class="md-tabs__link">
+          
+  
+  
+  Design
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
         <a href="refs/" class="md-tabs__link">
           
   
@@ -439,6 +459,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#how-it-works" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        How it works
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#quick-start" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -482,6 +513,17 @@
     <span class="md-ellipsis">
       
         Available Resolvers
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#where-to-go-next" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Where to go next
       
     </span>
   </a>
@@ -660,14 +702,14 @@
   
   
     <li class="md-nav__item">
-      <a href="properties/" class="md-nav__link">
+      <a href="custom_resolvers/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    Properties
+    Custom Resolvers
   
 
     
@@ -688,14 +730,42 @@
   
   
     <li class="md-nav__item">
-      <a href="design/" class="md-nav__link">
+      <a href="hydra/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    Design Choices
+    Using with Hydra
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="troubleshooting/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Troubleshooting
   
 
     
@@ -746,7 +816,7 @@
   <span class="md-ellipsis">
     
   
-    Reference
+    Design
   
 
     
@@ -759,6 +829,121 @@
         
         <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
           <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Design
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="design/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Design Choices
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="properties/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Properties
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Reference
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -952,6 +1137,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#how-it-works" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        How it works
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#quick-start" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -995,6 +1191,17 @@
     <span class="md-ellipsis">
       
         Available Resolvers
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#where-to-go-next" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Where to go next
       
     </span>
   </a>
@@ -1078,10 +1285,24 @@
 
 <h2 id="overview">Overview<a class="headerlink" href="#overview" title="Permanent link">&para;</a></h2>
 <p><code>hya</code> is a library of custom <a href="https://github.com/omry/omegaconf">OmegaConf</a> resolvers designed to be
-used with <a href="https://github.com/facebookresearch/hydra">Hydra</a>. It provides a comprehensive set of
-resolvers for mathematical operations, path manipulation, data type conversions, and more.</p>
+used with <a href="https://github.com/facebookresearch/hydra">Hydra</a>. A resolver is a function that a
+configuration calls with the syntax <code>${key:argument,...}</code>. With <code>hya</code>, a configuration can compute
+values (arithmetic and math functions), build paths and identifiers, and create NumPy arrays or
+PyTorch tensors, instead of repeating hand-computed values.</p>
+<h2 id="how-it-works">How it works<a class="headerlink" href="#how-it-works" title="Permanent link">&para;</a></h2>
+<ol>
+<li><code>import hya</code> registers the resolvers with OmegaConf. No other call is needed.</li>
+<li>A configuration calls a resolver by its key, which starts with <code>hya.</code>.</li>
+<li>OmegaConf calls the resolver when the value is accessed, with the referenced values of the
+   configuration as arguments.</li>
+</ol>
+<p>The required dependency is <code>omegaconf</code>. A few resolvers need an optional package (NumPy, PyTorch or
+braceexpand), which is imported only when one of them is called.</p>
 <h2 id="quick-start">Quick Start<a class="headerlink" href="#quick-start" title="Permanent link">&para;</a></h2>
-<p>The default resolvers are automatically registered when you import <code>hya</code>:</p>
+<p>Install the library:</p>
+<div class="highlight"><pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>hya
+</code></pre></div>
+<p>Then import <code>hya</code> and use the resolvers in a configuration:</p>
 <div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">hya</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">omegaconf</span><span class="w"> </span><span class="kn">import</span> <span class="n">OmegaConf</span>
 
@@ -1134,8 +1355,10 @@ resolvers for mathematical operations, path manipulation, data type conversions,
 <span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">"__main__"</span><span class="p">:</span>
     <span class="n">main</span><span class="p">()</span>
 </code></pre></div>
+<p>See <a href="hydra/">Using with Hydra</a> for multiple configuration files, command line overrides and the
+supported Python versions.</p>
 <h2 id="registering-custom-resolvers">Registering Custom Resolvers<a class="headerlink" href="#registering-custom-resolvers" title="Permanent link">&para;</a></h2>
-<p>You can extend <code>hya</code> with your own custom resolvers:</p>
+<p>You can extend <code>hya</code> with your own resolvers:</p>
 <div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">hya</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_default_registry</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">omegaconf</span><span class="w"> </span><span class="kn">import</span> <span class="n">OmegaConf</span>
 
@@ -1154,25 +1377,99 @@ resolvers for mathematical operations, path manipulation, data type conversions,
 <span class="n">conf</span> <span class="o">=</span> <span class="n">OmegaConf</span><span class="o">.</span><span class="n">create</span><span class="p">({</span><span class="s2">"result"</span><span class="p">:</span> <span class="s2">"${multiply:5,3}"</span><span class="p">})</span>
 <span class="nb">print</span><span class="p">(</span><span class="n">conf</span><span class="o">.</span><span class="n">result</span><span class="p">)</span>  <span class="c1"># Output: 15</span>
 </code></pre></div>
+<p>See <a href="custom_resolvers/">Custom Resolvers</a> to override, load lazily and test your resolvers.</p>
 <h2 id="available-resolvers">Available Resolvers<a class="headerlink" href="#available-resolvers" title="Permanent link">&para;</a></h2>
 <p><code>hya</code> provides 24 built-in resolvers, plus 4 that need an optional package. All keys start with
 <code>hya.</code>:</p>
-<ul>
-<li><strong>Arithmetic</strong>: <code>add</code>, <code>sub</code>, <code>mul</code>, <code>truediv</code>, <code>floordiv</code>, <code>ceildiv</code>, <code>neg</code>, <code>pow</code>, <code>sum</code></li>
-<li><strong>Math functions</strong>: <code>sqrt</code>, <code>exp</code>, <code>log</code>, <code>log10</code>, <code>sinh</code>, <code>asinh</code></li>
-<li><strong>Comparison</strong>: <code>max</code>, <code>min</code></li>
-<li><strong>Casts</strong>: <code>int</code>, <code>float</code></li>
-<li><strong>Constants</strong>: <code>pi</code></li>
-<li><strong>Paths and strings</strong>: <code>path</code>, <code>iter_join</code>, <code>sha256</code></li>
-<li><strong>Collections</strong>: <code>len</code></li>
-<li><strong>Optional (with dependencies)</strong>:</li>
-<li>NumPy: <code>np.array</code></li>
-<li>PyTorch: <code>torch.tensor</code>, <code>torch.dtype</code></li>
-<li>Braceexpand: <code>braceexpand</code></li>
-</ul>
-<p>See the <a href="resolvers/">Resolvers</a> page for the documentation of every resolver, the
-<a href="properties/">Properties</a> page for the rules <code>hya</code> guarantees, and the
-<a href="design/">Design Choices</a> page for the reasons behind the design and its trade-offs.</p>
+<table>
+<thead>
+<tr>
+<th>Category</th>
+<th>Resolvers</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Arithmetic</strong></td>
+<td><code>add</code>, <code>sub</code>, <code>mul</code>, <code>truediv</code>, <code>floordiv</code>, <code>ceildiv</code>, <code>neg</code></td>
+</tr>
+<tr>
+<td><strong>Math Functions</strong></td>
+<td><code>pow</code>, <code>sqrt</code>, <code>exp</code>, <code>log</code>, <code>log10</code>, <code>sinh</code>, <code>asinh</code></td>
+</tr>
+<tr>
+<td><strong>Comparison</strong></td>
+<td><code>max</code>, <code>min</code></td>
+</tr>
+<tr>
+<td><strong>Casts</strong></td>
+<td><code>int</code>, <code>float</code></td>
+</tr>
+<tr>
+<td><strong>Collections</strong></td>
+<td><code>len</code>, <code>sum</code></td>
+</tr>
+<tr>
+<td><strong>Constants</strong></td>
+<td><code>pi</code></td>
+</tr>
+<tr>
+<td><strong>Paths</strong></td>
+<td><code>path</code>, <code>iter_join</code></td>
+</tr>
+<tr>
+<td><strong>Hashing</strong></td>
+<td><code>sha256</code></td>
+</tr>
+<tr>
+<td><strong>Optional</strong></td>
+<td><code>braceexpand</code>, <code>np.array</code>, <code>torch.tensor</code>, <code>torch.dtype</code></td>
+</tr>
+</tbody>
+</table>
+<h2 id="where-to-go-next">Where to go next<a class="headerlink" href="#where-to-go-next" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>Page</th>
+<th>Content</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href="get_started/">Get Started</a></td>
+<td>Installation and optional dependencies</td>
+</tr>
+<tr>
+<td><a href="user_guide/">User Guide</a></td>
+<td>Syntax, common use cases and values in Python</td>
+</tr>
+<tr>
+<td><a href="resolvers/">Resolvers</a></td>
+<td>Reference of every resolver</td>
+</tr>
+<tr>
+<td><a href="custom_resolvers/">Custom Resolvers</a></td>
+<td>Add your own resolvers to a registry</td>
+</tr>
+<tr>
+<td><a href="hydra/">Using with Hydra</a></td>
+<td>Hydra applications, overrides and multiple files</td>
+</tr>
+<tr>
+<td><a href="troubleshooting/">Troubleshooting</a></td>
+<td>Common errors and their solutions</td>
+</tr>
+<tr>
+<td><a href="design/">Design Choices</a></td>
+<td>How <code>hya</code> is designed, why, and the trade-offs</td>
+</tr>
+<tr>
+<td><a href="properties/">Properties</a></td>
+<td>The rules <code>hya</code> guarantees, and what it does not</td>
+</tr>
+</tbody>
+</table>
 <h2 id="api-stability">API stability<a class="headerlink" href="#api-stability" title="Permanent link">&para;</a></h2>
 <p><img alt="⚠" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/26a0.svg" title=":warning:" /> While <code>hya</code> is in development stage, no API is guaranteed to be stable from one
 release to the next. In fact, it is very likely that the API will change multiple times before a

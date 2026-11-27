@@ -74,7 +74,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#configuration-values" class="md-skip">
+        <a href="#utilities" class="md-skip">
           Skip to content
         </a>
       
@@ -268,6 +268,26 @@
   
   
   User Guide
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../design/" class="md-tabs__link">
+          
+  
+  
+  Design
 
         </a>
       </li>
@@ -530,14 +550,14 @@
   
   
     <li class="md-nav__item">
-      <a href="../../properties/" class="md-nav__link">
+      <a href="../../custom_resolvers/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    Properties
+    Custom Resolvers
   
 
     
@@ -558,6 +578,121 @@
   
   
     <li class="md-nav__item">
+      <a href="../../hydra/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Using with Hydra
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../troubleshooting/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Troubleshooting
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Design
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Design
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../design/" class="md-nav__link">
         
   
@@ -566,6 +701,34 @@
     
   
     Design Choices
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../properties/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Properties
   
 
     
@@ -609,10 +772,10 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" checked>
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" checked>
         
           
-          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="">
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="">
             
   
   
@@ -630,8 +793,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="true">
-          <label class="md-nav__title" for="__nav_4">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_5">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -738,6 +901,8 @@
       <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
       
       
+        
+      
       
         <label class="md-nav__link md-nav__link--active" for="__toc">
           
@@ -779,6 +944,8 @@
 <nav class="md-nav md-nav--secondary" aria-label="Table of contents">
   
   
+  
+    
   
   
     <label class="md-nav__title" for="__toc">
@@ -1002,6 +1169,8 @@
   
   
   
+    
+  
   
     <label class="md-nav__title" for="__toc">
       <span class="md-nav__icon md-icon"></span>
@@ -1184,8 +1353,8 @@
   
 
 
-  <h1>Utilities</h1>
-
+<h1 id="utilities">Utilities<a class="headerlink" href="#utilities" title="Permanent link">&para;</a></h1>
+<p>Helpers for custom resolvers and their tests.</p>
 <h2 id="configuration-values">Configuration values<a class="headerlink" href="#configuration-values" title="Permanent link">&para;</a></h2>
 
 
@@ -1322,6 +1491,18 @@ missing value (<code>???</code>).</p>
               </div>
             </td>
           </tr>
+          <tr class="doc-section-item">
+            <td>
+                  <code>InterpolationResolutionError</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>If an
+interpolation of a node cannot be resolved, for example a
+reference to a key that does not exist.</p>
+              </div>
+            </td>
+          </tr>
       </tbody>
     </table>
 
@@ -1364,6 +1545,10 @@ missing value (<code>???</code>).</p>
     <div class="doc doc-contents first">
 
         <p>Implement some utility functions to manage optional dependencies.</p>
+<p>For each optional package (<code>braceexpand</code>, <code>numpy</code> and <code>torch</code>),
+<code>is_&lt;package&gt;_available</code> indicates whether the package is installed,
+without importing it, and <code>validate_&lt;package&gt;</code> raises a
+<code>RuntimeError</code> that says how to install it when it is missing.</p>
 
 
 
@@ -1714,7 +1899,25 @@ tests to be conditionally skipped based on whether optional packages
 <p>These markers are useful for ensuring tests only run when the required
 dependencies are present, avoiding import errors and test failures when
 optional packages are not installed.</p>
+<p>For each optional package, <code>&lt;package&gt;_available</code> skips a test when the
+package is not installed, and <code>&lt;package&gt;_not_available</code> skips a test
+when it is installed: <code>braceexpand_available</code>,
+<code>braceexpand_not_available</code>, <code>numpy_available</code>,
+<code>numpy_not_available</code>, <code>torch_available</code> and
+<code>torch_not_available</code>.</p>
+<p>This module imports <code>pytest</code>, which the <code>testing</code> extra installs
+(<code>pip install 'hya[testing]'</code>).</p>
 
+
+<details class="example" open>
+  <summary>Example</summary>
+  <div class="highlight"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">hya.testing</span><span class="w"> </span><span class="kn">import</span> <span class="n">numpy_available</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nd">@numpy_available</span>
+<span class="gp">... </span><span class="k">def</span><span class="w"> </span><span class="nf">test_with_numpy</span><span class="p">():</span>
+<span class="gp">... </span>    <span class="k">pass</span>
+<span class="gp">...</span>
+</code></pre></div>
+</details>
 
 
 

@@ -1,7 +1,8 @@
 # User Guide
 
-This guide explains how to use `hya` in your projects. For the reasons behind the design, see
-[Design Choices](design.md); for the guarantees, see [Properties](properties.md).
+This guide explains how to use `hya` in a configuration and in Python. See also [Resolvers](resolvers.md)
+for each resolver, [Custom Resolvers](custom_resolvers.md) to add your own, [Using with Hydra](hydra.md)
+and [Troubleshooting](troubleshooting.md).
 
 ## Basic Usage
 
@@ -17,6 +18,9 @@ from omegaconf import OmegaConf
 conf = OmegaConf.create({"result": "${hya.add:2,3}"})
 print(conf.result)  # Output: 5
 ```
+
+Importing `hya` is needed once per process, in any module that runs before the values are
+accessed.
 
 The optional resolvers (`hya.braceexpand`, `hya.np.array`, `hya.torch.tensor`, `hya.torch.dtype`)
 are always registered, so the registry has the same keys on every machine. `import hya` does not
@@ -55,232 +59,80 @@ print(conf.training.num_batches)  # Output: 313
 print(conf.training.learning_rate)  # Output: 0.001
 ```
 
-## Integration with Hydra
+## Interpolation Syntax
 
-`hya` is designed to work seamlessly with [Hydra](https://github.com/facebookresearch/hydra).
-
-### Basic Hydra Example
-
-**config.yaml:**
+A resolver is called with `${key:argument1,argument2,...}`. The syntax is the one of
+[OmegaConf](https://omegaconf.readthedocs.io/en/latest/grammar.html); `hya` adds the resolvers
+only. The following rules cover the common cases.
 
 ```yaml
-dataset:
-  name: mnist
-  train_samples: 60000
-  val_samples: 10000
-  total_samples: ${hya.add:${dataset.train_samples},${dataset.val_samples}}
-
-model:
-  type: cnn
-  channels: [32, 64, 128]
-  num_layers: ${hya.len:${model.channels}}
-
-training:
-  batch_size: 64
-  epochs: 10
-  steps_per_epoch: ${hya.ceildiv:${dataset.train_samples},${training.batch_size}}
-
-paths:
-  root: /data
-  train: ${hya.iter_join:[${paths.root},${dataset.name},train],/}
-  val: ${hya.iter_join:[${paths.root},${dataset.name},val],/}
-
-experiment:
-  name: ${dataset.name}_${model.type}
-  version: ${hya.sha256:${experiment.name}}
+x: 4
+# A reference is an argument like any other
+double: ${hya.mul:${x},2} # 8
+# Calls can be nested
+nested: ${hya.add:${hya.mul:${x},3},1} # 13
+# The colon is required, even without argument
+tau: ${hya.mul:2,${hya.pi:}} # 6.283185307179586
+# An interpolation can be a part of a string
+name: run-${hya.add:${x},1} # "run-5"
+# Numbers, booleans and null are typed; a quoted value is a string
+number: ${hya.add:1,2} # 3
+text: ${hya.add:'1','2'} # "12"
+# Lists and dictionaries can be written in the arguments
+length: ${hya.len:[1,2,3]} # 3
+# Quote a string that holds a comma or a space that matters
+joined: ${hya.iter_join:[a,b],', '} # "a, b"
+# Quote a string that holds a special character, such as ~, =, { or }
+home: ${hya.path:"~/data"}
+# A backslash keeps the text as is
+literal: \${hya.add:1,2} # "${hya.add:1,2}"
 ```
 
-**train.py:**
+Spaces around the arguments are ignored. A resolver is called with positional arguments only.
+
+In a Python string, write the interpolation as is (`"${hya.add:1,2}"`); do not use an f-string, which
+would read the braces. In YAML, quote a whole value that holds a colon followed by a space, or a
+space followed by a `#`, as for any YAML string.
+
+## Using the Values in Python
+
+Accessing a key calls the resolver and returns its output, which can be any Python object:
 
 ```python
 import hya
-import hydra
-from omegaconf import DictConfig
+from omegaconf import OmegaConf
 
-
-@hydra.main(version_base=None, config_path=".", config_name="config")
-def train(cfg: DictConfig):
-    print(f"Dataset: {cfg.dataset.name}")
-    print(f"Total samples: {cfg.dataset.total_samples}")
-    print(f"Model layers: {cfg.model.num_layers}")
-    print(f"Steps per epoch: {cfg.training.steps_per_epoch}")
-    print(f"Train path: {cfg.paths.train}")
-    print(f"Experiment version: {cfg.experiment.version}")
-
-
-if __name__ == "__main__":
-    train()
+conf = OmegaConf.create({"output": "${hya.path:/data/output}", "steps": "${hya.add:1,2}"})
+print(conf.output.name)  # Output: output
+print(conf.steps + 1)  # Output: 4
 ```
 
-### Multi-Config with Hydra
-
-You can use `hya` resolvers across multiple configuration files:
-
-**config.yaml:**
-
-```yaml
-defaults:
-  - model: resnet
-  - optimizer: adam
-
-experiment:
-  name: ${model.name}_${optimizer.name}
-  seed: 42
-  version: ${hya.sha256:${experiment.name}_${experiment.seed}}
-```
-
-**model/resnet.yaml:**
-
-```yaml
-name: resnet
-depth: 50
-width_multiplier: 1.0
-effective_depth: ${hya.mul:${model.depth},${model.width_multiplier}}
-```
-
-**optimizer/adam.yaml:**
-
-```yaml
-name: adam
-lr: ${hya.pow:10,-4} # 0.0001
-betas: [0.9, 0.999]
-```
-
-## Custom Resolvers
-
-### Creating and Registering Custom Resolvers
-
-You can extend `hya` with your own custom resolvers:
+To get a plain dictionary with the resolved values, use `OmegaConf.to_container`:
 
 ```python
-from hya import get_default_registry
+import hya
+from omegaconf import OmegaConf
 
-# Get the default registry
-registry = get_default_registry()
-
-
-# Register a simple custom resolver
-@registry.register("double")
-def double_resolver(x):
-    """Double the input value."""
-    return x * 2
-
-
-# Register a more complex resolver
-@registry.register("clip")
-def clip_resolver(value, min_val, max_val):
-    """Clip a value between min and max."""
-    return max(min_val, min(value, max_val))
-
-
-# Register custom resolvers with OmegaConf
-# Note: Default hya resolvers are already registered on import
-# This only registers your custom resolvers added to the default registry
-registry.register_resolvers()
+conf = OmegaConf.create({"model": {"size": "${hya.mul:64,4}"}})
+print(OmegaConf.to_container(conf, resolve=True))  # Output: {'model': {'size': 256}}
 ```
 
-Now use them in your configuration:
-
-```yaml
-hyperparameters:
-  base_lr: 0.001
-  scaled_lr: ${double:${hyperparameters.base_lr}}
-
-  dropout: 0.7
-  clipped_dropout: ${clip:${hyperparameters.dropout},0.0,0.5}
-```
-
-A key is made of names joined by dots (`double`, `my.clip_2`), where a name is made of ASCII
-letters, digits and `_` and does not start with a digit. Any other key, such as `my-clip`, raises a
-`ValueError` when it is registered, and a resolver that is not callable raises a `TypeError`. The
-decorator needs the key: `@registry.register` alone raises a `TypeError`.
-
-### Overriding Existing Resolvers
-
-You can override a resolver of the registry with the keyword-only `exist_ok` parameter. The
-default resolvers are already published to OmegaConf when `hya` is imported, so
-`register_resolvers()` does not replace them silently: it skips the key and emits a warning. Use
-`replace=True` to replace the resolver of OmegaConf:
+An array, a tensor or a data type is not a value that a configuration can store. `to_container`
+returns it, but `OmegaConf.resolve`, which replaces the interpolations in place, needs the
+`allow_objects` flag, and `OmegaConf.to_yaml(conf, resolve=True)` does not support it:
 
 ```python
-from hya import get_default_registry
+import hya
+from omegaconf import OmegaConf, flag_override
 
-registry = get_default_registry()
-
-
-@registry.register("hya.add", exist_ok=True)
-def custom_add(first, *others):
-    """Custom add that also prints the result."""
-    result = first
-    for other in others:
-        result = result + other
-    print(f"Adding {(first, *others)} = {result}")
-    return result
-
-
-# Without replace=True, the published resolver is kept and a warning is emitted.
-# With replace=True, the resolver of OmegaConf is replaced by custom_add.
-registry.register_resolvers(replace=True)
+conf = OmegaConf.create({"dtype": "${hya.torch.dtype:float32}"})
+with flag_override(conf, "allow_objects", True):
+    OmegaConf.resolve(conf)
+print(conf.dtype)  # Output: torch.float32
 ```
 
-`register_resolvers` is idempotent: calling it twice changes nothing. A resolver removed from
-OmegaConf (for example by `OmegaConf.clear_resolvers()`) is published again. A key that another
-source registered in OmegaConf is not overwritten unless `replace=True`: one warning lists the
-skipped keys, after the other keys are published. With `replace=True`, every key of the registry is
-published, whatever OmegaConf holds. A resolver that another source registers over a key that the
-registry already published is kept without a warning: use `replace=True` to publish yours again.
-
-OmegaConf caches the value of the nodes it has already resolved. Replacing a resolver does not clear
-this cache for existing configurations: call `OmegaConf.clear_cache(cfg)` to clear it.
-
-With OmegaConf 2.4 and later, the resolvers are published with `annotation_validation="off"`: the
-type annotations of a resolver are documentation for readers and type checkers, OmegaConf does not
-check them at call time.
-
-### Registering a Resolver Lazily
-
-`register_lazy` registers a resolver as a `"module:function"` string. The module is imported the
-first time OmegaConf calls the resolver, not when the resolver is registered. This is how `hya`
-registers the resolvers that need a heavy optional package:
-
-```python
-from hya import get_default_registry
-
-registry = get_default_registry()
-registry.register_lazy("my.array", "hya.numpy:to_array_resolver")
-registry.register_resolvers()
-```
-
-A target that is not formatted as `"module:function"`, with an absolute module name made of names
-joined by dots and a function name that is a Python identifier, raises a `ValueError` when it is
-registered, and a target that is not a string raises a `TypeError`. An unknown module or function
-raises an error on the first call of the resolver. A lazy resolver
-cannot receive the special parameters of OmegaConf (`_root_`, `_parent_`, `_node_`): register such
-a resolver with `register`.
-
-### Creating Isolated Registries
-
-For advanced use cases, you can create independent registries:
-
-```python
-from hya.registry import ResolverRegistry
-
-# Create a new, isolated registry
-custom_registry = ResolverRegistry()
-
-
-@custom_registry.register("custom.multiply")
-def multiply(x, y):
-    return x * y
-
-
-# Register only these custom resolvers
-custom_registry.register_resolvers()
-```
-
-`ResolverRegistry` is also available from the top-level package: `from hya import ResolverRegistry`.
-Its constructor takes an optional mapping of keys to resolvers, validated as by `register`; anything
-else than a mapping or `None` raises a `TypeError`.
+`OmegaConf.to_yaml(conf)`, without `resolve=True`, writes the interpolations as they are, so use it
+to save a configuration.
 
 ## Common Use Cases
 
@@ -404,42 +256,57 @@ The pattern must be quoted in an interpolation. The result is a list (it has a l
 indexed and can be read several times), so it can be used by other resolvers such as
 `hya.iter_join`.
 
-## Registry API
+### Working with Complex Data Types
 
-### Checking for Resolvers
-
-Check if a resolver is registered:
+Create NumPy arrays and PyTorch tensors:
 
 ```python
-from hya import get_default_registry
+import hya
+from omegaconf import OmegaConf
 
-registry = get_default_registry()
+conf = OmegaConf.create(
+    {
+        "numpy_array": "${hya.np.array:[[1,2,3],[4,5,6]]}",
+        "torch_tensor": "${hya.torch.tensor:[1.0,2.0,3.0]}",
+        "torch_dtype": "${hya.torch.dtype:float32}",
+    }
+)
 
-# Check if a resolver exists
-if registry.has_resolver("hya.add"):
-    print("add resolver is available")
-
-# List all registered resolvers
-for key in registry.state.keys():
-    print(f"Registered: {key}")
+print(type(conf.numpy_array))  # <class 'numpy.ndarray'>
+print(type(conf.torch_tensor))  # <class 'torch.Tensor'>
+print(conf.torch_dtype)  # torch.float32
 ```
 
-### Accessing Registry State
+### Combining Multiple Resolvers
 
-```python
-from hya import get_default_registry
+Chain resolvers for complex operations:
 
-registry = get_default_registry()
+```yaml
+model:
+  base_size: 64
+  multiplier: 4
+  layers: 3
 
-# Get all registered resolvers: a read-only mapping (use registry.register to add one)
-resolvers_dict = registry.state
+  # Compute total size: (64 * 4) * 3 = 768
+  intermediate_size: ${hya.mul:${model.base_size},${model.multiplier}}
+  total_size: ${hya.mul:${model.intermediate_size},${model.layers}}
+```
 
-# Count resolvers
-print(f"Total resolvers: {len(resolvers_dict)}")
+### Using Resolvers with OmegaConf Features
 
-# Check specific resolvers
-core_resolvers = [k for k in resolvers_dict.keys() if k.startswith("hya.")]
-print(f"Core hya resolvers: {len(core_resolvers)}")
+Combine resolvers with OmegaConf's native features:
+
+```yaml
+# Use resolvers with the oc.env resolver of OmegaConf
+paths:
+  root: /data
+  project: ${oc.env:PROJECT_NAME,default_project}
+  output: ${hya.iter_join:[${paths.root},${paths.project}],/}
+
+# Use resolvers with Hydra overrides
+model:
+  size: 512 # Can be overridden via the command line: model.size=1024
+  doubled_size: ${hya.mul:${model.size},2}
 ```
 
 ## Best Practices
@@ -457,26 +324,6 @@ model:
 
 # Avoid: Hardcoding computed values
 # total_hidden: 9216  # If you change hidden_size, this becomes incorrect
-```
-
-### Error Handling
-
-An optional resolver is always registered. When its package is missing, the call raises a
-`RuntimeError` that says how to install the package. An error raised by a resolver is reported by
-OmegaConf as an `InterpolationResolutionError`. The message names the original exception (for
-example `ZeroDivisionError raised while resolving interpolation`) and the original exception is in
-the `__context__` chain of the error (`__cause__` is `None`):
-
-```python
-import hya
-from omegaconf import OmegaConf, errors
-
-try:
-    conf = OmegaConf.create({"tensor": "${hya.torch.tensor:[1,2,3]}"})
-    print(conf.tensor)
-except errors.InterpolationResolutionError as error:
-    # Without torch: 'torch' package is required but not installed. ... pip install torch
-    print(error)
 ```
 
 ### Type Safety
@@ -521,155 +368,4 @@ layer1:
 
 layer2:
   input_size: ${model.total_embeddings} # Calls hya.mul at each access
-```
-
-## Troubleshooting
-
-### Resolver Not Found
-
-**Error:** `omegaconf.errors.UnsupportedInterpolationType: Unsupported interpolation type hya.xxx`
-
-**Solution:** Make sure you have imported `hya`:
-
-```python
-import hya  # This line is required!
-from omegaconf import OmegaConf
-```
-
-### Optional Dependency Missing
-
-**Error:**
-
-```text
-omegaconf.errors.InterpolationResolutionError: RuntimeError raised while resolving interpolation: 'braceexpand' package is required but not installed
-```
-
-The optional resolvers (`hya.braceexpand`, `hya.np.array`, `hya.torch.*`) are always registered, and
-need their package when they are called.
-
-**Solution:** Install the required package:
-
-```shell
-pip install braceexpand  # or numpy, or torch
-```
-
-### Resolver Already Registered
-
-**Error:** `RuntimeError: A resolver is already registered for 'my_key'`
-
-**Solution:** Use `exist_ok=True` to override the resolver of the registry:
-
-```python
-@registry.register("my_key", exist_ok=True)
-def my_resolver(x):
-    return x
-```
-
-**Warning:** `A resolver is already registered in OmegaConf for 'my_key': not replaced.`
-
-OmegaConf already has a resolver for each key that the warning lists, and `register_resolvers()` did
-not replace them.
-
-**Solution:** Use `registry.register_resolvers(replace=True)` to replace them.
-
-### Invalid Resolver Key
-
-**Error:** `ValueError: Invalid resolver key 'my-key': use names made of letters, digits and _, ...`
-
-**Solution:** Use names joined by dots, for example `my_key` or `my.key`.
-
-### Type Errors in Resolvers
-
-**Error:** `TypeError: unsupported operand type(s) for +: 'int' and 'str'`
-
-**Solution:** Ensure your configuration passes correct types.
-
-Wrong, mixing types:
-
-```yaml
-result: ${hya.add:5,abc}
-```
-
-Correct, same types:
-
-```yaml
-result: ${hya.add:5,10}
-```
-
-### Circular References
-
-**Error:** `omegaconf.errors.InterpolationResolutionError: Recursive interpolation detected`
-
-**Solution:** Avoid self-referential configurations.
-
-Wrong, a circular reference:
-
-```yaml
-x: ${hya.add:${y},1}
-y: ${hya.add:${x},1}
-```
-
-Correct, no circular dependency:
-
-```yaml
-x: 5
-y: ${hya.add:${x},1}
-```
-
-## Advanced Topics
-
-### Working with Complex Data Types
-
-Create NumPy arrays and PyTorch tensors:
-
-```python
-import hya
-from omegaconf import OmegaConf
-
-conf = OmegaConf.create(
-    {
-        "numpy_array": "${hya.np.array:[[1,2,3],[4,5,6]]}",
-        "torch_tensor": "${hya.torch.tensor:[1.0,2.0,3.0]}",
-        "torch_dtype": "${hya.torch.dtype:float32}",
-    }
-)
-
-print(type(conf.numpy_array))  # <class 'numpy.ndarray'>
-print(type(conf.torch_tensor))  # <class 'torch.Tensor'>
-print(conf.torch_dtype)  # torch.float32
-```
-
-### Combining Multiple Resolvers
-
-Chain resolvers for complex operations:
-
-```yaml
-model:
-  base_size: 64
-  multiplier: 4
-  layers: 3
-
-  # Compute total size: (64 * 4) * 3 = 768
-  intermediate_size: ${hya.mul:${model.base_size},${model.multiplier}}
-  total_size: ${hya.mul:${model.intermediate_size},${model.layers}}
-```
-
-### Using Resolvers with OmegaConf Features
-
-Combine resolvers with OmegaConf's native features:
-
-```yaml
-defaults:
-  - base_config
-
-# Use resolvers with variable interpolation
-paths:
-  root: /data
-  project: ${oc.env:PROJECT_NAME,default_project}
-  output: ${hya.iter_join:[${paths.root},${paths.project}],/}
-
-# Use resolvers with Hydra overrides
-model:
-  size: 512 # Can be overridden via the command line: model.size=1024
-  doubled_size: ${hya.mul:${model.size},2}
 ```

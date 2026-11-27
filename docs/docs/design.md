@@ -4,6 +4,29 @@ This page explains how `hya` is designed and why. Each choice has a cost, so eac
 the trade-off and what to do when the choice does not fit your project. The rules that follow from
 these choices are listed in [Properties](properties.md).
 
+## Overview
+
+`hya` has three parts:
+
+| Part             | Module                                                       | Role                                                |
+| ---------------- | ------------------------------------------------------------ | --------------------------------------------------- |
+| Resolvers        | `hya.resolvers`, `hya.numpy`, `hya.torch`, `hya.braceexpand` | The functions that a configuration calls            |
+| Registry         | `hya.registry`                                               | Maps keys to resolvers and publishes them           |
+| Default registry | `hya.default`                                                | The keys of `hya`, published when `hya` is imported |
+
+A value goes through them as follows:
+
+1. `import hya` publishes the default registry to the resolver table of OmegaConf.
+2. A configuration holds an interpolation, such as `${hya.add:${x},1}`. Loading the configuration
+   does not call any resolver.
+3. When the value is accessed, OmegaConf resolves the references of the arguments and calls the
+   resolver, which imports its optional package if it has one.
+4. The output is returned to your code. OmegaConf does not keep it: the next access calls the
+   resolver again.
+
+`hya` uses the public API of OmegaConf only. The modules that need an optional package are
+independent of each other, and the default registry does not import them.
+
 ## Resolvers are standard library callables when possible
 
 `hya.sub`, `hya.sqrt`, `hya.max`, `hya.len`, `hya.int`, ... are registered as the callable itself
@@ -16,7 +39,7 @@ these choices are listed in [Properties](properties.md).
   `max` (`${hya.max:10,25,15}`), and `hya.log` raises the `ValueError` of `math.log` for a value
   outside its domain.
 - **If it does not fit:** register your own resolver (see
-  [Custom Resolvers](user_guide.md#custom-resolvers)).
+  [Custom Resolvers](custom_resolvers.md)).
 
 A resolver is a function of a few lines only when no standard library callable has the behaviour
 (`hya.add`, `hya.mul`, `hya.ceildiv`, `hya.path`, `hya.iter_join`, `hya.sha256`, `hya.pi`).
@@ -29,7 +52,7 @@ library. For example, there is no `hya.abs`, `hya.round` or `hya.mod`, and there
 
 - **Benefit:** the whole library fits in one page and each key has one meaning.
 - **Cost:** an operation that is missing needs a custom resolver (two lines, see
-  [Custom Resolvers](user_guide.md#custom-resolvers)).
+  [Custom Resolvers](custom_resolvers.md)).
 
 ## Optional resolvers are always registered, and imported lazily
 

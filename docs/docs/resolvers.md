@@ -220,8 +220,10 @@ from urllib.parse import unquote, urlparse
 path = os.fspath(path)
 url = urlparse(path)
 if url.scheme == "file":
-    if url.netloc not in ("", "localhost"):
-        raise ValueError(f"A file URL with a host is not supported: '{path}'")
+    if url.netloc not in ("", "localhost") or "?" in path or "#" in path:
+        raise ValueError(
+            f"A file URL with a host, a query or a fragment is not supported: '{path}'"
+        )
     path = unquote(url.path)
 value = Path(path).expanduser().resolve()
 ```
@@ -230,10 +232,12 @@ value = Path(path).expanduser().resolve()
 
 - Returns a `pathlib.Path` object, which is useful for path operations in Python.
 - Only a string that starts with `file:` (the scheme is case-insensitive) is read as a URL (its
-  percent-encoding is decoded and its query is dropped). A host other than `localhost`
-  (`file://host/a`) raises a `ValueError`: the host is never dropped silently.
-- Any other string is a plain path, written as is: `/data/a?b` and `/data/a%20b` keep the `?` and
-  the `%20`.
+  percent-encoding is decoded). A host other than `localhost` (`file://host/a`), a query or a
+  fragment (`file:///data/run#1`) raises a `ValueError`: no part of a URL is dropped silently.
+- In a `file:` URL, write a `?` of a file name as `%3F` and a `#` as `%23`, or give the path
+  without `file:`.
+- Any other string is a plain path, written as is: `/data/a?b`, `/data/run#1` and `/data/a%20b`
+  keep the `?`, the `#` and the `%20`.
 - A `pathlib.Path` is accepted, so the output of `hya.path` can be passed to `hya.path` again.
 - A path with a tilde must be quoted in an interpolation: `${hya.path:"~/data"}`. Unquoted, it is a
   grammar error.

@@ -349,7 +349,16 @@ experiment:
 
   # Use for reproducible paths
   output_dir: ${hya.iter_join:[outputs,${experiment.experiment_id}],/}
+
+model:
+  name: resnet
+  depth: 50
+model_id: ${hya.sha256:${model}} # The hash of the whole section
 ```
+
+`hya.sha256` hashes the resolved content of a value: a string as is, any other value as canonical
+JSON, so the order of the keys does not matter. A value without a JSON form, such as an array or a
+tensor, raises an error. See [`hya.sha256`](resolvers.md#hyasha256).
 
 ### List Operations
 

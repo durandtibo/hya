@@ -1,13 +1,23 @@
 from __future__ import annotations
 
 import math
-from pathlib import Path
+from enum import Enum
+from pathlib import Path, PurePosixPath
+from typing import Any
 
 import pytest
 from omegaconf import OmegaConf
-from omegaconf.errors import GrammarParseError, InterpolationResolutionError
+from omegaconf.errors import (
+    GrammarParseError,
+    InterpolationResolutionError,
+    MissingMandatoryValue,
+)
 
-from hya.resolvers import path_resolver
+from hya.resolvers import _encode_value, path_resolver, sha256_resolver
+
+
+class Color(Enum):
+    RED = 1
 
 
 def test_add_resolver_int2() -> None:
@@ -249,3 +259,115 @@ def test_sha256_resolver() -> None:
     assert isinstance(
         OmegaConf.create({"key": "${hya.sha256:${value}}", "value": "blabla"}).key, str
     )
+
+
+@pytest.mark.parametrize(
+    ("value", "expected"),
+    [
+        ("mystring", "bd3ff47540b31e62d4ca6b07794e5a886b0f655fc322730f26ecd65cc7dd5c90"),
+        ("", "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"),
+        (1, "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b"),
+        (1.5, "9f29a130438b81170b92a42650f9a94291ecad60bd47af2a3886e75f7f728725"),
+        (True, "b5bea41b6c623f7c09f1bf24dcae58ebab3c0cdd90ad966bc43a45b44867e12b"),
+        (None, "74234e98afe7498fb5daf1f36ac2d78acc339464f950703b8c019892f982b90b"),
+        ([1, 2], "49a64717d5d4cb19952e6eac2946415cf6879adacf9908e7d872332d32c6e684"),
+        ((1, 2), "49a64717d5d4cb19952e6eac2946415cf6879adacf9908e7d872332d32c6e684"),
+        ({"b": 2, "a": 1}, "43258cff783fe7036d8a43033f830adfc60ec037382473548ac742b888292777"),
+        (
+            PurePosixPath("/a"),
+            "54b379c98639bd24c4d8282825cd34f0cde7fcd347dc7655706f6a37fb680122",
+        ),
+    ],
+)
+def test_sha256_resolver_value(value: Any, expected: str) -> None:
+    assert sha256_resolver(value) == expected
+
+
+@pytest.mark.parametrize(
+    ("value", "text"),
+    [
+        ([], "[]"),
+        ({}, "{}"),
+        ({"b": [1, {"d": None, "c": "x"}], "a": 1.5}, '{"a":1.5,"b":[1,{"c":"x","d":null}]}'),
+        ([Color.RED], '["Color.RED"]'),
+        ([PurePosixPath("/a")], '["/a"]'),
+        ({1: 2}, '{"1":2}'),
+    ],
+)
+def test_sha256_resolver_hashes_the_canonical_json(value: Any, text: str) -> None:
+    assert sha256_resolver(value) == sha256_resolver(text)
+
+
+def test_sha256_resolver_string_is_not_encoded_in_json() -> None:
+    assert sha256_resolver("a") != sha256_resolver('"a"')
+
+
+def test_sha256_resolver_does_not_depend_on_the_order_of_the_keys() -> None:
+    assert sha256_resolver({"a": 1, "b": 2}) == sha256_resolver({"b": 2, "a": 1})
+
+
+def test_sha256_resolver_depends_on_the_order_of_a_list() -> None:
+    assert sha256_resolver([1, 2]) != sha256_resolver([2, 1])
+
+
+def test_sha256_resolver_config_node_and_plain_value() -> None:
+    assert sha256_resolver(OmegaConf.create({"a": [1]})) == sha256_resolver({"a": [1]})
+
+
+def test_sha256_resolver_resolves_the_interpolations_of_a_node() -> None:
+    conf = OmegaConf.create({"a": 1, "x": ["${a}"]})
+    assert sha256_resolver(conf.x) == sha256_resolver([1])
+
+
+def test_sha256_resolver_is_deterministic() -> None:
+    assert sha256_resolver({"a": [1, 2]}) == sha256_resolver({"a": [1, 2]})
+
+
+def test_sha256_resolver_does_not_modify_the_input() -> None:
+    value = {"b": [2, 1], "a": 1}
+    sha256_resolver(value)
+    assert list(value.items()) == [("b", [2, 1]), ("a", 1)]
+
+
+def test_sha256_resolver_mixed_key_types() -> None:
+    with pytest.raises(TypeError, match=r"'<' not supported between instances of"):
+        sha256_resolver({1: 2, "a": 3})
+
+
+def test_sha256_resolver_key_without_json_form() -> None:
+    with pytest.raises(TypeError, match=r"keys must be str, int, float, bool or None"):
+        sha256_resolver({(1, 2): 3})
+
+
+@pytest.mark.parametrize(
+    ("value", "name"),
+    [({1, 2}, "set"), (b"abc", "bytes"), ([object()], "object"), (1j, "complex")],
+)
+def test_sha256_resolver_value_without_json_form(value: Any, name: str) -> None:
+    with pytest.raises(TypeError, match=rf"hya.sha256 cannot hash a value of type {name}"):
+        sha256_resolver(value)
+
+
+def test_sha256_resolver_missing_value() -> None:
+    with pytest.raises(MissingMandatoryValue, match=r"Missing mandatory value"):
+        sha256_resolver(OmegaConf.create(["???"]))
+
+
+def test_encode_value_path() -> None:
+    assert _encode_value(PurePosixPath("/my/path")) == "/my/path"
+
+
+def test_encode_value_concrete_path() -> None:
+    assert _encode_value(Path("my_path")) == "my_path"
+
+
+def test_encode_value_enum() -> None:
+    assert _encode_value(Color.RED) == "Color.RED"
+
+
+@pytest.mark.parametrize(
+    ("value", "name"), [({1}, "set"), (b"a", "bytes"), ("a", "str"), (None, "NoneType")]
+)
+def test_encode_value_other_type(value: Any, name: str) -> None:
+    with pytest.raises(TypeError, match=rf"hya.sha256 cannot hash a value of type {name}"):
+        _encode_value(value)

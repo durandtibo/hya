@@ -267,14 +267,22 @@ class ResolverRegistry:
         r"""Register the resolvers to OmegaConf.
 
         This method publishes the registered resolvers to OmegaConf. It is
-        idempotent: a resolver already published by this registry, and still
-        known by OmegaConf, is not registered again, so calling this method
-        twice changes nothing. A resolver removed from OmegaConf (for example
-        with ``OmegaConf.clear_resolvers()``) is published again. A
-        resolver is not published, and a warning is emitted, if OmegaConf
-        already has a resolver for its key (a resolver published before the
-        registry changed, or registered by another source) and ``replace`` is
-        ``False``.
+        idempotent: calling it twice changes nothing. A resolver removed
+        from OmegaConf (for example with ``OmegaConf.clear_resolvers()``)
+        is published again.
+
+        Without ``replace``, a resolver already published by this registry,
+        and whose key OmegaConf still knows, is not registered again. A key
+        is skipped if OmegaConf already has a resolver for it that this
+        registry did not publish (registered by another source), or if the
+        registry changed since it was published. One warning lists the
+        skipped keys, after the other keys are published, so no key is left
+        out when warnings are errors. A resolver that another source
+        registers over a published key is not detected: it is kept without
+        a warning.
+
+        With ``replace=True``, every key of the registry is published,
+        whatever OmegaConf holds.
 
         The resolvers are published with ``annotation_validation="off"`` when
         OmegaConf validates the annotations (2.4 and later): the annotations of
@@ -283,7 +291,8 @@ class ResolverRegistry:
         Args:
             replace: If ``True``, the resolvers replace the resolvers that
                 OmegaConf already has for the same keys. If ``False``, these
-                keys are skipped with a warning.
+                keys are skipped, with a warning for the ones that this
+                registry did not publish.
 
         Notes:
             OmegaConf caches the resolved value of the nodes of a
@@ -303,16 +312,19 @@ class ResolverRegistry:
 
             ```
         """
+        skipped: list[str] = []
         for key, resolver in self._state.items():
-            has_resolver = OmegaConf.has_resolver(key)
-            if self._published.get(key) is resolver and has_resolver:
-                continue  # published by this registry and still there: nothing to do
-            if has_resolver and not replace:
-                warnings.warn(
-                    f"A resolver is already registered in OmegaConf for '{key}': not replaced. "
-                    "Use register_resolvers(replace=True) to replace it.",
-                    stacklevel=2,
-                )
+            if not replace and OmegaConf.has_resolver(key):
+                if self._published.get(key) is not resolver:
+                    skipped.append(key)
                 continue
             _publish(key, resolver, replace=replace)
             self._published[key] = resolver
+        # The warning is emitted after the loop: as an error, it must not stop the publication
+        if skipped:
+            keys = ", ".join(f"'{key}'" for key in skipped)
+            warnings.warn(
+                f"A resolver is already registered in OmegaConf for {keys}: not replaced. "
+                "Use register_resolvers(replace=True) to replace it.",
+                stacklevel=2,
+            )

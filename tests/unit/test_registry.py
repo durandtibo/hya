@@ -515,6 +515,81 @@ def test_resolver_registry_register_resolvers_replace_is_silent(
     assert len(recwarn) == 0
 
 
+def test_resolver_registry_register_resolvers_replace_publishes_a_published_key() -> None:
+    resolver = Mock()
+    registry = ResolverRegistry({"key": resolver})
+    with patch("hya.registry.OmegaConf") as omegaconf:
+        omegaconf.has_resolver.return_value = False
+        registry.register_resolvers()
+        omegaconf.has_resolver.return_value = True
+        registry.register_resolvers(replace=True)
+    assert omegaconf.register_resolver.call_args_list == [
+        call("key", resolver, replace=False, annotation_validation="off"),
+        call("key", resolver, replace=True, annotation_validation="off"),
+    ]
+
+
+def test_resolver_registry_register_resolvers_replace_publishes_all_keys() -> None:
+    first, second = Mock(), Mock()
+    registry = ResolverRegistry({"first": first, "second": second})
+    with patch("hya.registry.OmegaConf") as omegaconf:
+        omegaconf.has_resolver.side_effect = lambda key: key == "first"
+        registry.register_resolvers(replace=True)
+    assert omegaconf.register_resolver.call_args_list == [
+        call("first", first, replace=True, annotation_validation="off"),
+        call("second", second, replace=True, annotation_validation="off"),
+    ]
+
+
+def test_resolver_registry_register_resolvers_published_key_after_replace_is_silent(
+    recwarn: pytest.WarningsRecorder,
+) -> None:
+    registry = ResolverRegistry({"key": Mock()})
+    with patch("hya.registry.OmegaConf") as omegaconf:
+        omegaconf.has_resolver.return_value = True
+        registry.register_resolvers(replace=True)
+        registry.register_resolvers()
+    assert len(recwarn) == 0
+
+
+def test_resolver_registry_register_resolvers_one_warning_for_the_skipped_keys(
+    recwarn: pytest.WarningsRecorder,
+) -> None:
+    registry = ResolverRegistry({"z.b": Mock(), "z.a": Mock(), "z.c": Mock()})
+    with patch("hya.registry.OmegaConf") as omegaconf:
+        omegaconf.has_resolver.return_value = True
+        registry.register_resolvers()
+    assert [str(warning.message) for warning in recwarn] == [
+        (
+            "A resolver is already registered in OmegaConf for 'z.b', 'z.a', 'z.c': not replaced. "
+            "Use register_resolvers(replace=True) to replace it."
+        )
+    ]
+
+
+def test_resolver_registry_register_resolvers_warning_points_to_the_caller() -> None:
+    registry = ResolverRegistry({"key": Mock()})
+    with patch("hya.registry.OmegaConf") as omegaconf:
+        omegaconf.has_resolver.return_value = True
+        with pytest.warns(UserWarning, match=r"not replaced") as record:
+            registry.register_resolvers()
+    assert record[0].filename == __file__
+
+
+def test_resolver_registry_register_resolvers_publishes_all_keys_before_the_warning() -> None:
+    first, second, third = Mock(), Mock(), Mock()
+    registry = ResolverRegistry({"z.a": first, "z.b": second, "z.c": third})
+    with patch("hya.registry.OmegaConf") as omegaconf:
+        omegaconf.has_resolver.side_effect = lambda key: key == "z.b"
+        # The warnings are errors (see filterwarnings)
+        with pytest.raises(UserWarning, match=r"for 'z.b': not replaced"):
+            registry.register_resolvers()
+    assert omegaconf.register_resolver.call_args_list == [
+        call("z.a", first, replace=False, annotation_validation="off"),
+        call("z.c", third, replace=False, annotation_validation="off"),
+    ]
+
+
 def test_resolver_registry_register_resolvers_replace_is_keyword_only() -> None:
     register_resolvers: Any = ResolverRegistry().register_resolvers
     with pytest.raises(TypeError, match=r"takes 1 positional argument but 2 were given"):

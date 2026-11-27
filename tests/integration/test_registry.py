@@ -142,6 +142,49 @@ def test_register_resolvers_key_of_another_source_is_replaced() -> None:
     assert resolve() == 10
 
 
+def test_register_resolvers_replace_restores_a_key_replaced_by_another_source() -> None:
+    registry = ResolverRegistry({KEY: double})
+    registry.register_resolvers()
+    ResolverRegistry({KEY: triple}).register_resolvers(replace=True)
+    registry.register_resolvers(replace=True)
+    assert resolve() == 10
+
+
+def test_register_resolvers_keeps_a_key_replaced_by_another_source_silently(
+    recwarn: pytest.WarningsRecorder,
+) -> None:
+    registry = ResolverRegistry({KEY: double})
+    registry.register_resolvers()
+    ResolverRegistry({KEY: triple}).register_resolvers(replace=True)
+    registry.register_resolvers()
+    assert (resolve(), len(recwarn)) == (15, 0)
+
+
+def test_register_resolvers_replace_twice_with_the_same_resolver() -> None:
+    registry = ResolverRegistry({KEY: double})
+    registry.register_resolvers(replace=True)
+    registry.register_resolvers(replace=True)
+    assert resolve() == 10
+
+
+def test_register_resolvers_publishes_the_other_keys_when_warnings_are_errors() -> None:
+    code = """
+from omegaconf import OmegaConf
+from hya import ResolverRegistry
+
+ResolverRegistry({"z.b": len}).register_resolvers()
+try:
+    ResolverRegistry({"z.a": len, "z.b": max, "z.c": len}).register_resolvers()
+except UserWarning as warning:
+    assert "for 'z.b': not replaced" in str(warning), warning
+else:
+    raise AssertionError("no warning")
+assert OmegaConf.has_resolver("z.a") and OmegaConf.has_resolver("z.c")
+"""
+    result = run_python(code)
+    assert result.returncode == 0, result.stderr
+
+
 def test_register_resolvers_publishes_again_after_clear_resolver() -> None:
     registry = ResolverRegistry({KEY: double})
     registry.register_resolvers()
@@ -247,6 +290,25 @@ assert len(caught) == 1 and "not replaced" in str(caught[0].message), caught
 assert OmegaConf.create({"k": "${hya.add:1,2}"}).k == 3
 registry.register_resolvers(replace=True)
 assert OmegaConf.create({"k": "${hya.add:1,2}"}).k == "custom"
+"""
+    result = run_python(code)
+    assert result.returncode == 0, result.stderr
+
+
+def test_second_import_of_hya_emits_one_warning() -> None:
+    code = """
+import sys
+import warnings
+
+import hya
+
+for name in [name for name in sys.modules if name == "hya" or name.startswith("hya.")]:
+    del sys.modules[name]
+with warnings.catch_warnings(record=True) as caught:
+    warnings.simplefilter("always")
+    import hya
+assert len(caught) == 1, caught
+assert "'hya.add'" in str(caught[0].message) and "'hya.torch.tensor'" in str(caught[0].message)
 """
     result = run_python(code)
     assert result.returncode == 0, result.stderr

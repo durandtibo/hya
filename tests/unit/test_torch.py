@@ -6,7 +6,11 @@ from unittest.mock import call, patch
 
 import pytest
 from omegaconf import OmegaConf
-from omegaconf.errors import InterpolationResolutionError, MissingMandatoryValue
+from omegaconf.errors import (
+    InterpolationResolutionError,
+    MissingMandatoryValue,
+    OmegaConfBaseException,
+)
 
 from hya.imports import is_torch_available
 from hya.testing import torch_available
@@ -275,7 +279,7 @@ def test_to_tensor_resolver_dtype_none_keeps_the_dtype_of_a_tensor() -> None:
 @torch_available
 @pytest.mark.parametrize("name", ["", "ones", "bool32", "torch.float32"])
 def test_to_tensor_resolver_unknown_dtype_name(name: str) -> None:
-    with pytest.raises(InterpolationResolutionError, match=rf"Incorrect dtype {re.escape(name)}\."):
+    with pytest.raises(ValueError, match=rf"Incorrect dtype {re.escape(name)}\."):
         to_tensor_resolver([1, 2], name)
 
 
@@ -294,3 +298,31 @@ def test_to_tensor_resolver_dtype_name_missing_package(dtype: str | None) -> Non
         pytest.raises(RuntimeError, match=r"missing package"),
     ):
         to_tensor_resolver([1, 2], dtype)
+
+
+@torch_available
+@pytest.mark.parametrize("name", ["", "ones", "bool32", "torch.float32", "__name__"])
+def test_torch_dtype_resolver_direct_call_unknown_name(name: str) -> None:
+    with pytest.raises(ValueError, match=rf"Incorrect dtype {re.escape(name)}\."):
+        torch_dtype_resolver(name)
+
+
+@torch_available
+def test_torch_dtype_resolver_direct_call_unknown_name_lists_the_sorted_names() -> None:
+    with pytest.raises(
+        ValueError,
+        match=re.escape(f"The available dtypes are {sorted(_dtype_names())}"),
+    ):
+        torch_dtype_resolver("ones")
+
+
+@torch_available
+def test_torch_dtype_resolver_returns_the_dtype_of_torch() -> None:
+    assert torch_dtype_resolver("int64") is torch.int64
+
+
+@torch_available
+def test_torch_dtype_resolver_direct_call_error_is_not_an_omegaconf_error() -> None:
+    with pytest.raises(ValueError, match=r"Incorrect dtype ones\.") as exc_info:
+        torch_dtype_resolver("ones")
+    assert not isinstance(exc_info.value, OmegaConfBaseException)

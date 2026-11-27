@@ -90,8 +90,10 @@ to replace silently:
 
 ## Errors are the ones of OmegaConf
 
-A resolver that fails raises an `InterpolationResolutionError`. `hya` does not wrap the error in an
-exception of its own.
+A resolver raises standard exceptions only, and OmegaConf reports a failure as an
+`InterpolationResolutionError`. `hya` does not wrap the error in an exception of its own, and no
+resolver raises an OmegaConf error of its own accord: a direct Python call of
+`torch_dtype_resolver` raises a plain `ValueError`.
 
 - **Benefit:** there is no extra layer between you and the real error. The message names the
   original exception, which is in the `__context__` chain of the error (`__cause__` is `None`).

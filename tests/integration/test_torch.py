@@ -127,3 +127,16 @@ def test_tensor_resolver_unknown_dtype_name() -> None:
     conf = OmegaConf.create({"key": "${hya.torch.tensor:[1,2],bool32}"})
     with pytest.raises(InterpolationResolutionError, match=r"Incorrect dtype bool32\."):
         _ = conf.key
+
+
+@torch_available
+@pytest.mark.parametrize(
+    "expression", ["${hya.torch.dtype:bool32}", "${hya.torch.tensor:[1,2],bool32}"]
+)
+def test_dtype_resolver_error_names_the_value_error(expression: str) -> None:
+    conf = OmegaConf.create({"key": expression})
+    with pytest.raises(
+        InterpolationResolutionError,
+        match=r"ValueError raised while resolving interpolation: Incorrect dtype bool32\.",
+    ):
+        _ = conf.key

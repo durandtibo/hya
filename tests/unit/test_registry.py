@@ -6,7 +6,7 @@ from unittest.mock import Mock, NonCallableMock, call, patch
 
 import pytest
 
-from hya.registry import ResolverRegistry, _publish
+from hya.registry import _KEY, ResolverRegistry, _publish
 
 if TYPE_CHECKING:
     from collections.abc import Callable, Generator
@@ -125,6 +125,107 @@ def test_resolver_registry_register_does_not_modify_state_on_duplicate() -> None
     assert registry.state == {"key": resolver}
 
 
+VALID_KEYS = ["a", "_", "_a", "A1", "a_b", "a.b", "a.b_2.c", "_a._b", "oc.env", "hya.np.array"]
+INVALID_KEYS = [
+    "",
+    " ",
+    "a b",
+    " a",
+    "a ",
+    "a\n",
+    "1a",
+    "a.1",
+    ".a",
+    "a.",
+    "a..b",
+    "a-b",
+    "a:b",
+    "a,b",
+    "a/b",
+    "${a}",
+    "\u00e9",
+    "a\u00e9",
+]
+
+
+@pytest.mark.parametrize("key", VALID_KEYS)
+def test_resolver_registry_register_valid_key(key: str) -> None:
+    registry = ResolverRegistry()
+    registry.register(key)(add_two)
+    assert registry.state == {key: add_two}
+
+
+@pytest.mark.parametrize("key", INVALID_KEYS)
+def test_resolver_registry_register_invalid_key(key: str) -> None:
+    registry = ResolverRegistry()
+    with pytest.raises(ValueError, match=r"Invalid resolver key"):
+        registry.register(key)
+    assert registry.state == {}
+
+
+def test_resolver_registry_register_invalid_key_with_exist_ok() -> None:
+    with pytest.raises(ValueError, match=r"Invalid resolver key 'a-b'"):
+        ResolverRegistry().register("a-b", exist_ok=True)
+
+
+@pytest.mark.parametrize(("key", "name"), [(1, "int"), (None, "NoneType"), (b"a", "bytes")])
+def test_resolver_registry_register_key_not_a_string(key: Any, name: str) -> None:
+    with pytest.raises(TypeError, match=rf"The key must be a string, but received {name}"):
+        ResolverRegistry().register(key)
+
+
+def test_resolver_registry_register_without_a_key() -> None:
+    registry = ResolverRegistry()
+    register: Any = registry.register
+    with pytest.raises(TypeError, match=r"Use the decorator as @registry.register\('my_key'\)"):
+        register(add_two)
+    assert registry.state == {}
+
+
+def test_resolver_registry_init_with_a_non_callable_value() -> None:
+    state: Any = {"key": 1}
+    with pytest.raises(TypeError, match=r"Resolver must be callable, but received int"):
+        ResolverRegistry(state)
+
+
+@pytest.mark.parametrize("key", ["a-b", ""])
+def test_resolver_registry_init_with_an_invalid_key(key: str) -> None:
+    with pytest.raises(ValueError, match=r"Invalid resolver key"):
+        ResolverRegistry({key: add_two})
+
+
+def test_resolver_registry_init_with_a_key_that_is_not_a_string() -> None:
+    state: Any = {1: add_two}
+    with pytest.raises(TypeError, match=r"The key must be a string, but received int"):
+        ResolverRegistry(state)
+
+
+def test_resolver_registry_init_does_not_modify_the_state_on_error() -> None:
+    state: Any = {"add2": add_two, "key": 1}
+    with pytest.raises(TypeError, match=r"Resolver must be callable"):
+        ResolverRegistry(state)
+    assert state == {"add2": add_two, "key": 1}
+
+
+def test_resolver_registry_init_keeps_the_order_of_the_state() -> None:
+    assert list(ResolverRegistry({"b": add_two, "a": add_two}).state) == ["b", "a"]
+
+
+##########################
+#     Tests for _KEY     #
+##########################
+
+
+@pytest.mark.parametrize("key", VALID_KEYS)
+def test_key_pattern_match(key: str) -> None:
+    assert _KEY.fullmatch(key)
+
+
+@pytest.mark.parametrize("key", INVALID_KEYS)
+def test_key_pattern_no_match(key: str) -> None:
+    assert not _KEY.fullmatch(key)
+
+
 ####################################################
 #     Tests for ResolverRegistry.register_lazy     #
 ####################################################
@@ -220,7 +321,22 @@ def test_resolver_registry_register_lazy_function_not_found() -> None:
         registry.state["key"]()
 
 
-@pytest.mark.parametrize("target", ["", "module", "module:", ":function", ":"])
+@pytest.mark.parametrize(
+    "target",
+    [
+        "",
+        "module",
+        "module:",
+        ":function",
+        ":",
+        "a:b:c",
+        "module::function",
+        "module:a.b",
+        "module:1f",
+        "module:f g",
+        "module:function ",
+    ],
+)
 def test_resolver_registry_register_lazy_invalid_target(target: str) -> None:
     registry = ResolverRegistry()
     with pytest.raises(ValueError, match=r"The target must be formatted as 'module:function'"):
@@ -232,6 +348,19 @@ def test_resolver_registry_register_lazy_invalid_target_does_not_register() -> N
     with pytest.raises(ValueError, match=r"must be formatted as"):
         registry.register_lazy("key", "module")
     assert registry.state == {}
+
+
+def test_resolver_registry_register_lazy_invalid_key() -> None:
+    registry = ResolverRegistry()
+    with pytest.raises(ValueError, match=r"Invalid resolver key 'a-b'"):
+        registry.register_lazy("a-b", "package.module:function")
+    assert registry.state == {}
+
+
+def test_resolver_registry_register_lazy_key_not_a_string() -> None:
+    key: Any = 1
+    with pytest.raises(TypeError, match=r"The key must be a string, but received int"):
+        ResolverRegistry().register_lazy(key, "package.module:function")
 
 
 def test_resolver_registry_register_lazy_duplicate_exist_ok_false() -> None:

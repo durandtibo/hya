@@ -1,6 +1,6 @@
 # Reusable workflow for testing code with specific dependency versions.
 # Used by ci-test-deps.yaml to test compatibility with different versions of dependencies.
-# Runs unit tests with each specified version of a package.
+# Runs unit and integration tests with each specified version of a package.
 
 name: Test Code with Dependency Version
 on:
@@ -52,3 +52,8 @@ jobs:
       - name: Run unit tests
         run: |
           inv test.unit
+
+      # The integration tests exercise the real packages, without patching
+      - name: Run integration tests
+        run: |
+          inv test.integration

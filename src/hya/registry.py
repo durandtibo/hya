@@ -4,6 +4,7 @@ from __future__ import annotations
 
 __all__ = ["ResolverRegistry"]
 
+import re
 import warnings
 from collections.abc import Callable, Mapping
 from importlib import import_module
@@ -18,6 +19,10 @@ F = TypeVar("F", bound=Callable[..., Any])
 # OmegaConf 2.4 renamed ``register_new_resolver`` to ``register_resolver`` and validates the
 # annotations of the resolvers at call time. OmegaConf 2.2 and 2.3 do not validate them.
 _HAS_ANNOTATION_VALIDATION: bool = tuple(map(int, omegaconf.__version__.split(".")[:2])) >= (2, 4)
+
+# A key that every supported OmegaConf can interpolate: ASCII identifiers joined by dots.
+# OmegaConf 2.3 and later also interpolate "-", which OmegaConf 2.2 does not.
+_KEY: re.Pattern[str] = re.compile(r"[A-Za-z_]\w*(\.[A-Za-z_]\w*)*", re.ASCII)
 
 
 def _publish(key: str, resolver: Callable[..., Any], *, replace: bool) -> None:
@@ -55,6 +60,13 @@ class ResolverRegistry:
     Args:
         state: Optional initial state mapping containing key-resolver pairs.
             If provided, a copy is made to prevent external modifications.
+            Each pair is added with ``register``, so it is validated.
+
+    Raises:
+        TypeError: If a key of ``state`` is not a string, or a value is
+            not callable.
+        ValueError: If a key of ``state`` is not made of names joined
+            by dots (see ``register``).
 
     Example:
         ```pycon
@@ -69,9 +81,11 @@ class ResolverRegistry:
     """
 
     def __init__(self, state: Mapping[str, Callable[..., Any]] | None = None) -> None:
-        self._state: dict[str, Callable[..., Any]] = dict(state) if state else {}
+        self._state: dict[str, Callable[..., Any]] = {}
         # The resolvers published to OmegaConf by this registry
         self._published: dict[str, Callable[..., Any]] = {}
+        for key, resolver in (state or {}).items():
+            self.register(key)(resolver)
 
     @property
     def state(self) -> Mapping[str, Callable[..., Any]]:
@@ -128,8 +142,11 @@ class ResolverRegistry:
         This method returns a decorator that can be used to register resolver functions.
 
         Args:
-            key: The key used to register the resolver. Must be unique unless
-                exist_ok is True.
+            key: The key used to register the resolver: names made of ASCII
+                letters, digits and ``_`` that do not start with a digit,
+                joined by dots (for example ``"my.resolver_2"``). Every
+                supported OmegaConf can interpolate such a key. Must be unique
+                unless exist_ok is True.
             exist_ok: If False, a RuntimeError is raised if you try to register
                 a new resolver with an existing key. If True, the existing
                 resolver will be overridden.
@@ -138,7 +155,10 @@ class ResolverRegistry:
             A decorator function that registers the resolver and returns it unchanged.
 
         Raises:
-            TypeError: If the resolver is not callable.
+            TypeError: If the key is not a string (for example
+                ``@registry.register`` used without a key), or if the
+                resolver is not callable.
+            ValueError: If the key is not made of names joined by dots.
             RuntimeError: If the key already exists and exist_ok is False.
 
         Example:
@@ -154,6 +174,18 @@ class ResolverRegistry:
 
             ```
         """
+        if not isinstance(key, str):
+            msg = (
+                f"The key must be a string, but received {type(key).__name__}. "
+                "Use the decorator as @registry.register('my_key')."
+            )
+            raise TypeError(msg)
+        if not _KEY.fullmatch(key):
+            msg = (
+                f"Invalid resolver key '{key}': use names made of letters, digits and _, "
+                "that do not start with a digit, joined by dots"
+            )
+            raise ValueError(msg)
 
         def wrap(resolver: F) -> F:
             if not callable(resolver):
@@ -184,18 +216,28 @@ class ResolverRegistry:
         the registry say what it is.
 
         Args:
-            key: The key used to register the resolver. Must be unique unless
-                ``exist_ok`` is ``True``.
+            key: The key used to register the resolver, as for ``register``.
+                Must be unique unless ``exist_ok`` is ``True``.
             target: The resolver to import, as ``"module:function"``, for
-                example ``"hya.numpy:to_array_resolver"``.
+                example ``"hya.numpy:to_array_resolver"``. The function
+                is the name of an attribute of the module.
             exist_ok: If ``False``, a ``RuntimeError`` is raised if you try to
                 register a new resolver with an existing key. If ``True``,
                 the existing resolver will be overridden.
 
         Raises:
-            ValueError: If ``target`` is not formatted as ``"module:function"``.
+            TypeError: If the key is not a string.
+            ValueError: If ``target`` is not formatted as
+                ``"module:function"``, or if the key is not made of names
+                joined by dots.
             RuntimeError: If the key already exists and ``exist_ok`` is
                 ``False``.
+
+        Note:
+            A resolver registered lazily cannot receive the special
+            parameters of OmegaConf (``_root_``, ``_parent_`` or
+            ``_node_``): OmegaConf reads them from the signature, which
+            is not known before the import.
 
         Example:
             ```pycon
@@ -208,7 +250,7 @@ class ResolverRegistry:
             ```
         """
         module_name, _, function_name = target.partition(":")
-        if not module_name or not function_name:
+        if not module_name or not function_name.isidentifier():
             msg = f"The target must be formatted as 'module:function', but received '{target}'"
             raise ValueError(msg)
 

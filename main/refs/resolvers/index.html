@@ -12,6 +12,8 @@
         <link rel="prev" href="../registry/">
       
       
+        <link rel="next" href="../utilities/">
+      
       
         
       
@@ -979,6 +981,34 @@
 
               
             
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../utilities/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Utilities
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
           </ul>
         </nav>
       
@@ -1557,7 +1587,9 @@ them is a float (<code>11.0, 4</code> gives <code>3.0</code>).</p>
         <p>Convert all items in an iterable to strings and join them.</p>
 <p>This resolver takes an iterable (e.g., list, tuple) and concatenates
 all elements into a single string, separated by the specified separator.
-Each element is converted to a string using str().</p>
+The configuration nodes of the iterable are resolved first, at any
+depth. Each element is then converted to a string using str(), so a
+nested list is written as a Python list.</p>
 
 
 <p><span class="doc-section-title">Parameters:</span></p>
@@ -1633,6 +1665,30 @@ Can be any string including empty string, space, comma, etc.</p>
     </table>
 
 
+<p><span class="doc-section-title">Raises:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code>MissingMandatoryValue</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>If a node contains a
+missing value (<code>???</code>).</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
 <details class="example" open>
   <summary>Example</summary>
   <div class="highlight"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">hya</span>
@@ -1643,6 +1699,12 @@ Can be any string including empty string, space, comma, etc.</p>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">conf</span> <span class="o">=</span> <span class="n">OmegaConf</span><span class="o">.</span><span class="n">create</span><span class="p">({</span><span class="s2">"path"</span><span class="p">:</span> <span class="s2">"${hya.iter_join:[data,models,v1],/}"</span><span class="p">})</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">conf</span><span class="o">.</span><span class="n">path</span>
 <span class="go">data/models/v1</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># The interpolations of nested values are resolved</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">conf</span> <span class="o">=</span> <span class="n">OmegaConf</span><span class="o">.</span><span class="n">create</span><span class="p">(</span>
+<span class="gp">... </span>    <span class="p">{</span><span class="s2">"a"</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="s2">"x"</span><span class="p">:</span> <span class="p">[[</span><span class="s2">"$</span><span class="si">{a}</span><span class="s2">"</span><span class="p">],</span> <span class="mi">2</span><span class="p">],</span> <span class="s2">"key"</span><span class="p">:</span> <span class="s2">"${hya.iter_join:$</span><span class="si">{x}</span><span class="s2">,-}"</span><span class="p">}</span>
+<span class="gp">... </span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">conf</span><span class="o">.</span><span class="n">key</span>
+<span class="go">[1]-2</span>
 </code></pre></div>
 </details>
 
@@ -1776,8 +1838,10 @@ object: it expands the user home directory (<code>~</code>) and resolves the
 path to an absolute path. A string that starts with <code>file:</code> (the
 scheme is case-insensitive) is read as a file URL: the path of the URL
 is used, with its percent-encoding (for example <code>%20</code> for a space)
-decoded. Any other string is a plain path, written as is: <code>?</code> and
-<code>%</code> are not interpreted.</p>
+decoded. In a URL, <code>?</code> and <code>#</code> start a query and a fragment, so a
+file name that contains them is written <code>%3F</code> and <code>%23</code>. Any
+other string is a plain path, written as is: <code>?</code>, <code>#</code> and <code>%</code>
+are not interpreted.</p>
 
 
 <p><span class="doc-section-title">Parameters:</span></p>
@@ -1861,8 +1925,9 @@ decoded. Any other string is a plain path, written as is: <code>?</code> and
             <td>
               <div class="doc-md-description">
                 <p>If a <code>file:</code> URL has a host other than <code>localhost</code>
-(for example <code>file://host/a</code>): the host would be dropped
-silently.</p>
+(for example <code>file://host/a</code>), a query or a fragment (any
+<code>?</code> or <code>#</code>, for example <code>file:///data/run#1</code>): they
+would be dropped silently.</p>
               </div>
             </td>
           </tr>
@@ -1967,10 +2032,17 @@ interpolation is a grammar error.</p>
 
     <div class="doc doc-contents ">
 
-        <p>Compute the SHA-256 hash of an input object.</p>
-<p>This resolver converts the object to a string representation and
-computes its SHA-256 hash. Useful for generating consistent identifiers
-or cache keys from configuration values.</p>
+        <p>Compute the SHA-256 hash of the whole content of an object.</p>
+<p>The configuration nodes of the object are resolved first, at any
+depth. A string is then hashed as is, so the result is the SHA-256
+of the text, the same as other tools give. Any other value is
+hashed from its canonical JSON form: sorted keys and no space
+(<code>[1,2]</code>, <code>{"a":1,"b":2}</code>, <code>true</code>, <code>null</code>). In this form, a
+path or an enum is written as its string. Useful for generating
+consistent identifiers or cache keys from configuration values.</p>
+<p>The hash does not keep the type of a value: the string <code>[1]</code> and
+the list <code>[1]</code> have the same hash, and so do an integer key and
+the same string key.</p>
 
 
 <p><span class="doc-section-title">Parameters:</span></p>
@@ -1993,8 +2065,10 @@ or cache keys from configuration values.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>The object to compute the SHA-256 hash. The object will
-be converted to a string using str() before hashing.</p>
+                <p>The object to compute the SHA-256 hash: a string, or a
+value with a JSON form (numbers, booleans, <code>None</code>, lists,
+tuples, dictionaries, <code>ListConfig</code>, <code>DictConfig</code>,
+paths and enums).</p>
               </div>
             </td>
             <td>
@@ -2028,6 +2102,43 @@ be converted to a string using str() before hashing.</p>
     </table>
 
 
+<p><span class="doc-section-title">Raises:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="TypeError">TypeError</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>If a value has no JSON form (for example an array, a
+tensor, a data type, a set or bytes), if a key of a mapping
+is not a string, a number, a boolean or <code>None</code>, or if a
+mapping mixes key types that cannot be sorted.</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                  <code>MissingMandatoryValue</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>If a node contains a
+missing value (<code>???</code>).</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
 <details class="example" open>
   <summary>Example</summary>
   <div class="highlight"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">hya</span>
@@ -2037,6 +2148,17 @@ be converted to a string using str() before hashing.</p>
 <span class="go">bd3ff47540b31e62d4ca6b07794e5a886b0f655fc322730f26ecd65cc7dd5c90</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="c1"># Useful for generating consistent IDs</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">conf</span> <span class="o">=</span> <span class="n">OmegaConf</span><span class="o">.</span><span class="n">create</span><span class="p">({</span><span class="s2">"id"</span><span class="p">:</span> <span class="s2">"${hya.sha256:experiment_v1}"</span><span class="p">})</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># The order of the keys does not change the hash</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">conf</span> <span class="o">=</span> <span class="n">OmegaConf</span><span class="o">.</span><span class="n">create</span><span class="p">(</span>
+<span class="gp">... </span>    <span class="p">{</span>
+<span class="gp">... </span>        <span class="s2">"x"</span><span class="p">:</span> <span class="p">{</span><span class="s2">"a"</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="s2">"b"</span><span class="p">:</span> <span class="mi">2</span><span class="p">},</span>
+<span class="gp">... </span>        <span class="s2">"y"</span><span class="p">:</span> <span class="p">{</span><span class="s2">"b"</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span> <span class="s2">"a"</span><span class="p">:</span> <span class="mi">1</span><span class="p">},</span>
+<span class="gp">... </span>        <span class="s2">"hx"</span><span class="p">:</span> <span class="s2">"${hya.sha256:$</span><span class="si">{x}</span><span class="s2">}"</span><span class="p">,</span>
+<span class="gp">... </span>        <span class="s2">"hy"</span><span class="p">:</span> <span class="s2">"${hya.sha256:$</span><span class="si">{y}</span><span class="s2">}"</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="p">}</span>
+<span class="gp">... </span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">conf</span><span class="o">.</span><span class="n">hx</span> <span class="o">==</span> <span class="n">conf</span><span class="o">.</span><span class="n">hy</span>
+<span class="go">True</span>
 </code></pre></div>
 </details>
 
@@ -2460,7 +2582,7 @@ configuration files.</p>
 
 <a href="#hya.torch.to_tensor_resolver" class="headerlink" title="Permanent link">&para;</a></h3>
 <div class="doc-signature highlight"><pre><span></span><code><span class="nf">to_tensor_resolver</span><span class="p">(</span>
-    <span class="n">data</span><span class="p">:</span> <span class="n"><span title="typing.Any">Any</span></span><span class="p">,</span> <span class="n">dtype</span><span class="p">:</span> <span class="n"><span title="hya.utils.fallback.torch.torch.dtype">dtype</span></span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">data</span><span class="p">:</span> <span class="n"><span title="typing.Any">Any</span></span><span class="p">,</span> <span class="n">dtype</span><span class="p">:</span> <span class="n"><span title="hya.utils.fallback.torch.torch.dtype">dtype</span></span> <span class="o">|</span> <span class="n"><span title="str">str</span></span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n"><span title="hya.utils.fallback.torch.torch.Tensor">Tensor</span></span>
 </code></pre></div>
 
@@ -2490,8 +2612,10 @@ configuration files.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>Specifies the data to transform in <code>torch.Tensor</code>.
-This value should be compatible with <code>torch.tensor</code></p>
+                <p>Specifies the data to transform in <code>torch.Tensor</code>: a
+tensor, or a value compatible with <code>torch.tensor</code>. The
+configuration nodes of a value are resolved first, at any
+depth.</p>
               </div>
             </td>
             <td>
@@ -2503,13 +2627,15 @@ This value should be compatible with <code>torch.tensor</code></p>
                 <code>dtype</code>
             </td>
             <td>
-                  <code><span title="hya.utils.fallback.torch.torch.dtype">dtype</span> | None</code>
+                  <code><span title="hya.utils.fallback.torch.torch.dtype">dtype</span> | <span title="str">str</span> | None</code>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>The data type of the tensor, for example the output of
-the <code>hya.torch.dtype</code> resolver. <code>None</code> lets PyTorch
-infer the data type from the data.</p>
+                <p>The data type of the tensor: a <code>torch.dtype</code> (for
+example the output of the <code>hya.torch.dtype</code> resolver) or
+its name (for example <code>"float32"</code>). <code>None</code> keeps the
+data type of a tensor, and lets PyTorch infer the data type
+of any other value.</p>
               </div>
             </td>
             <td>
@@ -2535,7 +2661,62 @@ infer the data type from the data.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>The input in a <code>torch.Tensor</code> object.</p>
+                <p>The input in a <code>torch.Tensor</code> object. It is a copy: it does</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="hya.utils.fallback.torch.torch.Tensor">Tensor</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>not share memory with a tensor given as input, and it does not</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="hya.utils.fallback.torch.torch.Tensor">Tensor</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>require a gradient.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<p><span class="doc-section-title">Raises:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="ValueError">ValueError</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>If <code>dtype</code> is a string that is not the name of a
+torch dtype.</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                  <code>MissingMandatoryValue</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>If a node contains a
+missing value (<code>???</code>).</p>
               </div>
             </td>
           </tr>
@@ -2553,6 +2734,14 @@ infer the data type from the data.</p>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">conf</span> <span class="o">=</span> <span class="n">OmegaConf</span><span class="o">.</span><span class="n">create</span><span class="p">({</span><span class="s2">"key"</span><span class="p">:</span> <span class="s2">"${hya.torch.tensor:[1,2,3],${hya.torch.dtype:float32}}"</span><span class="p">})</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">conf</span><span class="o">.</span><span class="n">key</span>
 <span class="go">tensor([1., 2., 3.])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># The data type can be given by its name</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">conf</span> <span class="o">=</span> <span class="n">OmegaConf</span><span class="o">.</span><span class="n">create</span><span class="p">({</span><span class="s2">"key"</span><span class="p">:</span> <span class="s2">"${hya.torch.tensor:[1,2],float32}"</span><span class="p">})</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">conf</span><span class="o">.</span><span class="n">key</span>
+<span class="go">tensor([1., 2.])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># A tensor is copied</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">conf</span> <span class="o">=</span> <span class="n">OmegaConf</span><span class="o">.</span><span class="n">create</span><span class="p">({</span><span class="s2">"key"</span><span class="p">:</span> <span class="s2">"${hya.torch.tensor:${hya.torch.tensor:[1,2]}}"</span><span class="p">})</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">conf</span><span class="o">.</span><span class="n">key</span>
+<span class="go">tensor([1, 2])</span>
 </code></pre></div>
 </details>
 
@@ -2648,13 +2837,14 @@ should match the attribute name in torch (e.g., use
       <tbody>
           <tr class="doc-section-item">
             <td>
-                  <code><span title="omegaconf.errors.InterpolationResolutionError">InterpolationResolutionError</span></code>
+                  <code><span title="ValueError">ValueError</span></code>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>If the target string doesn't
-correspond to a valid torch dtype. The message lists the
-available dtype names, sorted.</p>
+                <p>If the target string doesn't correspond to a valid
+torch dtype. The message lists the available dtype names,
+sorted. Through an interpolation, OmegaConf reports it as an
+<code>InterpolationResolutionError</code>.</p>
               </div>
             </td>
           </tr>

@@ -852,6 +852,34 @@
 
               
             
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="refs/utilities/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Utilities
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
           </ul>
         </nav>
       
@@ -1109,6 +1137,7 @@ resolvers for mathematical operations, path manipulation, data type conversions,
 <h2 id="registering-custom-resolvers">Registering Custom Resolvers<a class="headerlink" href="#registering-custom-resolvers" title="Permanent link">&para;</a></h2>
 <p>You can extend <code>hya</code> with your own custom resolvers:</p>
 <div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">hya</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_default_registry</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">omegaconf</span><span class="w"> </span><span class="kn">import</span> <span class="n">OmegaConf</span>
 
 <span class="n">registry</span> <span class="o">=</span> <span class="n">get_default_registry</span><span class="p">()</span>
 

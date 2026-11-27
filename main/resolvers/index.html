@@ -1142,6 +1142,34 @@
 
               
             
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../refs/utilities/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Utilities
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
           </ul>
         </nav>
       
@@ -1844,8 +1872,10 @@ user expansion.</p>
 <span class="n">path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">fspath</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
 <span class="n">url</span> <span class="o">=</span> <span class="n">urlparse</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
 <span class="k">if</span> <span class="n">url</span><span class="o">.</span><span class="n">scheme</span> <span class="o">==</span> <span class="s2">"file"</span><span class="p">:</span>
-    <span class="k">if</span> <span class="n">url</span><span class="o">.</span><span class="n">netloc</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">""</span><span class="p">,</span> <span class="s2">"localhost"</span><span class="p">):</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"A file URL with a host is not supported: '</span><span class="si">{</span><span class="n">path</span><span class="si">}</span><span class="s2">'"</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">url</span><span class="o">.</span><span class="n">netloc</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">""</span><span class="p">,</span> <span class="s2">"localhost"</span><span class="p">)</span> <span class="ow">or</span> <span class="s2">"?"</span> <span class="ow">in</span> <span class="n">path</span> <span class="ow">or</span> <span class="s2">"#"</span> <span class="ow">in</span> <span class="n">path</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">"A file URL with a host, a query or a fragment is not supported: '</span><span class="si">{</span><span class="n">path</span><span class="si">}</span><span class="s2">'"</span>
+        <span class="p">)</span>
     <span class="n">path</span> <span class="o">=</span> <span class="n">unquote</span><span class="p">(</span><span class="n">url</span><span class="o">.</span><span class="n">path</span><span class="p">)</span>
 <span class="n">value</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">path</span><span class="p">)</span><span class="o">.</span><span class="n">expanduser</span><span class="p">()</span><span class="o">.</span><span class="n">resolve</span><span class="p">()</span>
 </code></pre></div>
@@ -1853,10 +1883,12 @@ user expansion.</p>
 <ul>
 <li>Returns a <code>pathlib.Path</code> object, which is useful for path operations in Python.</li>
 <li>Only a string that starts with <code>file:</code> (the scheme is case-insensitive) is read as a URL (its
-  percent-encoding is decoded and its query is dropped). A host other than <code>localhost</code>
-  (<code>file://host/a</code>) raises a <code>ValueError</code>: the host is never dropped silently.</li>
-<li>Any other string is a plain path, written as is: <code>/data/a?b</code> and <code>/data/a%20b</code> keep the <code>?</code> and
-  the <code>%20</code>.</li>
+  percent-encoding is decoded). A host other than <code>localhost</code> (<code>file://host/a</code>), a query or a
+  fragment (<code>file:///data/run#1</code>) raises a <code>ValueError</code>: no part of a URL is dropped silently.</li>
+<li>In a <code>file:</code> URL, write a <code>?</code> of a file name as <code>%3F</code> and a <code>#</code> as <code>%23</code>, or give the path
+  without <code>file:</code>.</li>
+<li>Any other string is a plain path, written as is: <code>/data/a?b</code>, <code>/data/run#1</code> and <code>/data/a%20b</code>
+  keep the <code>?</code>, the <code>#</code> and the <code>%20</code>.</li>
 <li>A <code>pathlib.Path</code> is accepted, so the output of <code>hya.path</code> can be passed to <code>hya.path</code> again.</li>
 <li>A path with a tilde must be quoted in an interpolation: <code>${hya.path:"~/data"}</code>. Unquoted, it is a
   grammar error.</li>
@@ -1884,13 +1916,21 @@ user expansion.</p>
 <span class="w">  </span><span class="c1"># Result: "resnet_cifar10"</span>
 </code></pre></div>
 <p><strong>Equivalent Python:</strong></p>
-<div class="highlight"><pre><span></span><code><span class="n">value</span> <span class="o">=</span> <span class="n">separator</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">iterable</span><span class="p">))</span>
+<div class="highlight"><pre><span></span><code><span class="c1"># iterable is the resolved content of the argument, without configuration nodes</span>
+<span class="n">value</span> <span class="o">=</span> <span class="n">separator</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">iterable</span><span class="p">))</span>
 </code></pre></div>
+<p><strong>Notes:</strong></p>
+<ul>
+<li>The interpolations of the iterable are resolved at any depth, and a missing value (<code>???</code>) is an
+  error.</li>
+<li>Each element is converted with <code>str</code>: with <code>x: [["${a}"], 2]</code> and <code>a: 1</code>,
+  <code>${hya.iter_join:${x},-}</code> is <code>[1]-2</code>.</li>
+</ul>
 <p><strong>Use Case:</strong> Dynamically constructing file paths, experiment names, or configuration strings.</p>
 <h3 id="utility-functions">Utility Functions<a class="headerlink" href="#utility-functions" title="Permanent link">&para;</a></h3>
 <h4 id="hyasha256"><code>hya.sha256</code><a class="headerlink" href="#hyasha256" title="Permanent link">&para;</a></h4>
-<p>Computes the SHA-256 hash of an object.</p>
-<p><strong>Syntax:</strong> <code>${hya.sha256:object}</code></p>
+<p>Computes the SHA-256 hash of the whole content of a value.</p>
+<p><strong>Syntax:</strong> <code>${hya.sha256:value}</code></p>
 <p><strong>Example:</strong></p>
 <div class="highlight"><pre><span></span><code><span class="nt">hash</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">${hya.sha256:mystring}</span>
 <span class="c1"># Result: "bd3ff47540b31e62d4ca6b07794e5a886b0f655fc322730f26ecd65cc7dd5c90"</span>
@@ -1899,12 +1939,43 @@ user expansion.</p>
 <span class="w">  </span><span class="nt">config</span><span class="p">:</span><span class="w"> </span><span class="s">"resnet50_adam_0.001"</span>
 <span class="w">  </span><span class="nt">version_id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">${hya.sha256:${experiment.config}}</span>
 <span class="w">  </span><span class="c1"># Generates consistent hash for versioning</span>
+
+<span class="nt">model</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">resnet</span>
+<span class="w">  </span><span class="nt">depth</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">50</span>
+<span class="nt">model_id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">${hya.sha256:${model}}</span><span class="w"> </span><span class="c1"># Changes when a value of model changes</span>
 </code></pre></div>
 <p><strong>Equivalent Python:</strong></p>
 <div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">hashlib</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">enum</span><span class="w"> </span><span class="kn">import</span> <span class="n">Enum</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">PurePath</span>
 
-<span class="n">value</span> <span class="o">=</span> <span class="n">hashlib</span><span class="o">.</span><span class="n">sha256</span><span class="p">(</span><span class="nb">bytes</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">obj</span><span class="p">),</span> <span class="s2">"utf-8"</span><span class="p">))</span><span class="o">.</span><span class="n">hexdigest</span><span class="p">()</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">encode</span><span class="p">(</span><span class="n">value</span><span class="p">):</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="p">(</span><span class="n">PurePath</span><span class="p">,</span> <span class="n">Enum</span><span class="p">)):</span>
+        <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+    <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"hya.sha256 cannot hash a value of type </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">value</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+
+
+<span class="c1"># value is the resolved content of the argument, without configuration nodes</span>
+<span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+    <span class="n">value</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">sort_keys</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">separators</span><span class="o">=</span><span class="p">(</span><span class="s2">","</span><span class="p">,</span> <span class="s2">":"</span><span class="p">),</span> <span class="n">default</span><span class="o">=</span><span class="n">encode</span><span class="p">)</span>
+<span class="n">digest</span> <span class="o">=</span> <span class="n">hashlib</span><span class="o">.</span><span class="n">sha256</span><span class="p">(</span><span class="n">value</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s2">"utf-8"</span><span class="p">))</span><span class="o">.</span><span class="n">hexdigest</span><span class="p">()</span>
 </code></pre></div>
+<p><strong>Notes:</strong></p>
+<ul>
+<li>The interpolations of the value are resolved at any depth, and a missing value (<code>???</code>) is an
+  error.</li>
+<li>A string is hashed as is: the result is the one that other SHA-256 tools give for the text.</li>
+<li>Any other value is hashed from its canonical JSON form (sorted keys, no space), so the order of
+  the keys of a mapping does not matter. A path or an enum is written as its string.</li>
+<li>A value without a JSON form (an array, a tensor, a data type, a set, bytes) raises a <code>TypeError</code>.
+  Hash the list or the string it is built from. A mapping that mixes key types cannot be sorted and
+  raises too.</li>
+<li>The type of a value is not part of the hash: the string <code>[1]</code> and the list <code>[1]</code> have the same
+  hash, and so do an integer key and the same string key.</li>
+</ul>
 <p><strong>Use Case:</strong> Creating unique identifiers for experiments, cache keys, or version tracking.</p>
 <h2 id="optional-resolvers">Optional Resolvers<a class="headerlink" href="#optional-resolvers" title="Permanent link">&para;</a></h2>
 <p>These resolvers require additional packages to be installed.</p>
@@ -1970,8 +2041,8 @@ user expansion.</p>
 <p><strong>Package Required:</strong> <code>torch&gt;=2.4</code></p>
 <p>Install with: <code>pip install torch</code></p>
 <h4 id="hyatorchtensor"><code>hya.torch.tensor</code><a class="headerlink" href="#hyatorchtensor" title="Permanent link">&para;</a></h4>
-<p>Converts data to a PyTorch tensor. The optional second argument is a <code>torch.dtype</code>, for example the
-output of <a href="#hyatorchdtype"><code>hya.torch.dtype</code></a>.</p>
+<p>Converts data to a PyTorch tensor. The optional second argument is the data type: its name, or a
+<code>torch.dtype</code> such as the output of <a href="#hyatorchdtype"><code>hya.torch.dtype</code></a>.</p>
 <p><strong>Syntax:</strong> <code>${hya.torch.tensor:data}</code> or <code>${hya.torch.tensor:data,dtype}</code></p>
 <p><strong>Example:</strong></p>
 <div class="highlight"><pre><span></span><code><span class="c1"># 1D tensor</span>
@@ -1981,7 +2052,8 @@ output of <a href="#hyatorchdtype"><code>hya.torch.dtype</code></a>.</p>
 <span class="nt">matrix</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">${hya.torch.tensor:[[1,2],[3,4]]}</span>
 
 <span class="c1"># Tensor with a data type</span>
-<span class="nt">mask</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">${hya.torch.tensor:[1,0,1],${hya.torch.dtype:bool}}</span><span class="w"> </span><span class="c1"># tensor([ True, False,  True])</span>
+<span class="nt">mask</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">${hya.torch.tensor:[1,0,1],bool}</span><span class="w"> </span><span class="c1"># tensor([ True, False,  True])</span>
+<span class="nt">scale</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">${hya.torch.tensor:[1,2],${hya.torch.dtype:float32}}</span><span class="w"> </span><span class="c1"># tensor([1., 2.])</span>
 
 <span class="c1"># Use in model configuration</span>
 <span class="nt">model</span><span class="p">:</span>
@@ -1990,9 +2062,21 @@ output of <a href="#hyatorchdtype"><code>hya.torch.dtype</code></a>.</p>
 <p><strong>Equivalent Python:</strong></p>
 <div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
 
+<span class="c1"># data is the resolved content of the argument, without configuration nodes</span>
 <span class="n">value</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
 <span class="n">value</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">)</span>  <span class="c1"># with a dtype</span>
+<span class="c1"># data is a tensor</span>
+<span class="n">value</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">detach</span><span class="p">()</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">dtype</span><span class="o">=</span><span class="n">data</span><span class="o">.</span><span class="n">dtype</span> <span class="k">if</span> <span class="n">dtype</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">dtype</span><span class="p">,</span> <span class="n">copy</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="c1"># a dtype given by its name is first converted as hya.torch.dtype does</span>
 </code></pre></div>
+<p><strong>Notes:</strong></p>
+<ul>
+<li>The interpolations of the data are resolved at any depth, and a missing value (<code>???</code>) is an
+  error.</li>
+<li>A tensor is accepted, for example the output of another <code>hya.torch.tensor</code>. It is copied: the
+  result does not share memory with it and does not require a gradient. Without a data type, the
+  copy keeps the data type of the tensor.</li>
+</ul>
 <h4 id="hyatorchdtype"><code>hya.torch.dtype</code><a class="headerlink" href="#hyatorchdtype" title="Permanent link">&para;</a></h4>
 <p>Creates a PyTorch dtype from its string representation.</p>
 <p><strong>Syntax:</strong> <code>${hya.torch.dtype:dtype_name}</code></p>
@@ -2020,8 +2104,9 @@ The exact available dtypes depend on your PyTorch installation. For a complete l
 
 <span class="n">value</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">float32</span>  <span class="c1"># for dtype_name="float32"</span>
 </code></pre></div>
-<p><strong>Note:</strong> An unknown name raises an <code>InterpolationResolutionError</code> whose message lists the
-available dtype names, sorted.</p>
+<p><strong>Note:</strong> An unknown name raises a <code>ValueError</code> whose message lists the available dtype names,
+sorted. Through an interpolation, OmegaConf reports it as an <code>InterpolationResolutionError</code>, as for
+the error of any other resolver.</p>
 <h2 id="resolver-categories-summary">Resolver Categories Summary<a class="headerlink" href="#resolver-categories-summary" title="Permanent link">&para;</a></h2>
 <table>
 <thead>

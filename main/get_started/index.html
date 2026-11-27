@@ -821,6 +821,34 @@
 
               
             
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../refs/utilities/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Utilities
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
           </ul>
         </nav>
       
@@ -964,7 +992,7 @@ This minimal installation includes only <code>omegaconf</code>, which is suffici
 resolvers.</p>
 <h3 id="installing-optional-dependencies">Installing Optional Dependencies<a class="headerlink" href="#installing-optional-dependencies" title="Permanent link">&para;</a></h3>
 <p><code>hya</code> provides additional resolvers that require optional dependencies:</p>
-<div class="highlight"><pre><span></span><code><span class="c1"># Install all optional dependencies</span>
+<div class="highlight"><pre><span></span><code><span class="c1"># Install all optional dependencies, including pytest (the testing extra)</span>
 uv<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span><span class="s1">'hya[all]'</span>
 
 <span class="c1"># Install specific optional dependencies</span>
@@ -1021,24 +1049,26 @@ installation by running the following command:</p>
 <p>Then, you can clone the git repository:</p>
 <div class="highlight"><pre><span></span><code>git<span class="w"> </span>clone<span class="w"> </span>git@github.com:durandtibo/hya.git
 </code></pre></div>
-<p>It is recommended to create a Python 3.11+ virtual environment. This step is optional so you
-can skip it. To create a virtual environment, you can use the following command:</p>
-<div class="highlight"><pre><span></span><code>make<span class="w"> </span>conda
+<p>Then, create the virtual environment and install <code>hya</code> with the following commands:</p>
+<div class="highlight"><pre><span></span><code><span class="nb">cd</span><span class="w"> </span>hya
+make<span class="w"> </span>setup-venv
+<span class="nb">source</span><span class="w"> </span>.venv/bin/activate
 </code></pre></div>
-<p>It automatically creates a conda virtual environment. When the virtual environment is created, you
-can activate it with the following command:</p>
-<div class="highlight"><pre><span></span><code>conda<span class="w"> </span>activate<span class="w"> </span>hya
-</code></pre></div>
-<p>This example uses <code>conda</code> to create a virtual environment, but you can use other tools or
-configurations. Then, you should install the required package to use <code>hya</code> with the following
+<p><code>make setup-venv</code> installs <code>uv</code> if it is missing and updates it, creates a Python 3.14 virtual
+environment in <code>.venv</code> (it replaces an existing one), and installs <code>hya</code> in editable mode with all
+its dependencies. It asks you to confirm that <code>.venv</code> can be cleared: answer <code>y</code>, as any other
+answer stops the installation.</p>
+<p>Once the virtual environment is activated, you can install the dependencies again with the following
 command:</p>
-<div class="highlight"><pre><span></span><code>make<span class="w"> </span>install
+<div class="highlight"><pre><span></span><code>inv<span class="w"> </span>env.install
 </code></pre></div>
-<p>This command will install all the required packages. You can also use this command to update the
-required packages. This command will check if there is a more recent package available and will
-install it. Finally, you can test the installation with the following command:</p>
-<div class="highlight"><pre><span></span><code>make<span class="w"> </span>unit-test-cov
+<p>You can also use this command to restore the environment to the versions of the lock file
+(<code>uv.lock</code>). To update the dependencies to more recent versions, use <code>inv env.update</code>.</p>
+<p>Finally, you can test the installation with the following commands:</p>
+<div class="highlight"><pre><span></span><code>inv<span class="w"> </span>test.unit<span class="w"> </span>--cov
+inv<span class="w"> </span>test.integration
 </code></pre></div>
+<p>Run <code>inv --list</code> to see all the tasks.</p>
 
 
 

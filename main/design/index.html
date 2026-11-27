@@ -678,6 +678,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#the-registry-rejects-what-cannot-work" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The registry rejects what cannot work
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#the-registry-is-explicit-about-replacing" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -726,6 +737,17 @@
     <span class="md-ellipsis">
       
         Annotations are documentation, not validation
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#the-hash-reads-the-whole-value" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The hash reads the whole value
       
     </span>
   </a>
@@ -906,6 +928,34 @@
 
               
             
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../refs/utilities/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Utilities
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
           </ul>
         </nav>
       
@@ -1022,6 +1072,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#the-registry-rejects-what-cannot-work" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The registry rejects what cannot work
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#the-registry-is-explicit-about-replacing" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1070,6 +1131,17 @@
     <span class="md-ellipsis">
       
         Annotations are documentation, not validation
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#the-hash-reads-the-whole-value" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The hash reads the whole value
       
     </span>
   </a>
@@ -1159,6 +1231,9 @@ calls the resolver for the first time (<code>ResolverRegistry.register_lazy</cod
 <li><strong>If it does not fit:</strong> call the resolver once at start up, or check the package with
   <code>hya.imports</code> before you load the configuration.</li>
 </ul>
+<p>A lazy resolver cannot receive the special parameters of OmegaConf (<code>_root_</code>, <code>_parent_</code>,
+<code>_node_</code>): OmegaConf reads them from the signature of the function, which is not known before the
+import. Register such a resolver with <code>register</code>.</p>
 <p>A missing package raises a <code>RuntimeError</code> that says how to install it
 (<code>'torch' package is required but not installed. ... pip install torch</code>).</p>
 <h2 id="every-key-lives-in-the-hya-namespace">Every key lives in the <code>hya.</code> namespace<a class="headerlink" href="#every-key-lives-in-the-hya-namespace" title="Permanent link">&para;</a></h2>
@@ -1182,6 +1257,17 @@ calls the resolver for the first time (<code>ResolverRegistry.register_lazy</cod
 </ul>
 <p>Hydra has a plugin mechanism that could remove the import. <code>hya</code> does not use it: it needs a
 <code>hydra_plugins</code> namespace package and a dependency on Hydra internals for the gain of one line.</p>
+<h2 id="the-registry-rejects-what-cannot-work">The registry rejects what cannot work<a class="headerlink" href="#the-registry-rejects-what-cannot-work" title="Permanent link">&para;</a></h2>
+<p>Every entry of a <code>ResolverRegistry</code> is added by <code>register</code>, including the ones of the constructor
+and of <code>register_lazy</code>. It raises at once for a value that is not callable, a key that is not a
+string (<code>@registry.register</code> used without a key) and a key that is not made of names joined by dots.</p>
+<ul>
+<li><strong>Benefit:</strong> the error points at the line that registers, not at a configuration that fails to
+  parse later, and <code>register_resolvers()</code> cannot stop half way because of an entry.</li>
+<li><strong>Cost:</strong> a key such as <code>my-key</code>, which OmegaConf 2.3 and later can interpolate, is rejected,
+  because OmegaConf 2.2 cannot interpolate it and <code>hya</code> behaves the same on all of them.</li>
+<li><strong>If it does not fit:</strong> register such a resolver with <code>OmegaConf</code> directly.</li>
+</ul>
 <h2 id="the-registry-is-explicit-about-replacing">The registry is explicit about replacing<a class="headerlink" href="#the-registry-is-explicit-about-replacing" title="Permanent link">&para;</a></h2>
 <p>A <code>ResolverRegistry</code> is a map from a key to a callable, with two separate steps: <code>register</code> adds a
 callable to the registry, and <code>register_resolvers</code> publishes the registry to OmegaConf. Both refuse
@@ -1201,8 +1287,10 @@ to replace silently:</p>
   published it. Doing so needs private OmegaConf attributes that change between releases.</li>
 </ul>
 <h2 id="errors-are-the-ones-of-omegaconf">Errors are the ones of OmegaConf<a class="headerlink" href="#errors-are-the-ones-of-omegaconf" title="Permanent link">&para;</a></h2>
-<p>A resolver that fails raises an <code>InterpolationResolutionError</code>. <code>hya</code> does not wrap the error in an
-exception of its own.</p>
+<p>A resolver raises standard exceptions only, and OmegaConf reports a failure as an
+<code>InterpolationResolutionError</code>. <code>hya</code> does not wrap the error in an exception of its own, and no
+resolver raises an OmegaConf error of its own accord: a direct Python call of
+<code>torch_dtype_resolver</code> raises a plain <code>ValueError</code>.</p>
 <ul>
 <li><strong>Benefit:</strong> there is no extra layer between you and the real error. The message names the
   original exception, which is in the <code>__context__</code> chain of the error (<code>__cause__</code> is <code>None</code>).</li>
@@ -1211,12 +1299,14 @@ exception of its own.</p>
 </ul>
 <h2 id="resolvers-are-pure-and-can-return-any-object">Resolvers are pure and can return any object<a class="headerlink" href="#resolvers-are-pure-and-can-return-any-object" title="Permanent link">&para;</a></h2>
 <p>A resolver never modifies its arguments: <code>${hya.add:${x},[3]}</code> returns a new list and leaves <code>x</code>
-unchanged. A resolver may return any Python object (<code>Path</code>, <code>ndarray</code>, <code>Tensor</code>, <code>dtype</code>, list).</p>
+unchanged. It does not copy what it returns: <code>${hya.add:${x}}</code> is the node <code>x</code> itself, as <code>${x}</code>
+is, so copy such a value before you mutate it. A resolver may return any Python object (<code>Path</code>,
+<code>ndarray</code>, <code>Tensor</code>, <code>dtype</code>, list).</p>
 <ul>
 <li><strong>Benefit:</strong> a configuration can carry the objects your code needs, with no conversion step.</li>
-<li><strong>Cost:</strong> such values cannot always be written in YAML. Use them in code, or with
-  <code>OmegaConf.to_container(cfg, resolve=True)</code>. Do not rely on <code>OmegaConf.to_yaml</code> with
-  <code>resolve=True</code> for them.</li>
+<li><strong>Cost:</strong> an array, a tensor or a data type is not a value of a configuration. Use it in code, or
+  with <code>OmegaConf.to_container(cfg, resolve=True)</code>. <code>OmegaConf.resolve</code> needs the <code>allow_objects</code>
+  flag for it, and <code>OmegaConf.to_yaml</code> with <code>resolve=True</code> does not support it.</li>
 </ul>
 <h2 id="arguments-are-positional">Arguments are positional<a class="headerlink" href="#arguments-are-positional" title="Permanent link">&para;</a></h2>
 <p>The arguments of a resolver are positional, because the interpolation grammar has no keyword
@@ -1238,22 +1328,38 @@ at call time.</p>
 <li><strong>Cost:</strong> a wrong type fails inside the resolver (for example a <code>TypeError</code>) instead of in a
   validation step.</li>
 </ul>
+<h2 id="the-hash-reads-the-whole-value">The hash reads the whole value<a class="headerlink" href="#the-hash-reads-the-whole-value" title="Permanent link">&para;</a></h2>
+<p><code>hya.sha256</code> is meant for identifiers, so two different values must not share a hash by accident.
+It resolves the configuration nodes of its argument (<code>hya.utils.config.to_plain</code>, which
+<code>hya.iter_join</code> and <code>hya.torch.tensor</code> use too), then hashes a string as is and any other value as
+canonical JSON (sorted keys, no space).</p>
+<ul>
+<li><strong>Benefit:</strong> the hash follows the interpolated values, does not depend on the order of the keys,
+  on <code>repr</code>, on the print options of NumPy or PyTorch, or on the OmegaConf release, and the hash of
+  a string is the one that other SHA-256 tools give.</li>
+<li><strong>Cost:</strong> the type of a value is not part of the hash (the string <code>[1]</code> and the list <code>[1]</code> have the
+  same hash), a value without a JSON form raises instead of being hashed, and resolving a large list
+  at each access takes time.</li>
+<li><strong>If it does not fit:</strong> hash the value in your code, or register your own resolver.</li>
+</ul>
+<p>An array or a tensor is not hashed from its bytes: it would need a format for the data type and the
+shape, and two optional packages in a resolver of the standard library. Hash the value the array is
+built from.</p>
 <h2 id="some-behaviours-follow-python-on-purpose">Some behaviours follow Python on purpose<a class="headerlink" href="#some-behaviours-follow-python-on-purpose" title="Permanent link">&para;</a></h2>
 <ul>
-<li><strong><code>hya.sha256</code> hashes <code>str(obj)</code>.</strong> It is simple and predictable, but two mappings with the same
-  items in a different order have different hashes. Sort the keys in the configuration if you need
-  order-insensitivity.</li>
 <li><strong><code>hya.ceildiv</code> follows <code>//</code>.</strong> It computes <code>-(a // -b)</code>, which is exact for integers of any size.
   The result is an <code>int</code> for two integers and a <code>float</code> for a float. Use
   <code>${hya.int:${hya.ceildiv:x,y}}</code> to force an <code>int</code>.</li>
 <li><strong><code>hya.torch.dtype</code> accepts names, not <code>torch.float32</code>.</strong> There is one spelling for one thing,
-  and the error for an unknown name lists the valid names, sorted.</li>
+  and the error for an unknown name lists the valid names, sorted. <code>hya.torch.tensor</code> accepts the
+  same names.</li>
 <li><strong><code>hya.np.array</code> takes the data type as a string.</strong> The string that NumPy accepts is enough, so
-  there is no <code>hya.np.dtype</code> resolver. <code>hya.torch.tensor</code> takes a <code>torch.dtype</code>, usually the output
-  of <code>hya.torch.dtype</code>.</li>
+  there is no <code>hya.np.dtype</code> resolver. <code>hya.torch.tensor</code> takes the name too, so the two resolvers
+  have the same contract, and also a <code>torch.dtype</code>, such as the output of <code>hya.torch.dtype</code>.</li>
 <li><strong><code>hya.path</code> reads <code>file:</code> URLs only.</strong> A string that starts with <code>file:</code> is decoded as a URL; any
   other string is a plain path, so <code>/data/a%20b</code> keeps its <code>%20</code>. A file URL with a host other than
-  <code>localhost</code> raises a <code>ValueError</code> instead of dropping the host.</li>
+  <code>localhost</code>, a query or a fragment raises a <code>ValueError</code> instead of dropping it: write a <code>?</code> or a
+  <code>#</code> of a file name as <code>%3F</code> or <code>%23</code>.</li>
 <li><strong><code>hya.braceexpand</code> returns a list.</strong> It has a length, can be indexed and can be read several
   times, at the cost of building the whole expansion at once.</li>
 </ul>

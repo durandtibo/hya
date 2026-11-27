@@ -874,6 +874,34 @@
 
               
             
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="utilities/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Utilities
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
           </ul>
         </nav>
       
@@ -1131,11 +1159,47 @@ with keys and later used with OmegaConf.</p>
             <td>
               <div class="doc-md-description">
                 <p>Optional initial state mapping containing key-resolver pairs.
-If provided, a copy is made to prevent external modifications.</p>
+If provided, a copy is made to prevent external modifications.
+Each pair is added with <code>register</code>, so it is validated.</p>
               </div>
             </td>
             <td>
                   <code>None</code>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<p><span class="doc-section-title">Raises:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="TypeError">TypeError</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>If a key of <code>state</code> is not a string, or a value is
+not callable.</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="ValueError">ValueError</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>If a key of <code>state</code> is not made of names joined
+by dots (see <code>register</code>).</p>
+              </div>
             </td>
           </tr>
       </tbody>
@@ -1191,6 +1255,19 @@ If provided, a copy is made to prevent external modifications.</p>
         <p>The state of the registry.</p>
 <p>This is a read-only view: use <code>register</code> to add a resolver.</p>
 
+
+<details class="example" open>
+  <summary>Example</summary>
+  <div class="highlight"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">hya.registry</span><span class="w"> </span><span class="kn">import</span> <span class="n">ResolverRegistry</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">registry</span> <span class="o">=</span> <span class="n">ResolverRegistry</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nd">@registry</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="s2">"my_key"</span><span class="p">)</span>
+<span class="gp">... </span><span class="k">def</span><span class="w"> </span><span class="nf">my_resolver</span><span class="p">(</span><span class="n">value</span><span class="p">):</span>
+<span class="gp">... </span>    <span class="k">return</span> <span class="n">value</span>
+<span class="gp">...</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">list</span><span class="p">(</span><span class="n">registry</span><span class="o">.</span><span class="n">state</span><span class="p">)</span>
+<span class="go">['my_key']</span>
+</code></pre></div>
+</details>
     </div>
 
 </div>
@@ -1337,8 +1414,11 @@ key.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>The key used to register the resolver. Must be unique unless
-exist_ok is True.</p>
+                <p>The key used to register the resolver: names made of ASCII
+letters, digits and <code>_</code> that do not start with a digit,
+joined by dots (for example <code>"my.resolver_2"</code>). Every
+supported OmegaConf can interpolate such a key. Must be unique
+unless exist_ok is True.</p>
               </div>
             </td>
             <td>
@@ -1405,7 +1485,19 @@ resolver will be overridden.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>If the resolver is not callable.</p>
+                <p>If the key is not a string (for example
+<code>@registry.register</code> used without a key), or if the
+resolver is not callable.</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="ValueError">ValueError</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>If the key is not made of names joined by dots.</p>
               </div>
             </td>
           </tr>
@@ -1485,8 +1577,8 @@ the registry say what it is.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>The key used to register the resolver. Must be unique unless
-<code>exist_ok</code> is <code>True</code>.</p>
+                <p>The key used to register the resolver, as for <code>register</code>.
+Must be unique unless <code>exist_ok</code> is <code>True</code>.</p>
               </div>
             </td>
             <td>
@@ -1503,7 +1595,8 @@ the registry say what it is.</p>
             <td>
               <div class="doc-md-description">
                 <p>The resolver to import, as <code>"module:function"</code>, for
-example <code>"hya.numpy:to_array_resolver"</code>.</p>
+example <code>"hya.numpy:to_array_resolver"</code>. The function
+is the name of an attribute of the module.</p>
               </div>
             </td>
             <td>
@@ -1543,11 +1636,23 @@ the existing resolver will be overridden.</p>
       <tbody>
           <tr class="doc-section-item">
             <td>
+                  <code><span title="TypeError">TypeError</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>If the key is not a string.</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
                   <code><span title="ValueError">ValueError</span></code>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>If <code>target</code> is not formatted as <code>"module:function"</code>.</p>
+                <p>If <code>target</code> is not formatted as
+<code>"module:function"</code>, or if the key is not made of names
+joined by dots.</p>
               </div>
             </td>
           </tr>
@@ -1565,6 +1670,14 @@ the existing resolver will be overridden.</p>
       </tbody>
     </table>
 
+
+<details class="note" open>
+  <summary>Note</summary>
+  <p>A resolver registered lazily cannot receive the special
+parameters of OmegaConf (<code>_root_</code>, <code>_parent_</code> or
+<code>_node_</code>): OmegaConf reads them from the signature, which
+is not known before the import.</p>
+</details>
 
 <details class="example" open>
   <summary>Example</summary>

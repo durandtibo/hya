@@ -906,6 +906,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#invalid-resolver-key" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Invalid Resolver Key
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#type-errors-in-resolvers" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1205,6 +1216,34 @@
     
   
     Resolvers
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../refs/utilities/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Utilities
   
 
     
@@ -1646,6 +1685,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#invalid-resolver-key" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Invalid Resolver Key
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#type-errors-in-resolvers" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1891,6 +1941,10 @@ call of that resolver, which raises an error that says how to install the packag
 <span class="w">  </span><span class="nt">dropout</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.7</span>
 <span class="w">  </span><span class="nt">clipped_dropout</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">${clip:${hyperparameters.dropout},0.0,0.5}</span>
 </code></pre></div>
+<p>A key is made of names joined by dots (<code>double</code>, <code>my.clip_2</code>), where a name is made of ASCII
+letters, digits and <code>_</code> and does not start with a digit. Any other key, such as <code>my-clip</code>, raises a
+<code>ValueError</code> when it is registered, and a resolver that is not callable raises a <code>TypeError</code>. The
+decorator needs the key: <code>@registry.register</code> alone raises a <code>TypeError</code>.</p>
 <h3 id="overriding-existing-resolvers">Overriding Existing Resolvers<a class="headerlink" href="#overriding-existing-resolvers" title="Permanent link">&para;</a></h3>
 <p>You can override a resolver of the registry with the keyword-only <code>exist_ok</code> parameter. The
 default resolvers are already published to OmegaConf when <code>hya</code> is imported, so
@@ -1935,7 +1989,9 @@ registers the resolvers that need a heavy optional package:</p>
 <span class="n">registry</span><span class="o">.</span><span class="n">register_resolvers</span><span class="p">()</span>
 </code></pre></div>
 <p>A target that is not formatted as <code>"module:function"</code> raises a <code>ValueError</code> when it is registered.
-An unknown module or function raises an error on the first call of the resolver.</p>
+An unknown module or function raises an error on the first call of the resolver. A lazy resolver
+cannot receive the special parameters of OmegaConf (<code>_root_</code>, <code>_parent_</code>, <code>_node_</code>): register such
+a resolver with <code>register</code>.</p>
 <h3 id="creating-isolated-registries">Creating Isolated Registries<a class="headerlink" href="#creating-isolated-registries" title="Permanent link">&para;</a></h3>
 <p>For advanced use cases, you can create independent registries:</p>
 <div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">hya.registry</span><span class="w"> </span><span class="kn">import</span> <span class="n">ResolverRegistry</span>
@@ -1999,10 +2055,11 @@ An unknown module or function raises an error on the first call of the resolver.
 <span class="nt">data</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">input_shape</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">3</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">224</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">224</span><span class="p p-Indicator">]</span>
 <span class="w">  </span><span class="nt">dummy_input</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">${hya.torch.tensor:${data.input_shape}}</span>
-<span class="w">  </span><span class="c1"># The data type is the second argument of the tensor resolver</span>
-<span class="w">  </span><span class="nt">float_input</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">${hya.torch.tensor:${data.input_shape},${hya.torch.dtype:float32}}</span>
+<span class="w">  </span><span class="c1"># The data type is the second argument of the tensor resolver: its name or a torch.dtype</span>
+<span class="w">  </span><span class="nt">float_input</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">${hya.torch.tensor:${data.input_shape},float32}</span>
+<span class="w">  </span><span class="nt">same_dtype_input</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">${hya.torch.tensor:${data.input_shape},${model.dtype}}</span>
 </code></pre></div>
-<p>The NumPy resolver takes the data type as a string: <code>${hya.np.array:[1,2,3],float32}</code>.</p>
+<p>The NumPy resolver takes the data type as a string too: <code>${hya.np.array:[1,2,3],float32}</code>.</p>
 <h3 id="versioning-and-hashing">Versioning and Hashing<a class="headerlink" href="#versioning-and-hashing" title="Permanent link">&para;</a></h3>
 <p>Generate consistent identifiers:</p>
 <div class="highlight"><pre><span></span><code><span class="nt">experiment</span><span class="p">:</span>
@@ -2016,7 +2073,15 @@ An unknown module or function raises an error on the first call of the resolver.
 
 <span class="w">  </span><span class="c1"># Use for reproducible paths</span>
 <span class="w">  </span><span class="nt">output_dir</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">${hya.iter_join:[outputs,${experiment.experiment_id}],/}</span>
+
+<span class="nt">model</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">resnet</span>
+<span class="w">  </span><span class="nt">depth</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">50</span>
+<span class="nt">model_id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">${hya.sha256:${model}}</span><span class="w"> </span><span class="c1"># The hash of the whole section</span>
 </code></pre></div>
+<p><code>hya.sha256</code> hashes the resolved content of a value: a string as is, any other value as canonical
+JSON, so the order of the keys does not matter. A value without a JSON form, such as an array or a
+tensor, raises an error. See <a href="../resolvers/#hyasha256"><code>hya.sha256</code></a>.</p>
 <h3 id="list-operations">List Operations<a class="headerlink" href="#list-operations" title="Permanent link">&para;</a></h3>
 <p>Work with lists and sequences:</p>
 <div class="highlight"><pre><span></span><code><span class="nt">datasets</span><span class="p">:</span>
@@ -2155,6 +2220,9 @@ need their package when they are called.</p>
 <p><strong>Warning:</strong> <code>A resolver is already registered in OmegaConf for 'my_key': not replaced.</code></p>
 <p>OmegaConf already has a resolver for this key and <code>register_resolvers()</code> did not replace it.</p>
 <p><strong>Solution:</strong> Use <code>registry.register_resolvers(replace=True)</code> to replace it.</p>
+<h3 id="invalid-resolver-key">Invalid Resolver Key<a class="headerlink" href="#invalid-resolver-key" title="Permanent link">&para;</a></h3>
+<p><strong>Error:</strong> <code>ValueError: Invalid resolver key 'my-key': use names made of letters, digits and _, ...</code></p>
+<p><strong>Solution:</strong> Use names joined by dots, for example <code>my_key</code> or <code>my.key</code>.</p>
 <h3 id="type-errors-in-resolvers">Type Errors in Resolvers<a class="headerlink" href="#type-errors-in-resolvers" title="Permanent link">&para;</a></h3>
 <p><strong>Error:</strong> <code>TypeError: unsupported operand type(s) for +: 'int' and 'str'</code></p>
 <p><strong>Solution:</strong> Ensure your configuration passes correct types:</p>
@@ -2165,7 +2233,7 @@ need their package when they are called.</p>
 <span class="nt">result</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">${hya.add:5,10}</span>
 </code></pre></div>
 <h3 id="circular-references">Circular References<a class="headerlink" href="#circular-references" title="Permanent link">&para;</a></h3>
-<p><strong>Error:</strong> <code>omegaconf.errors.InterpolationResolutionError: Circular reference detected</code></p>
+<p><strong>Error:</strong> <code>omegaconf.errors.InterpolationResolutionError: Recursive interpolation detected</code></p>
 <p><strong>Solution:</strong> Avoid self-referential configurations:</p>
 <div class="highlight"><pre><span></span><code><span class="c1"># Wrong: Circular reference</span>
 <span class="nt">x</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">${hya.add:${y},1}</span>

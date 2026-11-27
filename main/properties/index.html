@@ -796,6 +796,34 @@
 
               
             
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../refs/utilities/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Utilities
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
           </ul>
         </nav>
       
@@ -933,17 +961,17 @@ repository. The <a href="../design/">Design Choices</a> page explains the reason
 <tr>
 <td>P5</td>
 <td><strong>Pure</strong></td>
-<td>A resolver never modifies its arguments. Interpolating a config node into a resolver cannot change the config.</td>
+<td>A resolver never modifies its arguments. A returned value can be an argument itself or one of its elements (<code>hya.add</code> of one value, <code>hya.max</code> of several values), exactly as <code>${x}</code> returns the node <code>x</code>: copy it before you mutate it.</td>
 </tr>
 <tr>
 <td>P6</td>
 <td><strong>Deterministic output</strong></td>
-<td>The same arguments give the same output, including inside error messages (sorted, no set order).</td>
+<td>The same resolved arguments give the same output, including error messages (sorted, no set order), on every process and OmegaConf release. <code>hya.path</code> also depends on the file system (working directory, home directory, symbolic links), which is its purpose.</td>
 </tr>
 <tr>
 <td>P7</td>
-<td><strong>Explicit registry</strong></td>
-<td>A <code>ResolverRegistry</code> is a plain key to callable map. <code>register</code> adds, <code>register_resolvers</code> publishes to OmegaConf. Registries are independent of each other.</td>
+<td><strong>Explicit, strict registry</strong></td>
+<td>A <code>ResolverRegistry</code> is a key to callable map. <code>register</code> adds, <code>register_resolvers</code> publishes. Every entry, from <code>register</code>, <code>register_lazy</code> or the constructor, has a callable value and a key that every supported OmegaConf can interpolate; anything else raises at registration.</td>
 </tr>
 <tr>
 <td>P8</td>
@@ -958,17 +986,17 @@ repository. The <a href="../design/">Design Choices</a> page explains the reason
 <tr>
 <td>P10</td>
 <td><strong>Errors are OmegaConf's</strong></td>
-<td>A failing resolver surfaces as <code>InterpolationResolutionError</code>. The message names the original exception and the original exception is in its <code>__context__</code> chain (not its <code>__cause__</code>). <code>hya</code> adds no wrapper of its own. A missing optional package gives an error that says how to install it, through an interpolation too.</td>
+<td>A resolver raises standard exceptions only, so a failure surfaces as <code>InterpolationResolutionError</code> whose message names the original exception, found in the <code>__context__</code> chain (<code>__cause__</code> is <code>None</code>). A missing optional package says how to install it.</td>
 </tr>
 <tr>
 <td>P11</td>
 <td><strong>Any value out</strong></td>
-<td>A resolver may return any Python object (<code>Path</code>, <code>ndarray</code>, <code>Tensor</code>, <code>dtype</code>, list). Such values are for use in code and are not meant for <code>OmegaConf.to_yaml</code>.</td>
+<td>A resolver may return any Python object (<code>Path</code>, <code>ndarray</code>, <code>Tensor</code>, <code>dtype</code>, list). Such values are for use in code: for an array, a tensor or a data type, <code>OmegaConf.resolve</code> needs the <code>allow_objects</code> flag and <code>to_yaml</code> does not support them.</td>
 </tr>
 <tr>
 <td>P12</td>
 <td><strong>Typed and documented</strong></td>
-<td>The package has a <code>py.typed</code> file, <code>pyright --verifytypes</code> scores 100 %, every public name is documented with a doctest, and every resolver is listed in the <a href="../resolvers/">resolvers</a> page.</td>
+<td>The package has a <code>py.typed</code> file, <code>pyright --verifytypes</code> scores 100 %, every public function, class, method and property is documented with a doctest and shown in the reference, every resolver is listed in the <a href="../resolvers/">resolvers</a> page, and the documentation says nothing false.</td>
 </tr>
 <tr>
 <td>P13</td>
@@ -978,12 +1006,22 @@ repository. The <a href="../design/">Design Choices</a> page explains the reason
 <tr>
 <td>P14</td>
 <td><strong>Installs next to Hydra</strong></td>
-<td><code>hya</code> accepts every OmegaConf release that a Hydra release accepts (<code>omegaconf&gt;=2.2,&lt;3.0</code>). CI runs the tests on the oldest and the newest OmegaConf.</td>
+<td><code>hya</code> accepts every OmegaConf release that a Hydra release accepts (<code>omegaconf&gt;=2.2,&lt;3.0</code>) and behaves the same on all of them. CI runs the tests on the oldest and the newest.</td>
 </tr>
 <tr>
 <td>P15</td>
 <td><strong>Composable</strong></td>
-<td>A resolver accepts the values OmegaConf gives it (<code>str</code>, <code>int</code>, <code>float</code>, <code>bool</code>, <code>None</code>, <code>list</code>, <code>dict</code>, <code>ListConfig</code>, <code>DictConfig</code>) and the output of another <code>hya</code> resolver (a <code>Path</code> for <code>hya.path</code>, a <code>torch.dtype</code> for <code>hya.torch.tensor</code>).</td>
+<td>A resolver accepts the values OmegaConf gives it (<code>str</code>, <code>int</code>, <code>float</code>, <code>bool</code>, <code>None</code>, <code>list</code>, <code>dict</code>, <code>ListConfig</code>, <code>DictConfig</code>) and the output of another <code>hya</code> resolver (a <code>Path</code> for <code>hya.path</code>, a tensor, an array or a <code>torch.dtype</code> for <code>hya.torch.tensor</code>). In particular <code>hya.torch.tensor</code> takes a tensor, an array, and a data type as a <code>torch.dtype</code> or as its name.</td>
+</tr>
+<tr>
+<td>P16</td>
+<td><strong>Resolved input</strong></td>
+<td>A resolver that reads a whole value (<code>hya.sha256</code>, <code>hya.iter_join</code>, <code>hya.np.array</code>, <code>hya.torch.tensor</code>) reads its <strong>resolved</strong> content: interpolations are resolved at any depth, and a missing value (<code>???</code>) raises <code>MissingMandatoryValue</code>.</td>
+</tr>
+<tr>
+<td>P17</td>
+<td><strong>Faithful hash</strong></td>
+<td><code>hya.sha256</code> hashes the whole content of a value: a string as is, any other value as canonical JSON (sorted keys). Two such values with different JSON forms have different hashes, and a value without a JSON form raises instead of being hashed from a summary.</td>
 </tr>
 </tbody>
 </table>
@@ -992,6 +1030,10 @@ repository. The <a href="../design/">Design Choices</a> page explains the reason
 <li><strong>P2.</strong> The optional resolvers are registered lazily (<code>ResolverRegistry.register_lazy</code>): the key
   is always in the registry, and the module is imported when OmegaConf calls the resolver for the
   first time. <code>import hya</code> does not look for the packages on disk.</li>
+<li><strong>P7.</strong> A key is made of names joined by dots, where a name is made of ASCII letters, digits and
+  <code>_</code> and does not start with a digit. OmegaConf 2.3 and later can interpolate a <code>-</code> too, but
+  OmegaConf 2.2 cannot, so <code>hya</code> rejects it (P14). A registry is independent of the other
+  registries.</li>
 <li><strong>P8.</strong> After <code>import hya</code>, the default resolvers are already published, so
   <code>registry.register_resolvers()</code> is silent. Overriding a built-in
   (<code>registry.register("hya.add", exist_ok=True)</code>) warns until <code>register_resolvers(replace=True)</code> is
@@ -999,13 +1041,19 @@ repository. The <a href="../design/">Design Choices</a> page explains the reason
   cache of the existing configurations (<code>OmegaConf.clear_cache(cfg)</code>).</li>
 <li><strong>P9.</strong> The optional keys are registered whether or not the package is installed, so the registry
   has the same keys on every machine.</li>
+<li><strong>P10.</strong> A missing configuration value (<code>???</code>) is reported by the exceptions of OmegaConf
+  (<code>MissingMandatoryValue</code>, which the message names). <code>hya</code> adds no exception class of its own and
+  no wrapper.</li>
 <li><strong>P10.</strong> With a missing package, the resolver raises a <code>RuntimeError</code> that says how to install it
   (<code>pip install torch</code>); OmegaConf reports it as an <code>InterpolationResolutionError</code>.</li>
 <li><strong>P10.</strong> With OmegaConf 2.4 and later, the validation of the annotations is off for the resolvers
   published by <code>hya</code>: the annotations are documentation for readers and type checkers, not a runtime
   contract.</li>
-<li><strong>P11.</strong> The value of an interpolation of a resolver that returns an object cannot always be
-  written in YAML: use the value in code, or <code>OmegaConf.to_container(cfg, resolve=True)</code>.</li>
+<li><strong>P11.</strong> Use such a value in code (<code>cfg.key</code>, or <code>OmegaConf.to_container(cfg, resolve=True)</code>).
+  To resolve a whole configuration in place, give it the <code>allow_objects</code> flag, when you create it
+  (<code>OmegaConf.create(..., flags={"allow_objects": True})</code>) or around the call
+  (<code>with flag_override(cfg, "allow_objects", True): OmegaConf.resolve(cfg)</code>, with
+  <code>from omegaconf import flag_override</code>).</li>
 </ul>
 <h2 id="limits">Limits<a class="headerlink" href="#limits" title="Permanent link">&para;</a></h2>
 <p><code>hya</code> does not provide the following.</p>
@@ -1015,12 +1063,16 @@ repository. The <a href="../design/">Design Choices</a> page explains the reason
 <li><strong>Detection of a conflicting registration.</strong> A resolver that another source registers after <code>hya</code>
   published the same key is not detected: it needs the private <code>BaseContainer._resolvers</code> of
   OmegaConf, which changes between releases.</li>
-<li><strong>Order-insensitive hashes.</strong> <code>hya.sha256</code> hashes <code>str(obj)</code>, so two mappings with the same items
-  in another order have different hashes.</li>
+<li><strong>Type-tagged hashes.</strong> <code>hya.sha256</code> of the string <code>[1]</code> equals the hash of the list <code>[1]</code>, an
+  integer key equals the same string key, and a path or an enum equals its string in JSON. A mapping
+  that mixes key types cannot be sorted and raises.</li>
+<li><strong>Special parameters of lazy resolvers.</strong> A resolver registered with <code>register_lazy</code> cannot
+  receive <code>_root_</code>, <code>_parent_</code> or <code>_node_</code>: OmegaConf reads them from the signature, which is not
+  known before the import.</li>
 <li><strong>Caching of the output of the resolvers.</strong> OmegaConf does not cache it: every access of an
   interpolation calls the resolver again.</li>
-<li><strong>YAML export of objects.</strong> <code>OmegaConf.to_yaml(resolve=True)</code> does not support the resolvers that
-  return objects (P11).</li>
+<li><strong>Export of objects.</strong> <code>OmegaConf.to_yaml(resolve=True)</code> does not support an array, a tensor or
+  a data type, and <code>OmegaConf.resolve</code> needs the <code>allow_objects</code> flag for them (P11).</li>
 </ul>
 
 

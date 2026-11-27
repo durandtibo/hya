@@ -21,7 +21,7 @@ install-uv:
 .PHONY: install-invoke
 install-invoke: install-uv
 	@echo "📦 Installing invoke..."
-	uv pip install "invoke>=3.0" "invoke-tasklib>=0.1.0a0"
+	uv pip install "invoke>=3.0" "invoke-tasklib>=0.0.8"
 	@echo "✅ invoke installed"
 	$(call show-tool,invoke)
 

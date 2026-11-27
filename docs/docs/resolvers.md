@@ -269,8 +269,16 @@ experiment:
 **Equivalent Python:**
 
 ```python
+# iterable is the resolved content of the argument, without configuration nodes
 value = separator.join(map(str, iterable))
 ```
+
+**Notes:**
+
+- The interpolations of the iterable are resolved at any depth, and a missing value (`???`) is an
+  error.
+- Each element is converted with `str`: with `x: [["${a}"], 2]` and `a: 1`,
+  `${hya.iter_join:${x},-}` is `[1]-2`.
 
 **Use Case:** Dynamically constructing file paths, experiment names, or configuration strings.
 

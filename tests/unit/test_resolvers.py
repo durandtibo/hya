@@ -13,7 +13,12 @@ from omegaconf.errors import (
     MissingMandatoryValue,
 )
 
-from hya.resolvers import _encode_value, path_resolver, sha256_resolver
+from hya.resolvers import (
+    _encode_value,
+    iter_join_resolver,
+    path_resolver,
+    sha256_resolver,
+)
 
 
 class Color(Enum):
@@ -90,6 +95,62 @@ def test_iter_join_resolver_list_int() -> None:
 
 def test_iter_join_resolver_empty_separator() -> None:
     assert OmegaConf.create({"key": "${hya.iter_join:[a,b,c],''}"}).key == "abc"
+
+
+def test_iter_join_resolver_empty_iterable() -> None:
+    assert iter_join_resolver([], "-") == ""
+
+
+def test_iter_join_resolver_one_element() -> None:
+    assert iter_join_resolver([1], "-") == "1"
+
+
+def test_iter_join_resolver_duplicate_elements() -> None:
+    assert iter_join_resolver(["a", "a"], "-") == "a-a"
+
+
+def test_iter_join_resolver_string_iterable() -> None:
+    assert iter_join_resolver("abc", "-") == "a-b-c"
+
+
+def test_iter_join_resolver_tuple() -> None:
+    assert iter_join_resolver((1, 2), "-") == "1-2"
+
+
+def test_iter_join_resolver_generator() -> None:
+    assert iter_join_resolver((i for i in [1, 2]), "-") == "1-2"
+
+
+def test_iter_join_resolver_mapping_joins_the_keys() -> None:
+    assert iter_join_resolver({"b": 1, "a": 2}, "-") == "b-a"
+
+
+def test_iter_join_resolver_nested_node() -> None:
+    conf = OmegaConf.create({"a": 1, "x": [["${a}"], 2]})
+    assert iter_join_resolver(conf.x, "-") == "[1]-2"
+
+
+def test_iter_join_resolver_node_in_a_list() -> None:
+    conf = OmegaConf.create({"a": 1, "x": ["${a}"]})
+    assert iter_join_resolver([conf.x, 2], "-") == "[1]-2"
+
+
+def test_iter_join_resolver_nested_mapping_node() -> None:
+    conf = OmegaConf.create({"a": 1, "x": [{"b": "${a}"}]})
+    assert iter_join_resolver(conf.x, "-") == "{'b': 1}"
+
+
+@pytest.mark.parametrize("value", [["???"], [["???"]]])
+def test_iter_join_resolver_missing_value(value: list[Any]) -> None:
+    with pytest.raises(MissingMandatoryValue, match=r"Missing mandatory value"):
+        iter_join_resolver(OmegaConf.create(value), "-")
+
+
+def test_iter_join_resolver_does_not_modify_the_input() -> None:
+    node = OmegaConf.create([1])
+    value = [node]
+    iter_join_resolver(value, "-")
+    assert value[0] is node
 
 
 def test_mul_resolver_int2() -> None:

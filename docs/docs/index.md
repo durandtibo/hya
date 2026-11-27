@@ -109,6 +109,7 @@ You can extend `hya` with your own custom resolvers:
 
 ```python
 from hya import get_default_registry
+from omegaconf import OmegaConf
 
 registry = get_default_registry()
 

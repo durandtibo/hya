@@ -564,7 +564,7 @@ result: ${hya.add:5,10}
 
 ### Circular References
 
-**Error:** `omegaconf.errors.InterpolationResolutionError: Circular reference detected`
+**Error:** `omegaconf.errors.InterpolationResolutionError: Recursive interpolation detected`
 
 **Solution:** Avoid self-referential configurations:
 

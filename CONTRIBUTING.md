@@ -19,16 +19,22 @@ We actively welcome your pull requests.
 1. Fork the repo and create your branch from `main`.
 2. If you've added code that should be tested, add tests.
 3. If you've changed APIs, update the documentation.
-4. Ensure the test suite passes. You can use the following command to run the tests:
+4. Ensure the test suite passes. You can use the following commands to install the project and
+   run the tests (see [Get Started](docs/docs/get_started.md#installing-from-source) to create the
+   virtual environment):
 
    ```shell
-   make unit-test-cov
+   inv env.install
+   inv test.unit --cov
+   inv test.integration
    ```
 
-5. Make sure your code lints. The following commands can help you to format the code:
+5. Make sure your code lints. The following commands format the code with
+   [ruff](https://docs.astral.sh/ruff/) and check it:
 
    ```shell
-   black .
+   inv fix
+   inv check
    pre-commit run --all-files
    ```
 

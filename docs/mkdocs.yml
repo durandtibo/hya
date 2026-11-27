@@ -28,6 +28,7 @@ nav:
       - refs/index.md
       - refs/registry.md
       - refs/resolvers.md
+      - refs/utilities.md
   - GitHub: https://github.com/durandtibo/hya
 
 repo_url: https://github.com/durandtibo/hya

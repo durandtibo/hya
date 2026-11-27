@@ -101,12 +101,14 @@ exception of its own.
 ## Resolvers are pure and can return any object
 
 A resolver never modifies its arguments: `${hya.add:${x},[3]}` returns a new list and leaves `x`
-unchanged. A resolver may return any Python object (`Path`, `ndarray`, `Tensor`, `dtype`, list).
+unchanged. It does not copy what it returns: `${hya.add:${x}}` is the node `x` itself, as `${x}`
+is, so copy such a value before you mutate it. A resolver may return any Python object (`Path`,
+`ndarray`, `Tensor`, `dtype`, list).
 
 - **Benefit:** a configuration can carry the objects your code needs, with no conversion step.
-- **Cost:** such values cannot always be written in YAML. Use them in code, or with
-  `OmegaConf.to_container(cfg, resolve=True)`. Do not rely on `OmegaConf.to_yaml` with
-  `resolve=True` for them.
+- **Cost:** an array, a tensor or a data type is not a value of a configuration. Use it in code, or
+  with `OmegaConf.to_container(cfg, resolve=True)`. `OmegaConf.resolve` needs the `allow_objects`
+  flag for it, and `OmegaConf.to_yaml` with `resolve=True` does not support it.
 
 ## Arguments are positional
 

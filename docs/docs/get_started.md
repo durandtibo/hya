@@ -21,7 +21,7 @@ resolvers.
 `hya` provides additional resolvers that require optional dependencies:
 
 ```shell
-# Install all optional dependencies
+# Install all optional dependencies, including pytest (the testing extra)
 uv pip install 'hya[all]'
 
 # Install specific optional dependencies
@@ -66,32 +66,34 @@ Then, you can clone the git repository:
 git clone git@github.com:durandtibo/hya.git
 ```
 
-It is recommended to create a Python 3.11+ virtual environment. This step is optional so you
-can skip it. To create a virtual environment, you can use the following command:
+Then, create the virtual environment and install `hya` with the following commands:
 
 ```shell
-make conda
+cd hya
+make setup-venv
+source .venv/bin/activate
 ```
 
-It automatically creates a conda virtual environment. When the virtual environment is created, you
-can activate it with the following command:
+`make setup-venv` installs `uv` if it is missing and updates it, creates a Python 3.14 virtual
+environment in `.venv` (it replaces an existing one), and installs `hya` in editable mode with all
+its dependencies. It asks you to confirm that `.venv` can be cleared: answer `y`, as any other
+answer stops the installation.
 
-```shell
-conda activate hya
-```
-
-This example uses `conda` to create a virtual environment, but you can use other tools or
-configurations. Then, you should install the required package to use `hya` with the following
+Once the virtual environment is activated, you can install the dependencies again with the following
 command:
 
 ```shell
-make install
+inv env.install
 ```
 
-This command will install all the required packages. You can also use this command to update the
-required packages. This command will check if there is a more recent package available and will
-install it. Finally, you can test the installation with the following command:
+You can also use this command to restore the environment to the versions of the lock file
+(`uv.lock`). To update the dependencies to more recent versions, use `inv env.update`.
+
+Finally, you can test the installation with the following commands:
 
 ```shell
-make unit-test-cov
+inv test.unit --cov
+inv test.integration
 ```
+
+Run `inv --list` to see all the tasks.

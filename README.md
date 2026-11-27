@@ -69,7 +69,7 @@ installed.
 To include all the packages, you can use the following command:
 
 ```shell
-pip install hya[all]
+pip install 'hya[all]'
 ```
 
 Please check the [get started page](https://durandtibo.github.io/hya/get_started) to see how to

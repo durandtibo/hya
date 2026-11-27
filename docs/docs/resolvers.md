@@ -449,8 +449,8 @@ weights: ${hya.np.array:[1,2,3],float32} # array([1., 2., 3.], dtype=float32)
 
 # Use in configuration
 data:
-  shape: [28, 28]
-  default_image: ${hya.np.array:${data.shape}}
+  channel_means: [0.485, 0.456, 0.406]
+  mean: ${hya.np.array:${data.channel_means},float32} # array([0.485, 0.456, 0.406], dtype=float32)
 ```
 
 **Equivalent Python:**

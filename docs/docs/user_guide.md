@@ -338,11 +338,11 @@ model:
   compute_dtype: ${hya.torch.dtype:float16}
 
 data:
-  input_shape: [3, 224, 224]
-  dummy_input: ${hya.torch.tensor:${data.input_shape}}
+  class_weights: [1, 2, 5]
+  weights: ${hya.torch.tensor:${data.class_weights}} # tensor([1, 2, 5])
   # The data type is the second argument of the tensor resolver: its name or a torch.dtype
-  float_input: ${hya.torch.tensor:${data.input_shape},float32}
-  same_dtype_input: ${hya.torch.tensor:${data.input_shape},${model.dtype}}
+  float_weights: ${hya.torch.tensor:${data.class_weights},float32} # tensor([1., 2., 5.])
+  same_dtype_weights: ${hya.torch.tensor:${data.class_weights},${model.dtype}}
 ```
 
 The NumPy resolver takes the data type as a string too: `${hya.np.array:[1,2,3],float32}`.
@@ -582,13 +582,17 @@ not replace them.
 
 **Error:** `TypeError: unsupported operand type(s) for +: 'int' and 'str'`
 
-**Solution:** Ensure your configuration passes correct types:
+**Solution:** Ensure your configuration passes correct types.
+
+Wrong, mixing types:
 
 ```yaml
-# Wrong: Mixing types
 result: ${hya.add:5,abc}
+```
 
-# Correct: Same types
+Correct, same types:
+
+```yaml
 result: ${hya.add:5,10}
 ```
 
@@ -596,14 +600,18 @@ result: ${hya.add:5,10}
 
 **Error:** `omegaconf.errors.InterpolationResolutionError: Recursive interpolation detected`
 
-**Solution:** Avoid self-referential configurations:
+**Solution:** Avoid self-referential configurations.
+
+Wrong, a circular reference:
 
 ```yaml
-# Wrong: Circular reference
 x: ${hya.add:${y},1}
 y: ${hya.add:${x},1}
+```
 
-# Correct: No circular dependency
+Correct, no circular dependency:
+
+```yaml
 x: 5
 y: ${hya.add:${x},1}
 ```

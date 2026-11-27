@@ -66,17 +66,21 @@ Then, you can clone the git repository:
 git clone git@github.com:durandtibo/hya.git
 ```
 
-Then, create a Python 3.11+ virtual environment in the repository, activate it, and install
-[`invoke`](https://www.pyinvoke.org/), which runs the tasks of the project:
+Then, create the virtual environment and install `hya` with the following commands:
 
 ```shell
 cd hya
-uv venv
+make setup-venv
 source .venv/bin/activate
-uv pip install invoke invoke-tasklib
 ```
 
-Then, install `hya` in editable mode with all its dependencies:
+`make setup-venv` installs `uv` if it is missing and updates it, creates a Python 3.14 virtual
+environment in `.venv` (it replaces an existing one), and installs `hya` in editable mode with all
+its dependencies. It asks you to confirm that `.venv` can be cleared: answer `y`, as any other
+answer stops the installation.
+
+Once the virtual environment is activated, you can install the dependencies again with the following
+command:
 
 ```shell
 inv env.install

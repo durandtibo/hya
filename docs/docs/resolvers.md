@@ -67,8 +67,9 @@ model:
 ```
 
 `hya.int` casts the float of a computation back to an integer, and `hya.sum` adds the elements of a
-list (`hya.add` takes values: `${hya.add:${model.layer_sizes}}` returns the list). `bool` and `str`
-have no resolver: `bool("false")` is `True`, and `str` is what an interpolation already does. See
+list (`hya.add` takes values: `${hya.add:${model.layer_sizes}}` returns a copy of the list). `bool`
+and `str` have no resolver: `bool("false")` is `True`, and `str` is what an interpolation already
+does. See
 [Design Choices](design.md) for why these resolvers have no wrapper.
 
 ### Arithmetic Operations
@@ -98,11 +99,19 @@ training:
 **Equivalent Python:**
 
 ```python
+# the values are the resolved content of the arguments, without configuration nodes
 value = value1 + value2 + value3 + ...
 ```
 
-**Note:** The arguments are never modified: `${hya.add:${x},[3]}` returns a new list and leaves
-`x` unchanged. At least one argument is required.
+**Notes:**
+
+- The arguments are never modified: `${hya.add:${x},[3]}` returns a new list and leaves `x`
+  unchanged. `${hya.add:${x}}` returns a copy of `x`.
+- Adding lists gives a plain `list`, whether they are written in the interpolation or referenced
+  (`${x}`). It also works with a read-only configuration.
+- The interpolations of the values are resolved at any depth, and a missing value (`???`) is an
+  error. The result holds the resolved values, no interpolation.
+- At least one argument is required.
 
 #### `hya.mul`
 

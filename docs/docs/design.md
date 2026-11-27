@@ -118,11 +118,31 @@ resolver raises an OmegaConf error of its own accord: a direct Python call of
 - **Cost:** you cannot catch "any `hya` error" with one `except` clause; you catch the OmegaConf
   error and inspect its context.
 
+## The resolvers of `hya` follow one contract
+
+A standard library resolver is the callable itself, with its behaviour. A resolver written by `hya`
+follows four rules:
+
+1. **Read resolved input.** An argument that is a list or a mapping goes through
+   `hya.utils.config.to_plain` before it is used, so no resolver computes on a configuration node.
+   `hya.mul` and `hya.ceildiv` take numbers and `hya.path` takes one path, so the rule does not apply
+   to them.
+2. **Return a new list, dictionary, array or tensor.**
+3. **Raise rather than guess or drop** a part of the input.
+4. **Keep no state.**
+
+- **Benefit:** a resolver gives the same result for a literal and for a reference, works with a
+  read-only configuration, and its result can be mutated without changing the configuration.
+- **Cost:** resolving a large list at each access takes time, and a list returned by `hya.add` no
+  longer holds interpolations or the API of a configuration node.
+- **If it does not fit:** use `${x}` to get the node `x` itself, or register your own resolver.
+
 ## Resolvers are pure and can return any object
 
 A resolver never modifies its arguments: `${hya.add:${x},[3]}` returns a new list and leaves `x`
-unchanged. It does not copy what it returns: `${hya.add:${x}}` is the node `x` itself, as `${x}`
-is, so copy such a value before you mutate it. A resolver may return any Python object (`Path`,
+unchanged, and `${hya.add:${x}}` is a copy of `x`. A standard library callable can return an
+argument or one of its elements (`hya.max` of several values), as `${x}` returns the node `x`, so
+copy such a value before you mutate it. A resolver may return any Python object (`Path`,
 `ndarray`, `Tensor`, `dtype`, list).
 
 - **Benefit:** a configuration can carry the objects your code needs, with no conversion step.
@@ -155,9 +175,9 @@ at call time.
 ## The hash reads the whole value
 
 `hya.sha256` is meant for identifiers, so two different values must not share a hash by accident.
-It resolves the configuration nodes of its argument (`hya.utils.config.to_plain`, which
-`hya.iter_join`, `hya.np.array` and `hya.torch.tensor` use too), then hashes a string as is and any
-other value as canonical JSON (sorted keys, no space, non-ASCII characters escaped).
+It resolves the configuration nodes of its argument (`hya.utils.config.to_plain`, the first rule of
+[the contract](#the-resolvers-of-hya-follow-one-contract)), then hashes a string as is and any other
+value as canonical JSON (sorted keys, no space, non-ASCII characters escaped).
 
 - **Benefit:** the hash follows the interpolated values, does not depend on the order of the keys,
   on `repr`, on the print options of NumPy or PyTorch, or on the OmegaConf release, and the hash of

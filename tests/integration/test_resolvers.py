@@ -167,10 +167,39 @@ def test_sha256_resolver_does_not_modify_config_dict() -> None:
     assert conf.x == {"a": 1}
 
 
-def test_add_resolver_of_one_value_returns_the_node_itself() -> None:
+def test_add_resolver_of_one_value_returns_a_copy() -> None:
     conf = OmegaConf.create({"x": [1, 2], "key": "${hya.add:${x}}"})
     conf.key.append(3)
-    assert conf.x == [1, 2, 3]
+    assert conf.x == [1, 2]
+
+
+@pytest.mark.parametrize(
+    ("expression", "expected"),
+    [
+        ("${hya.add:${x}}", [1]),
+        ("${hya.add:${x},[2]}", [1, 2]),
+        ("${hya.add:[0],${x}}", [0, 1]),
+        ("${hya.add:${x},${x}}", [1, 1]),
+    ],
+)
+def test_add_resolver_of_a_read_only_configuration(expression: str, expected: list[int]) -> None:
+    conf = OmegaConf.create({"x": [1], "key": expression})
+    OmegaConf.set_readonly(conf, True)
+    assert conf.key == expected
+
+
+@pytest.mark.parametrize(
+    "expression", ["${hya.add:${s.l},[2]}", "${hya.add:[],${s.l},[2]}", "${hya.add:[${s.a}],[2]}"]
+)
+def test_add_resolver_relative_interpolation_in_an_operand(expression: str) -> None:
+    conf = OmegaConf.create({"s": {"a": 1, "l": ["${..a}"]}, "key": expression})
+    assert conf.key == [1, 2]
+
+
+def test_add_resolver_of_a_mapping_node_returns_a_copy() -> None:
+    conf = OmegaConf.create({"x": {"a": 1}, "key": "${hya.add:${x}}"})
+    conf.key["b"] = 2
+    assert conf.x == {"a": 1}
 
 
 ##########################################
@@ -260,8 +289,9 @@ def test_iter_join_resolver_of_the_output_of_another_resolver() -> None:
 #     Tests for the resolved values     #
 #########################################
 
-# The resolvers that read a whole value, applied to the node ``x``
+# The resolvers that read a list or a mapping, applied to the node ``x``
 WHOLE_VALUE_RESOLVERS = [
+    pytest.param("${hya.add:${x}}", id="add"),
     pytest.param("${hya.sha256:${x}}", id="sha256"),
     pytest.param("${hya.iter_join:${x},-}", id="iter_join"),
     pytest.param("${hya.np.array:${x}}", id="np.array", marks=numpy_available),

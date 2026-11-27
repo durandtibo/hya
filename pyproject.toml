@@ -47,8 +47,7 @@ dependencies = ["omegaconf>=2.2,<3.0"]
 braceexpand = ["braceexpand>=0.1.7,<0.2.0"]
 numpy = ["numpy>=2.0,<3.0"]
 torch = [
-  # Linux and Apple Silicon (arm64)
-  "torch>=2.4,<3.0; sys_platform == 'linux' or (sys_platform == 'darwin' and platform_machine == 'arm64')",
+  "torch>=2.4,<3.0; (sys_platform == 'linux' or (sys_platform == 'darwin' and platform_machine == 'arm64'))",
 ]
 
 # Testing: ``hya.testing`` (the pytest marks) imports pytest

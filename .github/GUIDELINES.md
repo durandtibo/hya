@@ -44,7 +44,7 @@ The trigger of a reusable workflow is `workflow_call`: it runs when another work
 | `ci-test.yaml`                       | called by `ci.yaml`                    | Unit and integration tests, with all the dependencies and with the required ones only.                     |
 | `ci-test-deps.yaml`                  | called by `ci.yaml`                    | One job per dependency (`omegaconf` and each optional dependency), to test it with its supported versions. |
 | `ci-test-code-dep.yaml`              | called by `ci-test-deps.yaml`          | Run the unit and integration tests with the supported versions of one dependency.                          |
-| `ci-type-checking.yaml`              | called by `ci.yaml`, manual            | Type check the package with `ty` and `pyright`, and verify the public types (`--verifytypes`).             |
+| `ci-type-checking.yaml`              | called by `ci.yaml`, manual            | Type check the package with `ty` and `pyright`, and verify the public types (`inv types.verify`).          |
 | `ci-verify-workflows.yaml`           | pull request, push to `main`, manual   | Lint the files of `.github/workflows`.                                                                     |
 | `lib-get-test-matrix.yaml`           | called by other workflows, manual      | Load the Python versions and the operating systems to test.                                                |
 | `lib-get-package-extras.yaml`        | called by other workflows, manual      | Read the names of the optional dependencies from `pyproject.toml`.                                         |

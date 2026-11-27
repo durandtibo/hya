@@ -69,8 +69,8 @@
 - Optional libraries (numpy, torch, braceexpand) are imported lazily or guarded with
   `is_*_available()` and a fallback from `hya.utils.fallback`; do not import them
   unconditionally at module level in `src`. Add a fallback when you add a new optional package.
-- New resolvers are registered with the `ResolverRegistry` of their module (`hya.numpy`,
-  `hya.torch`, `hya.default`, ...) and documented in `docs/`.
+- New resolvers are added to the tables of `hya.default` (`_BUILTINS`, or `_OPTIONAL` for a
+  resolver that needs an optional package, which is registered lazily) and documented in `docs/`.
 - Every function, public or private (leading underscore), needs a docstring and its own unit
   tests. Private functions are not exempt. An override that adds nothing to the docstring of the
   method it overrides (same behaviour, arguments and exceptions) has no docstring: it inherits the

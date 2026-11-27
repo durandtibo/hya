@@ -21,7 +21,7 @@ resolvers.
 `hya` provides additional resolvers that require optional dependencies:
 
 ```shell
-# Install all optional dependencies
+# Install all optional dependencies, including pytest (the testing extra)
 uv pip install 'hya[all]'
 
 # Install specific optional dependencies
@@ -66,32 +66,30 @@ Then, you can clone the git repository:
 git clone git@github.com:durandtibo/hya.git
 ```
 
-It is recommended to create a Python 3.11+ virtual environment. This step is optional so you
-can skip it. To create a virtual environment, you can use the following command:
+Then, create a Python 3.11+ virtual environment in the repository, activate it, and install
+[`invoke`](https://www.pyinvoke.org/), which runs the tasks of the project:
 
 ```shell
-make conda
+cd hya
+uv venv
+source .venv/bin/activate
+uv pip install invoke invoke-tasklib
 ```
 
-It automatically creates a conda virtual environment. When the virtual environment is created, you
-can activate it with the following command:
+Then, install `hya` in editable mode with all its dependencies:
 
 ```shell
-conda activate hya
+inv env.install
 ```
 
-This example uses `conda` to create a virtual environment, but you can use other tools or
-configurations. Then, you should install the required package to use `hya` with the following
-command:
+You can also use this command to restore the environment to the versions of the lock file
+(`uv.lock`). To update the dependencies to more recent versions, use `inv env.update`.
+
+Finally, you can test the installation with the following commands:
 
 ```shell
-make install
+inv test.unit --cov
+inv test.integration
 ```
 
-This command will install all the required packages. You can also use this command to update the
-required packages. This command will check if there is a more recent package available and will
-install it. Finally, you can test the installation with the following command:
-
-```shell
-make unit-test-cov
-```
+Run `inv --list` to see all the tasks.

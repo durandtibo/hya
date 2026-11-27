@@ -5,10 +5,11 @@ from pathlib import Path
 from typing import Any
 
 import pytest
-from omegaconf import OmegaConf
-from omegaconf.errors import InterpolationResolutionError
+from omegaconf import OmegaConf, flag_override
+from omegaconf.errors import InterpolationResolutionError, UnsupportedValueType
 
 from hya import get_default_registry
+from hya.testing import numpy_available, torch_available
 
 DOCS_RESOLVERS = Path(__file__).parents[2] / "docs" / "docs" / "resolvers.md"
 # A resolver is documented by a heading (#### `hya.add`) or by a row of a table (| `hya.sub` |)
@@ -163,6 +164,45 @@ def test_sha256_resolver_does_not_modify_config_dict() -> None:
     conf = OmegaConf.create({"x": {"a": 1}, "key": "${hya.sha256:${x}}"})
     assert len(conf.key) == 64
     assert conf.x == {"a": 1}
+
+
+def test_add_resolver_of_one_value_returns_the_node_itself() -> None:
+    conf = OmegaConf.create({"x": [1, 2], "key": "${hya.add:${x}}"})
+    conf.key.append(3)
+    assert conf.x == [1, 2, 3]
+
+
+##########################################
+#     Tests for the returned objects     #
+##########################################
+
+OBJECT_EXPRESSIONS = [
+    pytest.param("${hya.np.array:[1,2]}", marks=numpy_available),
+    pytest.param("${hya.torch.tensor:[1,2]}", marks=torch_available),
+    pytest.param("${hya.torch.dtype:float32}", marks=torch_available),
+]
+
+
+@pytest.mark.parametrize("expression", OBJECT_EXPRESSIONS)
+def test_resolve_of_an_object_needs_the_allow_objects_flag(expression: str) -> None:
+    conf = OmegaConf.create({"key": expression})
+    with pytest.raises(UnsupportedValueType, match=r"is not a supported primitive type"):
+        OmegaConf.resolve(conf)
+
+
+@pytest.mark.parametrize("expression", OBJECT_EXPRESSIONS)
+def test_resolve_of_an_object_with_the_allow_objects_flag(expression: str) -> None:
+    conf = OmegaConf.create({"key": expression}, flags={"allow_objects": True})
+    OmegaConf.resolve(conf)
+    assert not OmegaConf.is_interpolation(conf, "key")
+
+
+@pytest.mark.parametrize("expression", OBJECT_EXPRESSIONS)
+def test_resolve_of_an_object_with_the_allow_objects_flag_override(expression: str) -> None:
+    conf = OmegaConf.create({"key": expression})
+    with flag_override(conf, "allow_objects", True):
+        OmegaConf.resolve(conf)
+    assert not OmegaConf.is_interpolation(conf, "key")
 
 
 #############################################

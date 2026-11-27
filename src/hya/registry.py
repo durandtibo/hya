@@ -78,6 +78,19 @@ class ResolverRegistry:
         r"""The state of the registry.
 
         This is a read-only view: use ``register`` to add a resolver.
+
+        Example:
+            ```pycon
+            >>> from hya.registry import ResolverRegistry
+            >>> registry = ResolverRegistry()
+            >>> @registry.register("my_key")
+            ... def my_resolver(value):
+            ...     return value
+            ...
+            >>> list(registry.state)
+            ['my_key']
+
+            ```
         """
         return MappingProxyType(self._state)
 

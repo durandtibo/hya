@@ -202,10 +202,12 @@ built from.
 - **`hya.np.array` takes the data type as a string.** The string that NumPy accepts is enough, so
   there is no `hya.np.dtype` resolver. `hya.torch.tensor` takes the name too, so the two resolvers
   have the same contract, and also a `torch.dtype`, such as the output of `hya.torch.dtype`.
-- **`hya.path` reads `file:` URLs only.** A string that starts with `file:` is decoded as a URL; any
-  other string is a plain path, so `/data/a%20b` keeps its `%20`. A file URL with a host other than
-  `localhost`, a query or a fragment raises a `ValueError` instead of dropping it: write a `?` or a
-  `#` of a file name as `%3F` or `%23`.
+- **`hya.path` reads `file:` URLs only.** A string that starts with `file:` is decoded as a URL. A
+  file URL with a host other than `localhost`, a query or a fragment raises a `ValueError` instead of
+  dropping it: write a `?` or a `#` of a file name as `%3F` or `%23`. Any other `scheme://` string
+  and an empty path raise too, because the path they would give is not what the configuration means,
+  and the failure would appear far from its cause. Any other string is a plain path, so
+  `/data/a%20b` keeps its `%20`.
 - **`hya.braceexpand` returns a list.** It has a length, can be indexed and can be read several
   times, at the cost of building the whole expansion at once.
 

@@ -193,16 +193,18 @@ The workflows follow those of [coola](https://github.com/durandtibo/coola).
   - `bot-`: scheduled automation that opens pull requests (dependency updates, pinning
     actions, formatting, ...) with the `ci-bot` GitHub App token.
   - `release-`: publishing to PyPI and the documentation, triggered by version tags
-    (`v*.*.*`) or manually; they run `ci.yaml` before publishing.
+    (`v*.*.*`) or manually; they do not run `ci.yaml`, so check that CI passes on the
+    commit before tagging.
   - `security-`: dependency review of PRs, scheduled dependency audit and scorecard.
-- `ci.yaml` is the single entry point of the checks (pull request, push to `main`, nightly,
-  `workflow_call` for the release). It calls `lib-get-test-matrix.yaml` once and passes the matrix
-  (`test-matrix` input) to the test workflows, so the Python versions and OS are defined in one
-  place. To add a check, create a `ci-<name>.yaml` reusable workflow and add a job in `ci.yaml`.
+- `ci.yaml` is the single entry point of the checks (pull request, push to `main`, nightly).
+  It calls `lib-get-test-matrix.yaml` once and passes the matrix (`test-matrix` input) to the
+  test workflows, so the Python versions and OS are defined in one place. To add a check,
+  create a `ci-<name>.yaml` reusable workflow and add a job in `ci.yaml`.
 - The optional dependencies come from `pyproject.toml` (`lib-get-package-extras.yaml`,
   `durandtibo/extract-pyproject-metadata-action`). Do not hardcode them in a workflow.
 - Every action is pinned to a commit SHA with a `# ratchet:owner/repo@vX.Y.Z` comment. Copy the pin
-  of an existing workflow; `bot-pin-action.yaml` refreshes them.
+  of an existing workflow; `bot-pin-action.yaml` refreshes them. The SLSA generator of
+  `release-pypi.yaml` is the one exception: it must be referenced by a tag (`# ratchet:exclude`).
 - Conventions: a header comment that says what the workflow does and when it runs; `permissions: {}`
   at the top and the minimum `permissions` per job; `timeout-minutes` on every job;
   `workflow_dispatch` when it makes sense. Look at an existing workflow and copy its conventions.

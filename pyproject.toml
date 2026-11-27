@@ -99,6 +99,7 @@ torch-backend = "auto"
 
 [tool.codespell]
 skip = "*.lock,./.git,./htmlcov,./docs/site,coverage.xml"
+ignore-words-list = "intoto"
 
 [tool.coverage.paths]
 source = ["src", "*/site-packages"]

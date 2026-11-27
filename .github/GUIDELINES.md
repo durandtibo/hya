@@ -54,7 +54,7 @@ The trigger of a reusable workflow is `workflow_call`: it runs when another work
 | `nightly-test-package.yaml`          | called by `nightly-package.yaml`       | Run the tests against the installed PyPI package.                                                          |
 | `nightly-test-package-dep.yaml`      | called by `nightly-package.yaml`       | Test the installed PyPI package with the supported versions of one dependency.                             |
 | `nightly-test-package-extras.yaml`   | called by `nightly-package.yaml`       | Check that each extra of the PyPI package installs.                                                        |
-| `release-pypi.yaml`                  | version tag `v*.*.*`, manual           | Build and publish the package to PyPI.                                                                     |
+| `release-pypi.yaml`                  | version tag `v*.*.*`, manual           | Build, sign, attest (SLSA, GitHub provenance) and publish the package to PyPI.                             |
 | `release-docs.yaml`                  | version tag `v*.*.*`, manual           | Deploy the documentation of the stable version (with `mike`).                                              |
 | `release-docs-dev.yaml`              | push to `main`, manual                 | Deploy the documentation of the development version.                                                       |
 | `release-docs-publish.yaml`          | called by the two previous workflows   | Build and deploy the documentation (shared logic).                                                         |
@@ -95,7 +95,9 @@ action/reusable workflow over copy-pasting steps.
   [`ratchet`](https://github.com/sethvargo/ratchet) via `workflows/bot-pin-action.yaml`.
   Never hand-pin a SHA without that comment — the next `bot-pin-action` run
   would otherwise silently downgrade or drift it. Local composite actions
-  (`uses: ./.github/actions/...`) are referenced by path, not pinned. Any
+  (`uses: ./.github/actions/...`) are referenced by path, not pinned. The one
+  exception is the SLSA generator in `workflows/release-pypi.yaml`, which must
+  be referenced by a tag (`# ratchet:exclude`). Any
   runtime tool invoked outside of a pinned action (e.g. `npx <pkg>`) should
   also pin an explicit version, so a bot-authored PR can't pick up an
   unreviewed upstream release.

@@ -1,6 +1,14 @@
 # PyPI package publishing workflow.
 # Builds and publishes the package to PyPI when a new version is released.
 # Triggered by version tags or can be run manually.
+#
+# On a tag, the artifacts are signed with Sigstore and attached to the GitHub
+# release, the SLSA generic generator attaches a SLSA provenance file
+# (*.intoto.jsonl) to the release (the OpenSSF Scorecard Signed-Releases check
+# looks for it), and actions/attest stores a GitHub build provenance
+# attestation. Publishing uses PyPI Trusted Publishing (OIDC), so no token is
+# needed. Requires a GitHub Environment named "pypi" configured as a PyPI
+# Trusted Publisher with workflow filename "release-pypi.yaml".
 
 name: Publish PyPI Package
 on:
@@ -16,29 +24,26 @@ concurrency:
 permissions: {}
 
 jobs:
-  # Nothing is published unless the whole CI passes on the released commit.
-  ci:
-    permissions:
-      contents: read
-    uses: ./.github/workflows/ci.yaml
-    secrets: inherit
-
   build:
     permissions:
       contents: read
-    needs: ci
     # Manual runs are only allowed from main; tag pushes are always allowed.
     if: github.event_name != 'workflow_dispatch' || github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     timeout-minutes: 5
+    outputs:
+      # Base64 of the sha256sum lines of the artifacts, the subjects of the
+      # SLSA provenance (computed by build-pypi-package-action).
+      hashes: ${{ steps.build.outputs.hashes }}
     steps:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # ratchet:actions/checkout@v7
 
       - name: Build package
-        uses: durandtibo/build-pypi-package-action@239defb64fe09080292442db058bddd02f498eb3 # ratchet:durandtibo/build-pypi-package-action@v0.1.0
+        id: build
+        uses: durandtibo/build-pypi-package-action@1f41417b6df6af42e13f58142f34261d6a490d0b # ratchet:durandtibo/build-pypi-package-action@v0.1.3
         with:
-          build-command: inv release.build
+          checksum-file: "true"
 
   sign-and-release:
     needs: build
@@ -54,23 +59,70 @@ jobs:
       - name: Sign and release package
         uses: durandtibo/sign-pypi-package-action@27337599193dc08605604ca7dd844528833f78b0 # ratchet:durandtibo/sign-pypi-package-action@v0.1.0
 
+  # SLSA provenance (*.intoto.jsonl) attached to the GitHub release.
+  # The reusable workflow must be referenced by a tag, not by a commit SHA:
+  # the generator verifies its own ref and fails on a SHA, so this is the
+  # one exception to the action pinning (no ratchet comment).
+  provenance:
+    needs: build
+    if: startsWith(github.ref, 'refs/tags/')
+    permissions:
+      actions: read # Required to read the workflow run
+      id-token: write # Required to sign the provenance with Sigstore
+      contents: write # Required to attach the provenance to the release
+    uses: slsa-framework/slsa-github-generator/.github/workflows/generator_generic_slsa3.yml@v2.1.0 # ratchet:exclude
+    with:
+      base64-subjects: ${{ needs.build.outputs.hashes }}
+      upload-assets: true
+
+  # GitHub build provenance attestation, stored in the GitHub attestation API
+  # (verify with `gh attestation verify <file> --repo <owner>/<repo>`).
+  attest:
+    needs: build
+    if: startsWith(github.ref, 'refs/tags/')
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+      id-token: write # Required to sign the attestation with Sigstore
+      attestations: write # Required to store the attestation
+    steps:
+      - name: Download distribution artifacts
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # ratchet:actions/download-artifact@v8.0.2
+        with:
+          name: dist
+          path: dist/
+
+      - name: Attest build provenance
+        uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6 # ratchet:actions/attest@v4.2.2
+        with:
+          subject-path: |
+            dist/*.tar.gz
+            dist/*.whl
+
   publish:
-    needs: [build, sign-and-release]
+    needs: [build, sign-and-release, provenance, attest]
     # Only fail-closed on tag pushes: on a tag, publish must wait for
-    # sign-and-release to succeed; on workflow_dispatch, sign-and-release
-    # is skipped (not failed), so allow publish to proceed.
+    # sign-and-release, provenance and attest to succeed; on
+    # workflow_dispatch they are skipped (not failed), so allow publish to
+    # proceed.
     if: |
       always() &&
       needs.build.result == 'success' &&
-      (needs.sign-and-release.result == 'success' || needs.sign-and-release.result == 'skipped')
+      (needs.sign-and-release.result == 'success' || needs.sign-and-release.result == 'skipped') &&
+      (needs.provenance.result == 'success' || needs.provenance.result == 'skipped') &&
+      (needs.attest.result == 'success' || needs.attest.result == 'skipped')
+    # publish-pypi-package-action runs pypa/gh-action-pypi-publish, a Docker
+    # container action, which requires a Docker daemon - ubuntu-slim doesn't
+    # have one, so this job must stay on ubuntu-latest.
     runs-on: ubuntu-latest
     timeout-minutes: 5
     environment:
       name: pypi
       url: https://pypi.org/project/hya/
     permissions:
-      # Required for PyPI Trusted Publishing (OIDC) - no API token needed.
-      id-token: write
+      id-token: write # Required for PyPI Trusted Publishing (OIDC)
+      contents: read # Required to download the signature bundles from the release
     steps:
       - name: Download distribution artifacts
         uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # ratchet:actions/download-artifact@v8.0.2
@@ -82,6 +134,7 @@ jobs:
         run: |
           cd dist && sha256sum --check SHA256SUMS && rm SHA256SUMS
 
+      # The bundles are attached to the GitHub release by sign-and-release.
       # sigstore verify expects each bundle next to a same-basename copy of
       # its artifact, so the artifacts are copied into a scratch dir rather
       # than downloading the bundles into dist/ itself - gh-action-pypi-publish
@@ -90,14 +143,15 @@ jobs:
       # contain the wheel/sdist that are meant to be published.
       - name: Download signature bundles
         if: startsWith(github.ref, 'refs/tags/')
-        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # ratchet:actions/download-artifact@v8.0.2
-        with:
-          name: signatures
-          path: verify/
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release download "${GITHUB_REF_NAME}" --repo "${GITHUB_REPOSITORY}" \
+            --pattern '*.sigstore.json' --dir verify/
 
       - name: Install uv
         if: startsWith(github.ref, 'refs/tags/')
-        uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # ratchet:astral-sh/setup-uv@v10.3.3
+        uses: astral-sh/setup-uv@1db35dd8eee11c5894872e0b383ae6c406cf738d # ratchet:astral-sh/setup-uv@v10.4.0
 
       - name: Verify Sigstore signatures
         if: startsWith(github.ref, 'refs/tags/')

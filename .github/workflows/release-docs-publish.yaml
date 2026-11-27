@@ -19,6 +19,11 @@ jobs:
     timeout-minutes: 5
     permissions:
       contents: write # Required to push to gh-pages branch
+    # Only one deployment at a time: concurrent pushes to gh-pages are rejected.
+    # Only the latest pending run is kept, GitHub cancels the older pending ones.
+    concurrency:
+      group: gh-pages-publish
+      cancel-in-progress: false
 
     steps:
       # Install dependencies including documentation tools

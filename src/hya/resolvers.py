@@ -14,7 +14,6 @@ __all__ = [
 
 import hashlib
 import json
-import logging
 import math
 import operator
 import os
@@ -30,8 +29,6 @@ from hya.utils.config import to_plain
 if TYPE_CHECKING:
     from collections.abc import Iterable
 
-
-logger: logging.Logger = logging.getLogger(__name__)
 
 # A URL with an authority, such as "s3://bucket": it is never a local path. A scheme of one
 # character is not matched, so a Windows drive ("C://x") is not read as a URL.

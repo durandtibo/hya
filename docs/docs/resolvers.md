@@ -328,7 +328,9 @@ def encode(value):
 
 # value is the resolved content of the argument, without configuration nodes
 if not isinstance(value, str):
-    value = json.dumps(value, sort_keys=True, separators=(",", ":"), default=encode)
+    value = json.dumps(
+        value, sort_keys=True, separators=(",", ":"), allow_nan=False, default=encode
+    )
 digest = hashlib.sha256(value.encode("utf-8")).hexdigest()
 ```
 
@@ -337,11 +339,15 @@ digest = hashlib.sha256(value.encode("utf-8")).hexdigest()
 - The interpolations of the value are resolved at any depth, and a missing value (`???`) is an
   error.
 - A string is hashed as is: the result is the one that other SHA-256 tools give for the text.
-- Any other value is hashed from its canonical JSON form (sorted keys, no space), so the order of
-  the keys of a mapping does not matter. A path or an enum is written as its string.
+- Any other value is hashed from its canonical JSON form (sorted keys, no space, non-ASCII
+  characters escaped as `\uXXXX`), so the order of the keys of a mapping does not matter.
+- In this form, a path or an enum is written as its string (`Color.RED`). An enum that is also an
+  `int`, a `float` or a `str` (an `IntEnum`, a `class Name(str, Enum)`) is written as its value.
 - A value without a JSON form (an array, a tensor, a data type, a set, bytes) raises a `TypeError`.
   Hash the list or the string it is built from. A mapping that mixes key types cannot be sorted and
   raises too.
+- A non-finite float (`nan` or `inf`) has no JSON form: it raises a `ValueError`. The string `nan`
+  is hashed as any string.
 - The type of a value is not part of the hash: the string `[1]` and the list `[1]` have the same
   hash, and so do an integer key and the same string key.
 

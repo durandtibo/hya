@@ -157,7 +157,7 @@ at call time.
 `hya.sha256` is meant for identifiers, so two different values must not share a hash by accident.
 It resolves the configuration nodes of its argument (`hya.utils.config.to_plain`, which
 `hya.iter_join`, `hya.np.array` and `hya.torch.tensor` use too), then hashes a string as is and any
-other value as canonical JSON (sorted keys, no space).
+other value as canonical JSON (sorted keys, no space, non-ASCII characters escaped).
 
 - **Benefit:** the hash follows the interpolated values, does not depend on the order of the keys,
   on `repr`, on the print options of NumPy or PyTorch, or on the OmegaConf release, and the hash of

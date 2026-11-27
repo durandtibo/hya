@@ -333,6 +333,20 @@ def test_sha256_resolver_of_an_object_without_json_form(expression: str) -> None
         _ = conf.key
 
 
+@pytest.mark.parametrize(
+    "expression",
+    [
+        "${hya.sha256:${hya.float:nan}}",
+        "${hya.sha256:[${hya.float:inf}]}",
+        "${hya.sha256:${x}}",
+    ],
+)
+def test_sha256_resolver_of_a_non_finite_float(expression: str) -> None:
+    conf = OmegaConf.create({"x": {"a": float("-inf")}, "key": expression})
+    with pytest.raises(InterpolationResolutionError, match=r"not JSON compliant"):
+        _ = conf.key
+
+
 def test_sha256_resolver_of_a_mapping_with_mixed_key_types() -> None:
     conf = OmegaConf.create({"x": {1: 2, "a": 3}, "key": "${hya.sha256:${x}}"})
     with pytest.raises(InterpolationResolutionError, match=r"TypeError"):

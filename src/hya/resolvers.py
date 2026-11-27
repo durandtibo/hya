@@ -13,14 +13,18 @@ __all__ = [
 ]
 
 import hashlib
+import json
 import logging
 import math
 import operator
 import os
+from enum import Enum
 from functools import reduce
-from pathlib import Path
+from pathlib import Path, PurePath
 from typing import TYPE_CHECKING, Any
 from urllib.parse import unquote, urlparse
+
+from hya.utils.config import to_plain
 
 if TYPE_CHECKING:
     from collections.abc import Iterable
@@ -243,18 +247,36 @@ def pi_resolver() -> float:
 
 
 def sha256_resolver(obj: Any) -> str:
-    r"""Compute the SHA-256 hash of an input object.
+    r"""Compute the SHA-256 hash of the whole content of an object.
 
-    This resolver converts the object to a string representation and
-    computes its SHA-256 hash. Useful for generating consistent identifiers
-    or cache keys from configuration values.
+    The configuration nodes of the object are resolved first, at any
+    depth. A string is then hashed as is, so the result is the SHA-256
+    of the text, the same as other tools give. Any other value is
+    hashed from its canonical JSON form: sorted keys and no space
+    (``[1,2]``, ``{"a":1,"b":2}``, ``true``, ``null``). In this form, a
+    path or an enum is written as its string. Useful for generating
+    consistent identifiers or cache keys from configuration values.
+
+    The hash does not keep the type of a value: the string ``[1]`` and
+    the list ``[1]`` have the same hash, and so do an integer key and
+    the same string key.
 
     Args:
-        obj: The object to compute the SHA-256 hash. The object will
-            be converted to a string using str() before hashing.
+        obj: The object to compute the SHA-256 hash: a string, or a
+            value with a JSON form (numbers, booleans, ``None``, lists,
+            tuples, dictionaries, ``ListConfig``, ``DictConfig``,
+            paths and enums).
 
     Returns:
         The SHA-256 hash as a hexadecimal string (64 characters).
+
+    Raises:
+        TypeError: If a value has no JSON form (for example an array, a
+            tensor, a data type, a set or bytes), if a key of a mapping
+            is not a string, a number, a boolean or ``None``, or if a
+            mapping mixes key types that cannot be sorted.
+        omegaconf.errors.MissingMandatoryValue: If a node contains a
+            missing value (``???``).
 
     Example:
         ```pycon
@@ -265,7 +287,51 @@ def sha256_resolver(obj: Any) -> str:
         bd3ff47540b31e62d4ca6b07794e5a886b0f655fc322730f26ecd65cc7dd5c90
         >>> # Useful for generating consistent IDs
         >>> conf = OmegaConf.create({"id": "${hya.sha256:experiment_v1}"})
+        >>> # The order of the keys does not change the hash
+        >>> conf = OmegaConf.create(
+        ...     {
+        ...         "x": {"a": 1, "b": 2},
+        ...         "y": {"b": 2, "a": 1},
+        ...         "hx": "${hya.sha256:${x}}",
+        ...         "hy": "${hya.sha256:${y}}",
+        ...     }
+        ... )
+        >>> conf.hx == conf.hy
+        True
 
         ```
     """
-    return hashlib.sha256(bytes(str(obj), "utf-8")).hexdigest()
+    value = to_plain(obj)
+    if not isinstance(value, str):
+        value = json.dumps(value, sort_keys=True, separators=(",", ":"), default=_encode_value)
+    return hashlib.sha256(value.encode("utf-8")).hexdigest()
+
+
+def _encode_value(value: object) -> str:
+    r"""Encode a value that JSON does not support.
+
+    It is the ``default`` function that ``sha256_resolver`` gives to
+    ``json.dumps``.
+
+    Args:
+        value: The value to encode.
+
+    Returns:
+        The string of a path or an enum.
+
+    Raises:
+        TypeError: If the value is not a path or an enum.
+
+    Example:
+        ```pycon
+        >>> from pathlib import PurePosixPath
+        >>> from hya.resolvers import _encode_value
+        >>> _encode_value(PurePosixPath("/my/path"))
+        '/my/path'
+
+        ```
+    """
+    if isinstance(value, (PurePath, Enum)):
+        return str(value)
+    msg = f"hya.sha256 cannot hash a value of type {type(value).__name__}"
+    raise TypeError(msg)

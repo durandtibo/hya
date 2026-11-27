@@ -20,6 +20,8 @@ repository. The [Design Choices](design.md) page explains the reasons and the tr
 | P13 | **Keyword-only options**   | The options of the Python API are keyword-only (`exist_ok`, `replace`). The arguments of a resolver are positional, because the interpolation grammar has no keyword syntax; an optional argument of a resolver comes last and has a default.                                                                                  |
 | P14 | **Installs next to Hydra** | `hya` accepts every OmegaConf release that a Hydra release accepts (`omegaconf>=2.2,<3.0`). CI runs the tests on the oldest and the newest OmegaConf.                                                                                                                                                                          |
 | P15 | **Composable**             | A resolver accepts the values OmegaConf gives it (`str`, `int`, `float`, `bool`, `None`, `list`, `dict`, `ListConfig`, `DictConfig`) and the output of another `hya` resolver (a `Path` for `hya.path`, a `torch.dtype` for `hya.torch.tensor`).                                                                               |
+| P16 | **Resolved input**         | A resolver that reads a whole value (`hya.sha256`, `hya.np.array`) reads its **resolved** content: interpolations are resolved at any depth, and a missing value (`???`) raises `MissingMandatoryValue`.                                                                                                                       |
+| P17 | **Faithful hash**          | `hya.sha256` hashes the whole content of a value: a string as is, any other value as canonical JSON (sorted keys). Two such values with different JSON forms have different hashes, and a value without a JSON form raises instead of being hashed from a summary.                                                             |
 
 ## Details
 
@@ -53,8 +55,9 @@ repository. The [Design Choices](design.md) page explains the reasons and the tr
 - **Detection of a conflicting registration.** A resolver that another source registers after `hya`
   published the same key is not detected: it needs the private `BaseContainer._resolvers` of
   OmegaConf, which changes between releases.
-- **Order-insensitive hashes.** `hya.sha256` hashes `str(obj)`, so two mappings with the same items
-  in another order have different hashes.
+- **Type-tagged hashes.** `hya.sha256` of the string `[1]` equals the hash of the list `[1]`, an
+  integer key equals the same string key, and a path or an enum equals its string in JSON. A mapping
+  that mixes key types cannot be sorted and raises.
 - **Caching of the output of the resolvers.** OmegaConf does not cache it: every access of an
   interpolation calls the resolver again.
 - **Export of objects.** `OmegaConf.to_yaml(resolve=True)` does not support an array, a tensor or

@@ -22,6 +22,7 @@ REFERENCE = Path(__file__).parents[2] / "docs" / "docs" / "refs"
         "hya.resolvers",
         "hya.testing",
         "hya.torch",
+        "hya.utils.config",
     ],
 )
 def test_public_module_is_in_the_reference(module: str) -> None:

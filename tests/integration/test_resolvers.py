@@ -9,6 +9,7 @@ from omegaconf import OmegaConf, flag_override
 from omegaconf.errors import InterpolationResolutionError, UnsupportedValueType
 
 from hya import get_default_registry
+from hya.resolvers import sha256_resolver
 from hya.testing import numpy_available, torch_available
 
 DOCS_RESOLVERS = Path(__file__).parents[2] / "docs" / "docs" / "resolvers.md"
@@ -253,3 +254,84 @@ def test_resolver_of_the_output_of_another_resolver() -> None:
 def test_iter_join_resolver_of_the_output_of_another_resolver() -> None:
     conf = OmegaConf.create({"key": "${hya.iter_join:[${hya.add:1,2},${hya.len:[1,2]}],-}"})
     assert conf.key == "3-2"
+
+
+#########################################
+#     Tests for the resolved values     #
+#########################################
+
+# The resolvers that read a whole value, applied to the node ``x``
+WHOLE_VALUE_RESOLVERS = [
+    pytest.param("${hya.sha256:${x}}", id="sha256"),
+    pytest.param("${hya.np.array:${x}}", id="np.array", marks=numpy_available),
+]
+
+
+@pytest.mark.parametrize("expression", WHOLE_VALUE_RESOLVERS)
+def test_whole_value_resolver_resolves_a_nested_interpolation(expression: str) -> None:
+    nested = OmegaConf.create({"a": 1, "x": [["${a}"]], "key": expression})
+    plain = OmegaConf.create({"x": [[1]], "key": expression})
+    assert str(nested.key) == str(plain.key)
+
+
+@pytest.mark.parametrize("expression", WHOLE_VALUE_RESOLVERS)
+def test_whole_value_resolver_missing_value(expression: str) -> None:
+    conf = OmegaConf.create({"x": [["???"]], "key": expression})
+    with pytest.raises(InterpolationResolutionError, match=r"MissingMandatoryValue"):
+        _ = conf.key
+
+
+@pytest.mark.parametrize(
+    ("x", "expression"),
+    [
+        pytest.param(["${a}"], "${hya.sha256:${x}}", id="list"),
+        pytest.param({"b": "${a}"}, "${hya.sha256:${x}}", id="mapping"),
+        pytest.param([["${a}"]], "${hya.sha256:${x}}", id="nested"),
+        pytest.param(["${a}"], "${hya.sha256:[${x}]}", id="literal-list"),
+        pytest.param(1, "${hya.sha256:[${a}]}", id="literal-interpolation"),
+    ],
+)
+def test_sha256_resolver_hash_changes_with_an_interpolated_value(x: Any, expression: str) -> None:
+    first = OmegaConf.create({"a": 1, "x": x, "key": expression})
+    second = OmegaConf.create({"a": 2, "x": x, "key": expression})
+    assert first.key != second.key
+
+
+def test_sha256_resolver_does_not_depend_on_the_order_of_the_keys() -> None:
+    conf = OmegaConf.create(
+        {
+            "x": {"a": 1, "b": 2},
+            "y": {"b": 2, "a": 1},
+            "hx": "${hya.sha256:${x}}",
+            "hy": "${hya.sha256:${y}}",
+        }
+    )
+    assert conf.hx == conf.hy
+
+
+def test_sha256_resolver_of_a_mapping() -> None:
+    conf = OmegaConf.create({"x": {"b": 2, "a": 1}, "key": "${hya.sha256:${x}}"})
+    assert conf.key == "43258cff783fe7036d8a43033f830adfc60ec037382473548ac742b888292777"
+
+
+def test_sha256_resolver_of_a_path() -> None:
+    conf = OmegaConf.create({"key": "${hya.sha256:${hya.path:/a}}"})
+    assert conf.key == sha256_resolver(Path("/a"))
+
+
+def test_sha256_resolver_of_a_list_of_paths() -> None:
+    conf = OmegaConf.create({"x": ["${hya.path:/a}"], "key": "${hya.sha256:${x}}"})
+    assert conf.key == sha256_resolver([Path("/a")])
+
+
+@pytest.mark.parametrize("expression", OBJECT_EXPRESSIONS)
+def test_sha256_resolver_of_an_object_without_json_form(expression: str) -> None:
+    conf = OmegaConf.create({"key": f"${{hya.sha256:{expression}}}"})
+    with pytest.raises(InterpolationResolutionError, match=r"hya.sha256 cannot hash a value"):
+        _ = conf.key
+
+
+def test_sha256_resolver_of_a_mapping_with_mixed_key_types() -> None:
+    conf = OmegaConf.create({"x": {1: 2, "a": 3}, "key": "${hya.sha256:${x}}"})
+    with pytest.raises(InterpolationResolutionError, match=r"TypeError"):
+        _ = conf.key

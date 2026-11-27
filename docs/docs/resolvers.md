@@ -278,9 +278,9 @@ value = separator.join(map(str, iterable))
 
 #### `hya.sha256`
 
-Computes the SHA-256 hash of an object.
+Computes the SHA-256 hash of the whole content of a value.
 
-**Syntax:** `${hya.sha256:object}`
+**Syntax:** `${hya.sha256:value}`
 
 **Example:**
 
@@ -292,15 +292,46 @@ experiment:
   config: "resnet50_adam_0.001"
   version_id: ${hya.sha256:${experiment.config}}
   # Generates consistent hash for versioning
+
+model:
+  name: resnet
+  depth: 50
+model_id: ${hya.sha256:${model}} # Changes when a value of model changes
 ```
 
 **Equivalent Python:**
 
 ```python
 import hashlib
+import json
+from enum import Enum
+from pathlib import PurePath
 
-value = hashlib.sha256(bytes(str(obj), "utf-8")).hexdigest()
+
+def encode(value):
+    if isinstance(value, (PurePath, Enum)):
+        return str(value)
+    raise TypeError(f"hya.sha256 cannot hash a value of type {type(value).__name__}")
+
+
+# value is the resolved content of the argument, without configuration nodes
+if not isinstance(value, str):
+    value = json.dumps(value, sort_keys=True, separators=(",", ":"), default=encode)
+digest = hashlib.sha256(value.encode("utf-8")).hexdigest()
 ```
+
+**Notes:**
+
+- The interpolations of the value are resolved at any depth, and a missing value (`???`) is an
+  error.
+- A string is hashed as is: the result is the one that other SHA-256 tools give for the text.
+- Any other value is hashed from its canonical JSON form (sorted keys, no space), so the order of
+  the keys of a mapping does not matter. A path or an enum is written as its string.
+- A value without a JSON form (an array, a tensor, a data type, a set, bytes) raises a `TypeError`.
+  Hash the list or the string it is built from. A mapping that mixes key types cannot be sorted and
+  raises too.
+- The type of a value is not part of the hash: the string `[1]` and the list `[1]` have the same
+  hash, and so do an integer key and the same string key.
 
 **Use Case:** Creating unique identifiers for experiments, cache keys, or version tracking.
 

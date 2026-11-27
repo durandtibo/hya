@@ -132,11 +132,26 @@ at call time.
 - **Cost:** a wrong type fails inside the resolver (for example a `TypeError`) instead of in a
   validation step.
 
+## The hash reads the whole value
+
+`hya.sha256` is meant for identifiers, so two different values must not share a hash by accident.
+It resolves the configuration nodes of its argument (`hya.utils.config.to_plain`), then hashes a
+string as is and any other value as canonical JSON (sorted keys, no space).
+
+- **Benefit:** the hash follows the interpolated values, does not depend on the order of the keys,
+  on `repr`, on the print options of NumPy or PyTorch, or on the OmegaConf release, and the hash of
+  a string is the one that other SHA-256 tools give.
+- **Cost:** the type of a value is not part of the hash (the string `[1]` and the list `[1]` have the
+  same hash), a value without a JSON form raises instead of being hashed, and resolving a large list
+  at each access takes time.
+- **If it does not fit:** hash the value in your code, or register your own resolver.
+
+An array or a tensor is not hashed from its bytes: it would need a format for the data type and the
+shape, and two optional packages in a resolver of the standard library. Hash the value the array is
+built from.
+
 ## Some behaviours follow Python on purpose
 
-- **`hya.sha256` hashes `str(obj)`.** It is simple and predictable, but two mappings with the same
-  items in a different order have different hashes. Sort the keys in the configuration if you need
-  order-insensitivity.
 - **`hya.ceildiv` follows `//`.** It computes `-(a // -b)`, which is exact for integers of any size.
   The result is an `int` for two integers and a `float` for a float. Use
   `${hya.int:${hya.ceildiv:x,y}}` to force an `int`.

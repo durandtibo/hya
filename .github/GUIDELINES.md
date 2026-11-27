@@ -16,7 +16,7 @@ Every file is prefixed by what it does:
 | `bot-`      | Scheduled automation that pushes commits / opens PRs as the `ci-bot` GitHub App.                                                                                     |
 | `nightly-`  | Scheduled checks against the _published_ PyPI package (as opposed to `ci-*`, which checks the repo's source).                                                        |
 | `release-`  | Publishing: PyPI package, GitHub release assets, documentation.                                                                                                      |
-| `security-` | Supply-chain/security scanning (Scorecard, dependency review).                                                                                                       |
+| `security-` | Supply-chain/security scanning (Scorecard, dependency review and audit).                                                                                             |
 
 `workflows/ci.yaml` is the entry point for pull requests/pushes to `main`; it fans out
 to the `ci-*.yaml` reusable workflows so each check can also be run/dispatched
@@ -39,7 +39,7 @@ The trigger of a reusable workflow is `workflow_call`: it runs when another work
 | `ci-build.yaml`                      | called by `ci.yaml`                    | Build the package and check that the built package installs.                                               |
 | `ci-cyclic-imports.yaml`             | called by `ci.yaml`, manual            | Check that there is no circular import (`inv imports.check-cycles`).                                       |
 | `ci-doctest.yaml`                    | called by `ci.yaml`, manual            | Run the doctests (`inv test.doctest`) and check that the documentation builds.                             |
-| `ci-format.yaml`                     | called by `ci.yaml`, manual            | Check the formatting and the linting of the Python and shell files.                                        |
+| `ci-format.yaml`                     | called by `ci.yaml`, manual            | Check the formatting and the linting of the files (`make format`, `make lint`) and of the Python code.     |
 | `ci-pre-commit.yaml`                 | called by `ci.yaml`, manual            | Run all the pre-commit hooks.                                                                              |
 | `ci-test.yaml`                       | called by `ci.yaml`                    | Unit and integration tests, with all the dependencies and with the required ones only.                     |
 | `ci-test-deps.yaml`                  | called by `ci.yaml`                    | One job per dependency (`omegaconf` and each optional dependency), to test it with its supported versions. |
@@ -58,6 +58,7 @@ The trigger of a reusable workflow is `workflow_call`: it runs when another work
 | `release-docs.yaml`                  | version tag `v*.*.*`, manual           | Deploy the documentation of the stable version (with `mike`).                                              |
 | `release-docs-dev.yaml`              | push to `main`, manual                 | Deploy the documentation of the development version.                                                       |
 | `release-docs-publish.yaml`          | called by the two previous workflows   | Build and deploy the documentation (shared logic).                                                         |
+| `security-audit.yaml`                | weekly (Monday), manual                | Audit the locked dependencies for known vulnerabilities (`pip-audit`).                                     |
 | `security-dependency-review.yaml`    | pull request                           | Review the dependencies added by the pull request.                                                         |
 | `security-scorecard.yaml`            | weekly, push, branch protection change | OSSF Scorecard supply-chain analysis.                                                                      |
 | `bot-cancel-stale-queued-runs.yaml`  | hourly                                 | Cancel the runs that have been queued for too long.                                                        |
@@ -101,13 +102,12 @@ action/reusable workflow over copy-pasting steps.
   runtime tool invoked outside of a pinned action (e.g. `npx <pkg>`) should
   also pin an explicit version, so a bot-authored PR can't pick up an
   unreviewed upstream release.
-- **Permissions**: top-level `permissions:` is always the least the workflow
-  needs — `contents: read` or `{}` — and any job that needs more (e.g.
-  `contents: write` to push, `id-token: write` for OIDC) declares it on that
-  job only, never widening the workflow default.
+- **Permissions**: every workflow has `permissions: {}` at the top level, which
+  grants nothing, and each job declares the minimum it needs (e.g.
+  `contents: write` to push, `id-token: write` for OIDC).
 - **Timeouts**: every job sets `timeout-minutes`, sized to what the job
   actually does (2 for a config-read job, 5 for most checks, 10 for slower
-  jobs like Scorecard or benchmarks) so a hung step can't occupy a runner
+  jobs like Scorecard or the tests) so a hung step can't occupy a runner
   indefinitely.
 - **Runners**: `ubuntu-slim` for lightweight jobs that only run a small
   action or a couple of shell commands (no Python/build tooling); otherwise
@@ -139,11 +139,10 @@ new extra only needs to be added in one place.
 ## Validating changes to this directory
 
 `workflows/ci-verify-workflows.yaml` runs `durandtibo/verify-github-workflow-action` on
-every PR/push that touches `.github/workflows/*`, checking pinning and
-general workflow correctness. Locally, `actionlint` (run from this
-directory) and a YAML syntax check are good pre-flight checks before pushing:
+every pull request and push to `main`, checking pinning and general workflow
+correctness. Locally, run the linters from the root of the repository before pushing:
 
 ```bash
-cd .github/workflows && actionlint
-python3 -c "import yaml, glob; [yaml.safe_load(open(f)) for f in glob.glob('*.yaml')]"
+make lint-actions # actionlint
+make lint         # all the linters
 ```

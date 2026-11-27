@@ -29,7 +29,16 @@ We actively welcome your pull requests.
    inv test.integration
    ```
 
-5. Make sure your code lints. The following commands format the code with
+5. If you changed docstrings or the documentation, run the examples and build the documentation:
+
+   ```shell
+   inv test.doctest
+   inv doc.build
+   ```
+
+   `inv doc.serve` shows the documentation locally while you edit it.
+
+6. Make sure your code lints. The following commands format the code with
    [ruff](https://docs.astral.sh/ruff/) and check it:
 
    ```shell
@@ -41,8 +50,8 @@ We actively welcome your pull requests.
 ## Issues
 
 We use GitHub issues to track public bugs or feature requests.
-For bugs, please ensure your description is clear and concise description, and has sufficient
-information to be easily reproducible.
+For bugs, please ensure your description is clear and concise, and has sufficient information to
+be easily reproducible.
 For feature request, please add a clear and concise description of the feature proposal.
 Please outline the motivation for the proposal.
 

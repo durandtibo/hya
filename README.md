@@ -34,9 +34,100 @@
 
 ## Overview
 
-`hya` is a library of custom [OmegaConf](https://github.com/omry/omegaconf) resolvers.
-`hya` is designed to be used with [Hydra](https://github.com/facebookresearch/hydra).
-The resolvers can be easily registered in your python project by adding the following lines:
+`hya` is a library of custom [OmegaConf](https://github.com/omry/omegaconf) resolvers, designed to
+be used with [Hydra](https://github.com/facebookresearch/hydra). With `hya`, a configuration can
+compute values instead of repeating hand-computed ones:
+
+- arithmetic and math functions, such as `hya.mul`, `hya.ceildiv` or `hya.sqrt`;
+- paths and identifiers, with `hya.path`, `hya.iter_join` and `hya.sha256`;
+- NumPy arrays, PyTorch tensors and data types, and brace expansion, with optional dependencies;
+- your own resolvers, managed by a registry.
+
+The only required dependency is `omegaconf`. An optional package is imported only when a resolver
+that needs it is called.
+
+- [Documentation](https://durandtibo.github.io/hya/)
+- [Installation](#installation)
+- [Quick start](#quick-start)
+- [Available resolvers](#available-resolvers)
+- [Contributing](#contributing)
+- [API stability](#api-stability)
+- [License](#license)
+
+> This page describes the `main` branch. For the latest release, see the
+> [stable documentation](https://durandtibo.github.io/hya/). In `0.4.0`, importing `hya` does not
+> register the resolvers: call `hya.get_default_registry().register_resolvers()` first.
+
+## Quick start
+
+Install `hya`:
+
+```shell
+pip install hya
+```
+
+Importing `hya` registers the resolvers, so a configuration can call them with the syntax
+`${key:argument,...}`:
+
+```pycon
+>>> import hya
+>>> from omegaconf import OmegaConf
+>>> conf = OmegaConf.create(
+...     {
+...         "num_samples": 1000,
+...         "batch_size": 32,
+...         "num_batches": "${hya.ceildiv:${num_samples},${batch_size}}",
+...         "learning_rate": "${hya.pow:10,-3}",
+...         "run_name": "${hya.iter_join:[mnist,${batch_size}],-}",
+...     }
+... )
+>>> conf.num_batches
+32
+>>> conf.learning_rate
+0.001
+>>> conf.run_name
+'mnist-32'
+
+```
+
+### Using with Hydra
+
+Install Hydra with `pip install hydra-core`, and add `import hya` to your application. Given the file
+`config.yaml`:
+
+```yaml
+dataset:
+  train_samples: 60000
+
+training:
+  batch_size: 64
+  steps_per_epoch: ${hya.ceildiv:${dataset.train_samples},${training.batch_size}}
+```
+
+the following script prints `938`:
+
+```python
+import hya
+import hydra
+from omegaconf import DictConfig
+
+
+@hydra.main(version_base=None, config_path=".", config_name="config")
+def main(cfg: DictConfig):
+    print(cfg.training.steps_per_epoch)
+
+
+if __name__ == "__main__":
+    main()
+```
+
+With `hydra-core` 1.3.8, use Python 3.11 to 3.13: on Python 3.14, Hydra stops with
+`ValueError: badly formed help string`. See
+[Using with Hydra](https://durandtibo.github.io/hya/main/hydra/).
+
+### Custom resolvers
+
+Add a resolver to the default registry, then publish it to OmegaConf:
 
 ```pycon
 >>> from hya import get_default_registry
@@ -45,14 +136,29 @@ The resolvers can be easily registered in your python project by adding the foll
 ... def multiply_resolver(x, y):
 ...     return x * y
 >>> registry.register_resolvers()
+>>> OmegaConf.create({"result": "${multiply:5,3}"}).result
+15
 
 ```
 
-- [Documentation](https://durandtibo.github.io/hya/)
-- [Installation](#installation)
-- [Contributing](#contributing)
-- [API stability](#api-stability)
-- [License](#license)
+See [Custom Resolvers](https://durandtibo.github.io/hya/main/custom_resolvers/) to override a
+resolver, load it lazily or build your own registry.
+
+## Available resolvers
+
+| Category       | Resolvers                                                                                                |
+| -------------- | -------------------------------------------------------------------------------------------------------- |
+| Arithmetic     | `hya.add`, `hya.sub`, `hya.mul`, `hya.truediv`, `hya.floordiv`, `hya.ceildiv`, `hya.neg`                 |
+| Math functions | `hya.pow`, `hya.sqrt`, `hya.exp`, `hya.log`, `hya.log10`, `hya.sinh`, `hya.asinh`                        |
+| Comparison     | `hya.max`, `hya.min`                                                                                     |
+| Casts          | `hya.int`, `hya.float`                                                                                   |
+| Collections    | `hya.len`, `hya.sum`                                                                                     |
+| Constants      | `hya.pi`                                                                                                 |
+| Paths          | `hya.path`, `hya.iter_join`                                                                              |
+| Hashing        | `hya.sha256`                                                                                             |
+| Optional       | `hya.braceexpand` (braceexpand), `hya.np.array` (NumPy), `hya.torch.tensor`, `hya.torch.dtype` (PyTorch) |
+
+The [resolvers page](https://durandtibo.github.io/hya/main/resolvers/) documents each one.
 
 ## Installation
 
@@ -71,6 +177,9 @@ To include all the packages, you can use the following command:
 ```shell
 pip install 'hya[all]'
 ```
+
+A single extra can be installed too: `braceexpand`, `numpy`, `torch` (Linux and macOS with Apple
+Silicon) or `testing` (the pytest marks of `hya.testing`), for example `pip install 'hya[numpy]'`.
 
 Please check the [get started page](https://durandtibo.github.io/hya/get_started) to see how to
 install only some specific packages or other alternatives to install the library.

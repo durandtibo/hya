@@ -21,7 +21,7 @@ repository. The [Design Choices](design.md) page explains the reasons and the tr
 | P14 | **Installs next to Hydra**    | `hya` accepts every OmegaConf release that a Hydra release accepts (`omegaconf>=2.2,<3.0`) and behaves the same on all of them. CI runs the tests on the oldest and the newest.                                                                                                                                                                                                                                                                                               |
 | P15 | **Composable**                | A resolver accepts the values OmegaConf gives it (`str`, `int`, `float`, `bool`, `None`, `list`, `dict`, `ListConfig`, `DictConfig`) and the output of another `hya` resolver of a type it takes (a `Path` for `hya.path`, a `torch.dtype` for `hya.torch.tensor`), without a warning. `hya.np.array` and `hya.torch.tensor` take a tensor (on the CPU, without gradient for NumPy) and an array, and `hya.torch.tensor` takes a data type as a `torch.dtype` or as its name. |
 | P16 | **Resolved input**            | A resolver that reads a whole value (`hya.sha256`, `hya.iter_join`, `hya.np.array`, `hya.torch.tensor`) reads its **resolved** content: interpolations are resolved at any depth, and a missing value (`???`) raises `MissingMandatoryValue`.                                                                                                                                                                                                                                 |
-| P17 | **Faithful hash**             | `hya.sha256` hashes the whole content of a value: a string as is, any other value as canonical JSON (sorted keys). Two such values with different JSON forms have different hashes, and a value without a JSON form raises instead of being hashed from a summary.                                                                                                                                                                                                            |
+| P17 | **Faithful hash**             | `hya.sha256` hashes the whole content of a value: a string as is, any other value as canonical JSON (sorted keys, no space, non-ASCII escaped). Two such values with different JSON forms have different hashes, and a value without a JSON form (a non-finite float included) raises.                                                                                                                                                                                        |
 
 ## Details
 
@@ -65,8 +65,9 @@ repository. The [Design Choices](design.md) page explains the reasons and the tr
   private `BaseContainer._resolvers` of OmegaConf, which changes between releases.
   `register_resolvers(replace=True)` publishes the key again.
 - **Type-tagged hashes.** `hya.sha256` of the string `[1]` equals the hash of the list `[1]`, an
-  integer key equals the same string key, and a path or an enum equals its string in JSON. A mapping
-  that mixes key types cannot be sorted and raises.
+  integer key equals the same string key, a path or an enum equals its string in JSON, and an enum
+  that is also an `int`, a `float` or a `str` equals its value. A mapping that mixes key types cannot
+  be sorted and raises.
 - **Special parameters of lazy resolvers.** A resolver registered with `register_lazy` cannot
   receive `_root_`, `_parent_` or `_node_`: OmegaConf reads them from the signature, which is not
   known before the import.

@@ -2,9 +2,9 @@ from __future__ import annotations
 
 import math
 import re
-from enum import Enum
+from enum import Enum, IntEnum
 from pathlib import Path, PurePosixPath
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 import pytest
 from omegaconf import OmegaConf
@@ -21,9 +21,20 @@ from hya.resolvers import (
     sha256_resolver,
 )
 
+if TYPE_CHECKING:
+    from collections.abc import Callable
+
 
 class Color(Enum):
     RED = 1
+
+
+class Number(IntEnum):
+    ONE = 1
+
+
+# An enum that is also a str, without the __str__ of StrEnum
+Letter = Enum("Letter", {"A": "a"}, type=str)
 
 
 def test_add_resolver_int2() -> None:
@@ -445,6 +456,42 @@ def test_sha256_resolver_key_without_json_form() -> None:
 def test_sha256_resolver_value_without_json_form(value: Any, name: str) -> None:
     with pytest.raises(TypeError, match=rf"hya.sha256 cannot hash a value of type {name}"):
         sha256_resolver(value)
+
+
+@pytest.mark.parametrize(
+    ("value", "expected"),
+    [
+        # SHA-256 of [1]
+        ([Number.ONE], "080a9ed428559ef602668b4c00f114f1a11c3f6b02a435f0bdc154578e4d7f22"),
+        # SHA-256 of ["a"]
+        ([Letter.A], "0eb5b8d6f81bc677da8a08567cc4fa9a06a57e9ec8da85ed73a7f62727996002"),
+        # SHA-256 of ["\u00e9"], the non-ASCII character is escaped
+        (["\u00e9"], "d8f81e7a2fa1455720e881bd1d164699bdc9bd7dd91641754a2ead7107c1ea0a"),
+    ],
+)
+def test_sha256_resolver_format_of_the_json(value: Any, expected: str) -> None:
+    assert sha256_resolver(value) == expected
+
+
+@pytest.mark.parametrize("number", [math.nan, math.inf, -math.inf])
+@pytest.mark.parametrize(
+    "wrap",
+    [
+        pytest.param(lambda x: x, id="value"),
+        pytest.param(lambda x: [x], id="list"),
+        pytest.param(lambda x: {"a": [x]}, id="mapping"),
+        pytest.param(lambda x: {x: 1}, id="key"),
+        pytest.param(lambda x: OmegaConf.create([x]), id="node"),
+    ],
+)
+def test_sha256_resolver_non_finite_float(number: float, wrap: Callable[[float], Any]) -> None:
+    with pytest.raises(ValueError, match=r"Out of range float values are not JSON compliant"):
+        sha256_resolver(wrap(number))
+
+
+@pytest.mark.parametrize("text", ["nan", "inf", "-inf", "NaN", "Infinity"])
+def test_sha256_resolver_string_of_a_non_finite_float(text: str) -> None:
+    assert len(sha256_resolver(text)) == 64
 
 
 def test_sha256_resolver_missing_value() -> None:

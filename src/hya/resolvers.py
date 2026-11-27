@@ -269,10 +269,14 @@ def sha256_resolver(obj: Any) -> str:
     The configuration nodes of the object are resolved first, at any
     depth. A string is then hashed as is, so the result is the SHA-256
     of the text, the same as other tools give. Any other value is
-    hashed from its canonical JSON form: sorted keys and no space
-    (``[1,2]``, ``{"a":1,"b":2}``, ``true``, ``null``). In this form, a
-    path or an enum is written as its string. Useful for generating
-    consistent identifiers or cache keys from configuration values.
+    hashed from its canonical JSON form: sorted keys, no space
+    (``[1,2]``, ``{"a":1,"b":2}``, ``true``, ``null``) and non-ASCII
+    characters escaped (``\u00e9`` for an ``e`` with an acute accent).
+    In this form, a path or an enum is written as its string, except an
+    enum that is also an ``int``, a ``float`` or a ``str`` (for example
+    an ``IntEnum``), which is written as its value. Useful for
+    generating consistent identifiers or cache keys from configuration
+    values.
 
     The hash does not keep the type of a value: the string ``[1]`` and
     the list ``[1]`` have the same hash, and so do an integer key and
@@ -292,6 +296,8 @@ def sha256_resolver(obj: Any) -> str:
             tensor, a data type, a set or bytes), if a key of a mapping
             is not a string, a number, a boolean or ``None``, or if a
             mapping mixes key types that cannot be sorted.
+        ValueError: If a value or a key is a non-finite float (``nan``
+            or ``inf``), which has no JSON form.
         omegaconf.errors.MissingMandatoryValue: If a node contains a
             missing value (``???``).
 
@@ -320,7 +326,9 @@ def sha256_resolver(obj: Any) -> str:
     """
     value = to_plain(obj)
     if not isinstance(value, str):
-        value = json.dumps(value, sort_keys=True, separators=(",", ":"), default=_encode_value)
+        value = json.dumps(
+            value, sort_keys=True, separators=(",", ":"), allow_nan=False, default=_encode_value
+        )
     return hashlib.sha256(value.encode("utf-8")).hexdigest()
 
 

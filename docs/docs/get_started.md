@@ -28,6 +28,7 @@ uv pip install 'hya[all]'
 uv pip install hya braceexpand  # For hya.braceexpand resolver
 uv pip install hya numpy        # For hya.np.array resolver
 uv pip install hya torch        # For hya.torch.tensor and hya.torch.dtype resolvers
+uv pip install 'hya[testing]'   # For the pytest marks of hya.testing
 ```
 
 ### Dependency Matrix

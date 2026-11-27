@@ -16,6 +16,7 @@ from omegaconf.errors import (
 
 from hya.resolvers import (
     _encode_value,
+    add_resolver,
     iter_join_resolver,
     path_resolver,
     sha256_resolver,
@@ -86,6 +87,112 @@ def test_add_resolver_no_argument() -> None:
     conf = OmegaConf.create({"key": "${hya.add:}"})
     with pytest.raises(InterpolationResolutionError, match=r"missing 1 required positional"):
         _ = conf.key
+
+
+@pytest.mark.parametrize(
+    ("first", "second"),
+    [
+        pytest.param([0], [1], id="literal-literal"),
+        pytest.param([0], OmegaConf.create([1]), id="literal-node"),
+        pytest.param(OmegaConf.create([0]), [1], id="node-literal"),
+        pytest.param(OmegaConf.create([0]), OmegaConf.create([1]), id="node-node"),
+    ],
+)
+def test_add_resolver_lists_give_a_list(first: Any, second: Any) -> None:
+    result = add_resolver(first, second)
+    assert (type(result), result) == (list, [0, 1])
+
+
+@pytest.mark.parametrize(
+    "value",
+    [
+        pytest.param([1, [2]], id="literal-list"),
+        pytest.param(OmegaConf.create([1, [2]]), id="list-node"),
+        pytest.param({"a": [1]}, id="literal-mapping"),
+        pytest.param(OmegaConf.create({"a": [1]}), id="mapping-node"),
+    ],
+)
+def test_add_resolver_of_one_container_is_a_copy(value: Any) -> None:
+    assert add_resolver(value) is not value
+
+
+@pytest.mark.parametrize(
+    ("value", "expected"),
+    [
+        pytest.param(OmegaConf.create([1, [2]]), [1, [2]], id="list-node"),
+        pytest.param(OmegaConf.create({"a": [1]}), {"a": [1]}, id="mapping-node"),
+    ],
+)
+def test_add_resolver_of_one_node_is_a_plain_container(value: Any, expected: Any) -> None:
+    result = add_resolver(value)
+    assert (type(result), result) == (type(expected), expected)
+
+
+@pytest.mark.parametrize("value", [1, 1.5, "abc", (1, 2), None, Path("a")])
+def test_add_resolver_of_one_other_object_is_the_object(value: Any) -> None:
+    assert add_resolver(value) is value
+
+
+@pytest.mark.parametrize(
+    ("values", "expected"),
+    [([1, 2, 3], 6), ([1.5, 2], 3.5), (["ab", "c"], "abc"), ([(1,), (2,)], (1, 2))],
+)
+def test_add_resolver_of_numbers_and_strings(values: list[Any], expected: Any) -> None:
+    assert add_resolver(*values) == expected
+
+
+def test_add_resolver_of_empty_lists() -> None:
+    assert add_resolver(OmegaConf.create([]), []) == []
+
+
+def test_add_resolver_of_the_same_list_twice() -> None:
+    value = [1]
+    assert add_resolver(value, value) == [1, 1]
+
+
+def test_add_resolver_does_not_modify_the_inputs() -> None:
+    first, second = [OmegaConf.create([1])], [2]
+    node = first[0]
+    add_resolver(first, second)
+    assert (first[0] is node, second) == (True, [2])
+
+
+def test_add_resolver_result_does_not_share_a_nested_list() -> None:
+    value = [[1]]
+    add_resolver(value, [])[0].append(2)
+    assert value == [[1]]
+
+
+def test_add_resolver_nested_interpolation() -> None:
+    conf = OmegaConf.create({"a": 1, "x": [["${a}"]]})
+    assert add_resolver([conf.x], [2]) == [[[1]], 2]
+
+
+@pytest.mark.parametrize(
+    "values",
+    [
+        pytest.param([OmegaConf.create(["???"])], id="one"),
+        pytest.param([OmegaConf.create([["???"]]), [1]], id="first-nested"),
+        pytest.param([[1], OmegaConf.create(["???"])], id="second"),
+        pytest.param([[1], [OmegaConf.create({"a": "???"})]], id="second-in-a-list"),
+    ],
+)
+def test_add_resolver_missing_value(values: list[Any]) -> None:
+    with pytest.raises(MissingMandatoryValue, match=r"Missing mandatory value"):
+        add_resolver(*values)
+
+
+def test_add_resolver_incompatible_types() -> None:
+    with pytest.raises(TypeError, match=r"unsupported operand type"):
+        add_resolver(1, "a")
+
+
+@pytest.mark.parametrize(
+    "expression", ["${hya.add:[0],[1]}", "${hya.add:[0],${x}}", "${hya.add:${y},${x}}"]
+)
+def test_add_resolver_type_does_not_depend_on_how_a_list_is_written(expression: str) -> None:
+    conf = OmegaConf.create({"x": [1], "y": [0], "key": expression})
+    assert type(conf.key) is type(OmegaConf.create({"key": "${hya.add:[0],[1]}"}).key)
 
 
 def test_ceildiv_resolver() -> None:

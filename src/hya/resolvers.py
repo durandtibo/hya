@@ -36,15 +36,26 @@ logger: logging.Logger = logging.getLogger(__name__)
 def add_resolver(first: Any, *others: Any) -> Any:
     r"""Return the addition of several objects.
 
-    The arguments are not modified: ``first`` is never extended in place,
-    so interpolating a list of the configuration does not change it.
+    The configuration nodes of the arguments are resolved first, at any
+    depth, so adding lists of the configuration gives a new plain
+    ``list``, whatever the way they are written. The arguments are not
+    modified: ``first`` is never extended in place.
 
     Args:
         first: The first value to add.
         *others: The other values to add.
 
     Returns:
-        ``first + other1 + other2 + ... + otherN``
+        ``first + other1 + other2 + ... + otherN``, computed with the
+        resolved values. With a single argument, a list or a dictionary
+        is a copy and any other object is returned as is. The elements of
+        a list hold no interpolation.
+
+    Raises:
+        TypeError: If the values cannot be added, for example a number
+            and a string.
+        omegaconf.errors.MissingMandatoryValue: If a node contains a
+            missing value (``???``).
 
     Example:
         ```pycon
@@ -61,10 +72,14 @@ def add_resolver(first: Any, *others: Any) -> Any:
         [1, 2, 3]
         >>> conf.x
         [1, 2]
+        >>> # The interpolations of the values are resolved
+        >>> conf = OmegaConf.create({"a": 1, "x": ["${a}"], "key": "${hya.add:${x},[2]}"})
+        >>> conf.key
+        [1, 2]
 
         ```
     """
-    return reduce(operator.add, others, first)
+    return reduce(operator.add, map(to_plain, others), to_plain(first))
 
 
 def ceildiv_resolver(dividend: float, divisor: float) -> float:

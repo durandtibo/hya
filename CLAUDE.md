@@ -4,10 +4,16 @@
 
 - Use the virtual environment in `.venv`: `.venv/bin/python`, `.venv/bin/pytest`, `.venv/bin/ruff`.
   There is no `python` on the `PATH`.
+- The common commands are invoke tasks, which the CI workflows also run: `.venv/bin/inv --list`
+  lists them. They come from `invoke-tasklib` (`tasks.py`, configured in `invoke.yaml`) and work
+  without activating the environment, except where said below.
 - Lint and format before committing: `.venv/bin/ruff check src tests` and
   `.venv/bin/ruff format src tests`. Fix the issues raised by ruff. Ignoring an issue (`noqa`, a
   changed rule set) is not fixing it.
-- Type check with `.venv/bin/inv types.check` (ty) and
+- Run all the pre-commit hooks (ruff, docformatter, codespell, ty, import-linter, ...) with
+  `PATH=$PWD/.venv/bin:$PATH .venv/bin/pre-commit run --all-files`. The import contracts are
+  defined in `pyproject.toml` (`[tool.importlinter]`): keep the layering, do not relax a contract.
+- Type check with `.venv/bin/inv types.check --complete` (ty, then pyright) and
   `VIRTUAL_ENV=$PWD/.venv PATH=$PWD/.venv/bin:$PATH .venv/bin/pyright --verifytypes hya --ignoreexternal`.
   The environment must be activated (set `VIRTUAL_ENV` and `PATH` as above): without it pyright does
   not find the package and reports a false result (`No py.typed file found`, 0 %). The score must
@@ -17,7 +23,9 @@
 - Run the unit tests of the modules you changed (for example
   `.venv/bin/pytest tests/unit/test_registry.py -q`). If a test fails, check with `git stash`
   whether it also fails on `main` before blaming your change.
-- The docstring examples are run as doctests: `.venv/bin/python -m pytest --xdoctest src/hya`.
+- The examples of the docstrings and of the markdown files are run as doctests with
+  `.venv/bin/inv test.doctest`. Check that the documentation builds without warnings with
+  `.venv/bin/inv doc.build`.
 
 ## Workflow
 
@@ -55,7 +63,8 @@
 - Follow the current style of the repository in everything you add (source, tests, docs, commit
   messages, PR descriptions). Look at a few neighbouring files first, and do not introduce a new
   convention or reformat code you do not otherwise change.
-- Every module starts with `from __future__ import annotations` and defines `__all__`.
+- Every module starts with `from __future__ import annotations` and defines `__all__`, except
+  an `__init__.py` that only holds a docstring.
 - Shared helpers belong in `hya.utils` as public functions (no leading underscore) with their
   own tests, not as private functions imported across modules.
 - Check optional packages with the functions of `hya.imports` (`validate_numpy`,
@@ -89,6 +98,9 @@
   `tests/unit/<package>/test_<module>.py` for subpackages such as `hya.utils`). Tests that exercise
   the real OmegaConf resolution end to end go in `tests/integration/`. Cross-thread behaviour goes
   there too, with a lock around the shared list.
+- `tests/package/checks.py` checks an installed package (built in CI or published on PyPI). It
+  must not import `pytest`, `hya.testing` or an optional library at module level: update it when
+  you add a module, a resolver or an optional dependency that it should check.
 - Do not use local imports inside tests (for example `import torch` in a test body). Import
   at the top of the module; use the markers from `hya.testing` (`numpy_available`,
   `torch_available`, `braceexpand_available` and their `*_not_available` counterparts) for

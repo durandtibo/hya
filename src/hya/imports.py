@@ -1,4 +1,10 @@
-r"""Implement some utility functions to manage optional dependencies."""
+r"""Implement some utility functions to manage optional dependencies.
+
+For each optional package (``braceexpand``, ``numpy`` and ``torch``),
+``is_<package>_available`` indicates whether the package is installed,
+without importing it, and ``validate_<package>`` raises a
+``RuntimeError`` that says how to install it when it is missing.
+"""
 
 from __future__ import annotations
 

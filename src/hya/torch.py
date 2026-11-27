@@ -44,8 +44,13 @@ def to_tensor_resolver(data: Any, dtype: torch.dtype | str | None = None) -> tor
         require a gradient.
 
     Raises:
+        RuntimeError: If the ``torch`` package is not installed.
+        TypeError: If the data has a type that PyTorch does not support
+            (for example a string), or if ``dtype`` is not a
+            ``torch.dtype``, a string or ``None``.
         ValueError: If ``dtype`` is a string that is not the name of a
-            torch dtype.
+            torch dtype, or if the data are nested lists of different
+            lengths.
         omegaconf.errors.MissingMandatoryValue: If a node contains a
             missing value (``???``).
 
@@ -96,6 +101,8 @@ def torch_dtype_resolver(target: str) -> torch.dtype:
         The corresponding torch.dtype object.
 
     Raises:
+        RuntimeError: If the ``torch`` package is not installed.
+        TypeError: If ``target`` is not a string.
         ValueError: If the target string doesn't correspond to a valid
             torch dtype. The message lists the available dtype names,
             sorted. Through an interpolation, OmegaConf reports it as an

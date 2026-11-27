@@ -8,6 +8,26 @@ tests to be conditionally skipped based on whether optional packages
 These markers are useful for ensuring tests only run when the required
 dependencies are present, avoiding import errors and test failures when
 optional packages are not installed.
+
+For each optional package, ``<package>_available`` skips a test when the
+package is not installed, and ``<package>_not_available`` skips a test
+when it is installed: ``braceexpand_available``,
+``braceexpand_not_available``, ``numpy_available``,
+``numpy_not_available``, ``torch_available`` and
+``torch_not_available``.
+
+This module imports ``pytest``, which the ``testing`` extra installs
+(``pip install 'hya[testing]'``).
+
+Example:
+    ```pycon
+    >>> from hya.testing import numpy_available
+    >>> @numpy_available
+    ... def test_with_numpy():
+    ...     pass
+    ...
+
+    ```
 """
 
 from __future__ import annotations

@@ -58,35 +58,41 @@ _OPTIONAL: dict[str, str] = {
 def get_default_registry() -> ResolverRegistry:
     """Get or create the default global resolver registry.
 
-    Returns a singleton registry instance using a simple singleton pattern.
-    The registry initially contains the default resolvers and can be
-    extended with custom resolvers. The registry has the same keys on every
-    machine: the resolvers that need an optional package (``braceexpand``,
-    ``numpy`` or ``torch``) are always registered. The module of such a
-    resolver is imported on its first call, not when ``hya`` is imported, and
-    the call raises an error that says how to install the package if it is
-    missing.
+    The first call creates the registry, and the next calls return the
+    same instance. The registry initially contains the default resolvers
+    and can be extended with custom resolvers. It has the same keys on
+    every machine: the resolvers that need an optional package
+    (``braceexpand``, ``numpy`` or ``torch``) are always registered. The
+    module of such a resolver is imported on its first call, not when
+    ``hya`` is imported, and the call raises an error that says how to
+    install the package if it is missing.
 
-    This function uses a singleton pattern to ensure the same registry instance
-    is returned on subsequent calls, which is efficient and maintains consistency
-    across an application.
+    Importing ``hya`` publishes the default resolvers to OmegaConf. A
+    resolver added to the registry afterwards is published by the next
+    call to ``register_resolvers``.
 
     Returns:
-        A ResolverRegistry instance
+        The default ``ResolverRegistry`` of the process.
 
     Notes:
-        The singleton pattern means modifications to the returned registry
-        affect all future calls to this function. If you need an isolated
-        registry, create a new ResolverRegistry instance directly.
+        A modification of the returned registry affects all the future
+        calls to this function. If you need an isolated registry, create
+        a new ``ResolverRegistry`` instance.
 
     Example:
         ```pycon
+        >>> from omegaconf import OmegaConf
         >>> from hya import get_default_registry
         >>> registry = get_default_registry()
+        >>> registry.has_resolver("hya.add")
+        True
         >>> @registry.register("my_key")
         ... def my_resolver(value):
-        ...     pass
+        ...     return value * 2
         ...
+        >>> registry.register_resolvers()
+        >>> OmegaConf.create({"key": "${my_key:21}"}).key
+        42
 
         ```
     """

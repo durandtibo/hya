@@ -69,6 +69,9 @@ def add_resolver(first: Any, *others: Any) -> Any:
         >>> conf = OmegaConf.create({"key": "${hya.add:1,2,3,4}"})
         >>> conf.key
         10
+        >>> # Strings are concatenated
+        >>> OmegaConf.create({"key": "${hya.add:abc,def}"}).key
+        abcdef
         >>> conf = OmegaConf.create({"x": [1, 2], "key": "${hya.add:${x},[3]}"})
         >>> conf.key
         [1, 2, 3]
@@ -100,6 +103,10 @@ def ceildiv_resolver(dividend: float, divisor: float) -> float:
     Returns:
         The ceiling of dividend / divisor, computed as
         ``-(dividend // -divisor)``.
+
+    Raises:
+        TypeError: If a value is not a number, for example a string.
+        ZeroDivisionError: If ``divisor`` is zero.
 
     Example:
         ```pycon
@@ -141,6 +148,8 @@ def iter_join_resolver(iterable: Iterable[Any], separator: str) -> str:
         A single string with all iterable elements joined by the separator.
 
     Raises:
+        TypeError: If ``iterable`` is not iterable.
+        AttributeError: If ``separator`` is not a string.
         omegaconf.errors.MissingMandatoryValue: If a node contains a
             missing value (``???``).
 
@@ -179,6 +188,10 @@ def mul_resolver(first: Any, *others: Any) -> Any:
 
     Returns:
         ``first * other1 * other2 * ... * otherN``
+
+    Raises:
+        TypeError: If the values cannot be multiplied, for example a
+            list of the configuration and a number.
 
     Example:
         ```pycon
@@ -221,6 +234,9 @@ def path_resolver(path: str | os.PathLike[str]) -> Path:
         directory and converted to absolute path.
 
     Raises:
+        TypeError: If ``path`` is not a string or a path-like object.
+        RuntimeError: If the home directory of a ``~`` path cannot be
+            determined, for example for an unknown user.
         ValueError: If the path is empty (write ``.`` for the working
             directory); if a ``file:`` URL has no path, a host other than
             ``localhost`` (for example ``file://host/a``), a query or a

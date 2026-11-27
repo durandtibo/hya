@@ -45,7 +45,11 @@ def to_array_resolver(data: ArrayLike, dtype: str | None = None) -> np.ndarray:
         it keeps the memory order of such an input.
 
     Raises:
+        RuntimeError: If the ``numpy`` package is not installed.
         TypeError: If ``dtype`` is not a valid NumPy data type.
+        ValueError: If the data cannot be converted to an array, for
+            example nested lists of different lengths, or a string with
+            a numeric ``dtype``.
         omegaconf.errors.MissingMandatoryValue: If a node contains a
             missing value (``???``).
 

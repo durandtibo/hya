@@ -54,9 +54,11 @@ def _publish(key: str, resolver: Callable[..., Any], *, replace: bool) -> None:
 class ResolverRegistry:
     r"""Implement a resolver registry.
 
-    This class manages a collection of resolver functions that can be registered
-    with keys and later used with OmegaConf.
-
+    A registry maps keys to resolvers. ``register`` and
+    ``register_lazy`` add a resolver to the registry, and
+    ``register_resolvers`` publishes the registry to OmegaConf, so that
+    configurations can use the keys. A registry is independent of the
+    other registries.
 
     Args:
         state: Optional initial state mapping containing key-resolver pairs,
@@ -72,12 +74,17 @@ class ResolverRegistry:
 
     Example:
         ```pycon
+        >>> from omegaconf import OmegaConf
         >>> from hya.registry import ResolverRegistry
-        >>> registry = ResolverRegistry()
-        >>> @registry.register("my_key")
-        ... def my_resolver(value):
-        ...     pass
+        >>> registry = ResolverRegistry({"demo.upper": str.upper})
+        >>> @registry.register("demo.double")
+        ... def double_resolver(value):
+        ...     return value * 2
         ...
+        >>> registry.register_resolvers()
+        >>> conf = OmegaConf.create({"x": "${demo.double:4}", "y": "${demo.upper:abc}"})
+        >>> conf.x, conf.y
+        (8, 'ABC')
 
         ```
     """
@@ -243,6 +250,13 @@ class ResolverRegistry:
                 ``False``.
 
         Note:
+            The first call of the resolver raises a
+            ``ModuleNotFoundError`` if the module does not exist, and an
+            ``AttributeError`` if the module has no such function.
+            Through an interpolation, OmegaConf reports it as an
+            ``InterpolationResolutionError``.
+
+        Note:
             A resolver registered lazily cannot receive the special
             parameters of OmegaConf (``_root_``, ``_parent_`` or
             ``_node_``): OmegaConf reads them from the signature, which
@@ -252,9 +266,11 @@ class ResolverRegistry:
             ```pycon
             >>> from hya.registry import ResolverRegistry
             >>> registry = ResolverRegistry()
-            >>> registry.register_lazy("hya.np.array", "hya.numpy:to_array_resolver")
-            >>> registry.has_resolver("hya.np.array")
+            >>> registry.register_lazy("demo.sqrt", "math:sqrt")
+            >>> registry.has_resolver("demo.sqrt")
             True
+            >>> registry.state["demo.sqrt"](16)
+            4.0
 
             ```
         """
@@ -305,6 +321,10 @@ class ResolverRegistry:
                 OmegaConf already has for the same keys. If ``False``, these
                 keys are skipped, with a warning for the ones that this
                 registry did not publish.
+
+        Raises:
+            UserWarning: If a key is skipped and the warnings are turned
+                into errors. The other keys are published first.
 
         Notes:
             OmegaConf caches the resolved value of the nodes of a

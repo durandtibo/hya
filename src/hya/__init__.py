@@ -1,4 +1,20 @@
-r"""Contain the main features of the ``hya`` package."""
+r"""Contain the main features of the ``hya`` package.
+
+Importing ``hya`` publishes the default resolvers to OmegaConf, so a
+configuration can use them without any other call. The package exposes
+``ResolverRegistry`` and ``get_default_registry`` to add your own
+resolvers.
+
+Example:
+    ```pycon
+    >>> import hya
+    >>> from omegaconf import OmegaConf
+    >>> conf = OmegaConf.create({"steps": "${hya.ceildiv:1000,32}"})
+    >>> conf.steps
+    32
+
+    ```
+"""
 
 from __future__ import annotations
 

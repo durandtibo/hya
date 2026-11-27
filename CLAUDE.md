@@ -15,8 +15,8 @@
   Ignoring an issue (`type: ignore`, `pyright: ignore`, a cast that hides the problem) is not
   fixing it.
 - Run the unit tests of the modules you changed (for example
-  `.venv/bin/pytest tests/unit/test_registry.py -q`). Some tests fail on `main`; check with
-  `git stash` before blaming your change.
+  `.venv/bin/pytest tests/unit/test_registry.py -q`). If a test fails, check with `git stash`
+  whether it also fails on `main` before blaming your change.
 - The docstring examples are run as doctests: `.venv/bin/python -m pytest --xdoctest src/hya`.
 
 ## Workflow
@@ -63,7 +63,9 @@
   `raise RuntimeError` for a missing package.
 - Do not add a validator that is one `isinstance` or one comparison; raise the error inline with
   a clear message, as the existing code does.
-- Keep new options keyword-only (`*`).
+- Build a lazy process-wide object with `functools.cache`, as `hya.default.get_default_registry`
+  does.
+- Keep new options keyword-only (`*`), as `ResolverRegistry.register` does.
 - Optional libraries (numpy, torch, braceexpand) are imported lazily or guarded with
   `is_*_available()` and a fallback from `hya.utils.fallback`; do not import them
   unconditionally at module level in `src`. Add a fallback when you add a new optional package.
@@ -85,15 +87,30 @@
   fast and efficient; move big or slow tests to `tests/integration/` if needed.
 - Unit tests mirror the source tree (`tests/unit/test_<module>.py`, and
   `tests/unit/<package>/test_<module>.py` for subpackages such as `hya.utils`). Tests that exercise
-  the real OmegaConf resolution end to end go in `tests/integration/`.
+  the real OmegaConf resolution end to end go in `tests/integration/`. Cross-thread behaviour goes
+  there too, with a lock around the shared list.
 - Do not use local imports inside tests (for example `import torch` in a test body). Import
   at the top of the module; use the markers from `hya.testing` (`numpy_available`,
   `torch_available`, `braceexpand_available` and their `*_not_available` counterparts) for
   optional libraries.
 - One behaviour per test: a test has one `assert` or one `pytest.raises`. Split a test that checks
-  several things (equal, different, negative, ...) into several tests.
+  several things (equal, different, negative, ...) into several tests. Thread-safety tests may
+  assert the count and the uniqueness together.
+- A test may combine `pytest.raises` (or `pytest.warns`) with an `assert` that checks the state
+  after the error (for example that the input was not mutated). This is one behaviour: the call
+  fails and leaves the state unchanged.
+
+  ```python
+  with pytest.raises(RuntimeError, match=r"already registered"):
+      registry.register("key")(other)
+  assert registry.state == {"key": resolver}
+  ```
+
+- Do not use `contextlib.suppress` in place of `pytest.raises` to swallow an expected exception:
+  it passes when no exception is raised, so the test does not prove the error happens. Use
+  `pytest.raises` with `match`, then assert on the state afterwards if needed.
 - Keep the unit tests simple and fast: no sleeps, no large data, no real network or heavy I/O,
-  and no logic (loops, branches) in the test body. Anything slow belongs in
+  and no logic (loops, branches) in the test body. Anything slow or concurrent belongs in
   `tests/integration/`.
 - Add the missing tests to get 100% coverage of the code you add or change
   (`.venv/bin/pytest <tests> --cov=hya --cov-report=term-missing`). Do not use

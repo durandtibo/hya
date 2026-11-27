@@ -1,11 +1,12 @@
 from __future__ import annotations
 
 import re
+from typing import Any
 from unittest.mock import patch
 
 import pytest
 from omegaconf import OmegaConf
-from omegaconf.errors import InterpolationResolutionError
+from omegaconf.errors import InterpolationResolutionError, MissingMandatoryValue
 
 from hya.imports import is_torch_available
 from hya.testing import torch_available
@@ -164,3 +165,90 @@ def test_to_tensor_resolver_missing_package_with_dtype() -> None:
         pytest.raises(RuntimeError, match=r"missing package"),
     ):
         to_tensor_resolver([1, 2], torch.float32)
+
+
+@torch_available
+def test_to_tensor_resolver_tensor() -> None:
+    assert to_tensor_resolver(torch.tensor([1, 2])).equal(torch.tensor([1, 2]))
+
+
+@torch_available
+def test_to_tensor_resolver_tensor_keeps_the_dtype() -> None:
+    assert to_tensor_resolver(torch.tensor([1.0], dtype=torch.float64)).dtype == torch.float64
+
+
+@torch_available
+def test_to_tensor_resolver_tensor_with_a_new_dtype() -> None:
+    assert to_tensor_resolver(torch.tensor([1, 2]), torch.float32).dtype == torch.float32
+
+
+@torch_available
+def test_to_tensor_resolver_tensor_returns_a_new_object() -> None:
+    data = torch.tensor([1, 2])
+    assert to_tensor_resolver(data) is not data
+
+
+@torch_available
+@pytest.mark.parametrize("dtype", [None, "int64"])
+def test_to_tensor_resolver_tensor_does_not_share_memory(dtype: str | None) -> None:
+    data = torch.tensor([1, 2])
+    result = to_tensor_resolver(data, None if dtype is None else getattr(torch, dtype))
+    result[0] = 10
+    assert data.tolist() == [1, 2]
+
+
+@torch_available
+def test_to_tensor_resolver_tensor_does_not_require_a_gradient() -> None:
+    assert not to_tensor_resolver(torch.tensor([1.0], requires_grad=True)).requires_grad
+
+
+@torch_available
+def test_to_tensor_resolver_tensor_does_not_modify_the_input() -> None:
+    data = torch.tensor([1.0], requires_grad=True)
+    to_tensor_resolver(data, torch.int64)
+    assert (data.dtype, data.requires_grad) == (torch.float32, True)
+
+
+@torch_available
+def test_to_tensor_resolver_tensor_emits_no_warning(recwarn: pytest.WarningsRecorder) -> None:
+    to_tensor_resolver(torch.tensor([1, 2]))
+    assert len(recwarn) == 0
+
+
+@torch_available
+def test_to_tensor_resolver_empty_tensor() -> None:
+    assert to_tensor_resolver(torch.tensor([])).shape == (0,)
+
+
+@torch_available
+def test_to_tensor_resolver_empty_list() -> None:
+    assert to_tensor_resolver([]).shape == (0,)
+
+
+@torch_available
+def test_to_tensor_resolver_config_node() -> None:
+    conf = OmegaConf.create({"a": 1, "x": [["${a}"], [2]]})
+    assert to_tensor_resolver(conf.x).tolist() == [[1], [2]]
+
+
+@torch_available
+def test_to_tensor_resolver_config_node_in_a_list() -> None:
+    conf = OmegaConf.create({"a": 1, "x": ["${a}"]})
+    assert to_tensor_resolver([conf.x, [2]]).tolist() == [[1], [2]]
+
+
+@torch_available
+@pytest.mark.parametrize("value", [["???"], [["???"]]])
+def test_to_tensor_resolver_missing_value(value: list[Any]) -> None:
+    with pytest.raises(MissingMandatoryValue, match=r"Missing mandatory value"):
+        to_tensor_resolver(OmegaConf.create(value))
+
+
+def test_to_tensor_resolver_missing_package_is_checked_first() -> None:
+    with (
+        patch("hya.torch.validate_torch", side_effect=RuntimeError("missing package")),
+        patch("hya.torch.to_plain") as to_plain,
+        pytest.raises(RuntimeError, match=r"missing package"),
+    ):
+        to_tensor_resolver([1, 2])
+    assert to_plain.call_count == 0

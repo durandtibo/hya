@@ -462,9 +462,20 @@ model:
 ```python
 import torch
 
+# data is the resolved content of the argument, without configuration nodes
 value = torch.tensor(data)
 value = torch.tensor(data, dtype=dtype)  # with a dtype
+# data is a tensor
+value = data.detach().to(dtype=data.dtype if dtype is None else dtype, copy=True)
 ```
+
+**Notes:**
+
+- The interpolations of the data are resolved at any depth, and a missing value (`???`) is an
+  error.
+- A tensor is accepted, for example the output of another `hya.torch.tensor`. It is copied: the
+  result does not share memory with it and does not require a gradient. Without a data type, the
+  copy keeps the data type of the tensor.
 
 #### `hya.torch.dtype`
 

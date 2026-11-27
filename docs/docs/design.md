@@ -157,10 +157,11 @@ built from.
   The result is an `int` for two integers and a `float` for a float. Use
   `${hya.int:${hya.ceildiv:x,y}}` to force an `int`.
 - **`hya.torch.dtype` accepts names, not `torch.float32`.** There is one spelling for one thing,
-  and the error for an unknown name lists the valid names, sorted.
+  and the error for an unknown name lists the valid names, sorted. `hya.torch.tensor` accepts the
+  same names.
 - **`hya.np.array` takes the data type as a string.** The string that NumPy accepts is enough, so
-  there is no `hya.np.dtype` resolver. `hya.torch.tensor` takes a `torch.dtype`, usually the output
-  of `hya.torch.dtype`.
+  there is no `hya.np.dtype` resolver. `hya.torch.tensor` takes the name too, so the two resolvers
+  have the same contract, and also a `torch.dtype`, such as the output of `hya.torch.dtype`.
 - **`hya.path` reads `file:` URLs only.** A string that starts with `file:` is decoded as a URL; any
   other string is a plain path, so `/data/a%20b` keeps its `%20`. A file URL with a host other than
   `localhost` raises a `ValueError` instead of dropping the host.

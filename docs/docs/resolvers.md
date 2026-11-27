@@ -435,8 +435,8 @@ Install with: `pip install torch`
 
 #### `hya.torch.tensor`
 
-Converts data to a PyTorch tensor. The optional second argument is a `torch.dtype`, for example the
-output of [`hya.torch.dtype`](#hyatorchdtype).
+Converts data to a PyTorch tensor. The optional second argument is the data type: its name, or a
+`torch.dtype` such as the output of [`hya.torch.dtype`](#hyatorchdtype).
 
 **Syntax:** `${hya.torch.tensor:data}` or `${hya.torch.tensor:data,dtype}`
 
@@ -450,7 +450,8 @@ weights: ${hya.torch.tensor:[0.1,0.2,0.3,0.4]}
 matrix: ${hya.torch.tensor:[[1,2],[3,4]]}
 
 # Tensor with a data type
-mask: ${hya.torch.tensor:[1,0,1],${hya.torch.dtype:bool}} # tensor([ True, False,  True])
+mask: ${hya.torch.tensor:[1,0,1],bool} # tensor([ True, False,  True])
+scale: ${hya.torch.tensor:[1,2],${hya.torch.dtype:float32}} # tensor([1., 2.])
 
 # Use in model configuration
 model:
@@ -467,6 +468,7 @@ value = torch.tensor(data)
 value = torch.tensor(data, dtype=dtype)  # with a dtype
 # data is a tensor
 value = data.detach().to(dtype=data.dtype if dtype is None else dtype, copy=True)
+# a dtype given by its name is first converted as hya.torch.dtype does
 ```
 
 **Notes:**

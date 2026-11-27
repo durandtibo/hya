@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import re
 from typing import Any
-from unittest.mock import patch
+from unittest.mock import call, patch
 
 import pytest
 from omegaconf import OmegaConf
@@ -252,3 +252,45 @@ def test_to_tensor_resolver_missing_package_is_checked_first() -> None:
     ):
         to_tensor_resolver([1, 2])
     assert to_plain.call_count == 0
+
+
+@torch_available
+@pytest.mark.parametrize(
+    ("name", "expected"), [("float32", "float32"), ("float", "float32"), ("long", "int64")]
+)
+def test_to_tensor_resolver_dtype_name(name: str, expected: str) -> None:
+    assert to_tensor_resolver([1, 2], name).dtype == getattr(torch, expected)
+
+
+@torch_available
+def test_to_tensor_resolver_dtype_name_of_a_tensor() -> None:
+    assert to_tensor_resolver(torch.tensor([1, 2]), "float64").dtype == torch.float64
+
+
+@torch_available
+def test_to_tensor_resolver_dtype_none_keeps_the_dtype_of_a_tensor() -> None:
+    assert to_tensor_resolver(torch.tensor([1.0]), None).dtype == torch.float32
+
+
+@torch_available
+@pytest.mark.parametrize("name", ["", "ones", "bool32", "torch.float32"])
+def test_to_tensor_resolver_unknown_dtype_name(name: str) -> None:
+    with pytest.raises(InterpolationResolutionError, match=rf"Incorrect dtype {re.escape(name)}\."):
+        to_tensor_resolver([1, 2], name)
+
+
+@torch_available
+def test_to_tensor_resolver_dtype_name_uses_the_dtype_resolver() -> None:
+    with patch("hya.torch.torch_dtype_resolver", return_value=torch.int32) as resolver:
+        to_tensor_resolver([1, 2], "name")
+    assert resolver.call_args_list == [call("name")]
+
+
+@torch_available
+@pytest.mark.parametrize("dtype", [None, "float32"])
+def test_to_tensor_resolver_dtype_name_missing_package(dtype: str | None) -> None:
+    with (
+        patch("hya.torch.validate_torch", side_effect=RuntimeError("missing package")),
+        pytest.raises(RuntimeError, match=r"missing package"),
+    ):
+        to_tensor_resolver([1, 2], dtype)

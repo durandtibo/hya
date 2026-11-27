@@ -25,7 +25,7 @@ else:  # pragma: no cover
     from hya.utils.fallback.torch import torch
 
 
-def to_tensor_resolver(data: Any, dtype: torch.dtype | None = None) -> torch.Tensor:
+def to_tensor_resolver(data: Any, dtype: torch.dtype | str | None = None) -> torch.Tensor:
     r"""Implement a resolver to transform the input to a
     ``torch.Tensor``.
 
@@ -34,10 +34,11 @@ def to_tensor_resolver(data: Any, dtype: torch.dtype | None = None) -> torch.Ten
             tensor, or a value compatible with ``torch.tensor``. The
             configuration nodes of a value are resolved first, at any
             depth.
-        dtype: The data type of the tensor, for example the output of
-            the ``hya.torch.dtype`` resolver. ``None`` keeps the data
-            type of a tensor, and lets PyTorch infer the data type of
-            any other value.
+        dtype: The data type of the tensor: a ``torch.dtype`` (for
+            example the output of the ``hya.torch.dtype`` resolver) or
+            its name (for example ``"float32"``). ``None`` keeps the
+            data type of a tensor, and lets PyTorch infer the data type
+            of any other value.
 
     Returns:
         The input in a ``torch.Tensor`` object. It is a copy: it does
@@ -45,6 +46,8 @@ def to_tensor_resolver(data: Any, dtype: torch.dtype | None = None) -> torch.Ten
         require a gradient.
 
     Raises:
+        InterpolationResolutionError: If ``dtype`` is a string that is
+            not the name of a torch dtype.
         omegaconf.errors.MissingMandatoryValue: If a node contains a
             missing value (``???``).
 
@@ -58,6 +61,10 @@ def to_tensor_resolver(data: Any, dtype: torch.dtype | None = None) -> torch.Ten
         >>> conf = OmegaConf.create({"key": "${hya.torch.tensor:[1,2,3],${hya.torch.dtype:float32}}"})
         >>> conf.key
         tensor([1., 2., 3.])
+        >>> # The data type can be given by its name
+        >>> conf = OmegaConf.create({"key": "${hya.torch.tensor:[1,2],float32}"})
+        >>> conf.key
+        tensor([1., 2.])
         >>> # A tensor is copied
         >>> conf = OmegaConf.create({"key": "${hya.torch.tensor:${hya.torch.tensor:[1,2]}}"})
         >>> conf.key
@@ -66,6 +73,8 @@ def to_tensor_resolver(data: Any, dtype: torch.dtype | None = None) -> torch.Ten
         ```
     """
     validate_torch()
+    if isinstance(dtype, str):
+        dtype = torch_dtype_resolver(dtype)
     if isinstance(data, torch.Tensor):
         return data.detach().to(dtype=data.dtype if dtype is None else dtype, copy=True)
     return torch.tensor(to_plain(data), dtype=dtype)

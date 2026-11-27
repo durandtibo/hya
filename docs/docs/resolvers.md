@@ -350,7 +350,7 @@ names: ${hya.iter_join:${hya.braceexpand:"a{1..3}"},-} # Result: "a1-a2-a3"
 
 ### NumPy
 
-**Package Required:** `numpy>=1.24`
+**Package Required:** `numpy>=2.0`
 
 Install with: `pip install numpy`
 
@@ -390,7 +390,7 @@ value = np.array(data, dtype=dtype)  # with a dtype
 
 ### PyTorch
 
-**Package Required:** `torch>=2.0`
+**Package Required:** `torch>=2.4`
 
 Install with: `pip install torch`
 

@@ -38,9 +38,9 @@ The following table shows which resolvers require which packages:
 | Resolver           | Required Package     | Description                     |
 | ------------------ | -------------------- | ------------------------------- |
 | `hya.braceexpand`  | `braceexpand>=0.1.7` | Brace expansion patterns        |
-| `hya.np.array`     | `numpy>=1.24`        | NumPy array creation            |
-| `hya.torch.tensor` | `torch>=2.0`         | PyTorch tensor creation         |
-| `hya.torch.dtype`  | `torch>=2.0`         | PyTorch data type specification |
+| `hya.np.array`     | `numpy>=2.0`         | NumPy array creation            |
+| `hya.torch.tensor` | `torch>=2.4`         | PyTorch tensor creation         |
+| `hya.torch.dtype`  | `torch>=2.4`         | PyTorch data type specification |
 
 All other resolvers work with the base installation (only `omegaconf` required).
 

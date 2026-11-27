@@ -45,13 +45,10 @@ dependencies = ["omegaconf>=2.2,<3.0"]
 
 [project.optional-dependencies]
 braceexpand = ["braceexpand>=0.1.7,<0.2.0"]
-numpy = ["numpy>=1.24,<3.0"]
+numpy = ["numpy>=2.0,<3.0"]
 torch = [
   # Linux and Apple Silicon (arm64)
-  "torch>=2.0,<3.0; sys_platform == 'linux' or (sys_platform == 'darwin' and platform_machine == 'arm64')",
-  # macOS x86_64 (deprecated upstream after torch 2.2)
-  # https://dev-discuss.pytorch.org/t/pytorch-macos-x86-builds-deprecation-starting-january-2024/1690
-  "torch>=2.0,<2.3; sys_platform == 'darwin' and platform_machine != 'arm64' and python_version < '3.13'",
+  "torch>=2.4,<3.0; sys_platform == 'linux' or (sys_platform == 'darwin' and platform_machine == 'arm64')",
 ]
 
 # Testing: ``hya.testing`` (the pytest marks) imports pytest
@@ -261,11 +258,7 @@ include_external_packages = false
 [[tool.importlinter.contracts]]
 name = "Core modules must not import feature modules"
 type = "forbidden"
-source_modules = [
-  "hya.imports",
-  "hya.registry",
-  "hya.utils",
-]
+source_modules = ["hya.imports", "hya.registry", "hya.utils"]
 forbidden_modules = [
   "hya.braceexpand",
   "hya.default",
@@ -309,17 +302,9 @@ forbidden_modules = ["hya.testing"]
 name = "The default registry must import the optional modules lazily"
 type = "forbidden"
 source_modules = ["hya.default"]
-forbidden_modules = [
-  "hya.braceexpand",
-  "hya.numpy",
-  "hya.torch",
-]
+forbidden_modules = ["hya.braceexpand", "hya.numpy", "hya.torch"]
 
 [[tool.importlinter.contracts]]
 name = "Optional modules must be independent"
 type = "independence"
-modules = [
-  "hya.braceexpand",
-  "hya.numpy",
-  "hya.torch",
-]
+modules = ["hya.braceexpand", "hya.numpy", "hya.torch"]

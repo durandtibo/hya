@@ -15,6 +15,7 @@ from omegaconf.errors import (
 )
 
 from hya.resolvers import (
+    _URL,
     _encode_value,
     add_resolver,
     iter_join_resolver,
@@ -385,8 +386,71 @@ def test_path_resolver_plain_path_keeps_fragment_character() -> None:
     assert path_resolver("/my/a#b") == Path("/my/a#b")
 
 
-def test_path_resolver_url_is_not_parsed_when_it_is_not_a_file_url() -> None:
-    assert path_resolver("http://host/path") == Path.cwd() / "http:" / "host" / "path"
+@pytest.mark.parametrize(
+    "url",
+    [
+        "s3://bucket/key",
+        "http://host/path",
+        "HTTPS://host",
+        "gs://bucket",
+        "git+ssh://host/repo",
+        "ab://",
+        "  s3://bucket/key",
+        "\ts3://bucket/key",
+    ],
+)
+def test_path_resolver_url_of_another_scheme_raises(url: str) -> None:
+    with pytest.raises(
+        ValueError,
+        match=re.escape(f"Only a file URL can be converted to a path, but received '{url}'"),
+    ):
+        path_resolver(url)
+
+
+def test_path_resolver_empty_path_raises() -> None:
+    with pytest.raises(ValueError, match=r"The path is empty"):
+        path_resolver("")
+
+
+@pytest.mark.parametrize("url", ["file:", "FILE:", "file://", "file://localhost"])
+def test_path_resolver_file_url_without_a_path_raises(url: str) -> None:
+    with pytest.raises(ValueError, match=re.escape(f"The file URL has no path: '{url}'")):
+        path_resolver(url)
+
+
+@pytest.mark.parametrize("url", ["file:///a%ff", "file:///a%c3", "file:%ff"])
+def test_path_resolver_file_url_with_invalid_utf8_raises(url: str) -> None:
+    with pytest.raises(UnicodeDecodeError, match=r"'utf-8' codec can't decode byte"):
+        path_resolver(url)
+
+
+def test_path_resolver_file_url_decodes_utf8() -> None:
+    assert path_resolver("file:///my/%C3%A9") == Path("/my/\u00e9")
+
+
+@pytest.mark.parametrize("host", ["LOCALHOST", "LocalHost"])
+def test_path_resolver_file_url_host_is_case_insensitive(host: str) -> None:
+    assert path_resolver(f"file://{host}/my/path") == Path("/my/path")
+
+
+@pytest.mark.parametrize(
+    ("path", "parts"),
+    [
+        (".", []),
+        ("a:b", ["a:b"]),
+        ("C://x", ["C:", "x"]),
+        ("./s3:/bucket", ["s3:", "bucket"]),
+        ("a/s3://bucket", ["a", "s3:", "bucket"]),
+        ("s3:/bucket", ["s3:", "bucket"]),
+    ],
+)
+def test_path_resolver_plain_path_with_a_colon(path: str, parts: list[str]) -> None:
+    assert path_resolver(path) == Path.cwd().joinpath(*parts)
+
+
+def test_path_resolver_empty_path_object() -> None:
+    # An empty path object is the path ".", not an empty string
+    assert path_resolver(Path()) == Path.cwd()
 
 
 def test_path_resolver_file_scheme_is_case_insensitive() -> None:
@@ -466,6 +530,26 @@ def test_path_resolver_path_of_a_path_resolver() -> None:
 def test_path_resolver_path_object_in_a_configuration() -> None:
     conf = OmegaConf.create({"p": Path("/my/path"), "key": "${hya.path:${p}}"})
     assert conf.key == Path("/my/path")
+
+
+##########################
+#     Tests for _URL     #
+##########################
+
+
+@pytest.mark.parametrize(
+    "text", ["s3://b", "http://host", "ab://", "a1+.-://x", " \t\nfile://x", "S3://b"]
+)
+def test_url_pattern_match(text: str) -> None:
+    assert _URL.match(text)
+
+
+@pytest.mark.parametrize(
+    "text",
+    ["", "C://x", "a:b", "s3:/b", "file:", "//host", "/s3://b", "./s3://b", "1a://b", "a b://c"],
+)
+def test_url_pattern_no_match(text: str) -> None:
+    assert not _URL.match(text)
 
 
 def test_pi_resolver() -> None:

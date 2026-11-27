@@ -415,3 +415,19 @@ def test_path_resolver_file_url_with_a_query_or_a_fragment_is_an_error(expressio
 def test_path_resolver_file_url_with_an_encoded_fragment_character() -> None:
     conf = OmegaConf.create({"key": "${hya.path:file:///data/run%231}"})
     assert conf.key == Path("/data/run#1").resolve()
+
+
+@pytest.mark.parametrize(
+    ("expression", "message"),
+    [
+        ("${hya.path:''}", r"The path is empty"),
+        ("${hya.path:${empty}}", r"The path is empty"),
+        ("${hya.path:'file:'}", r"The file URL has no path"),
+        ("${hya.path:s3://bucket/key}", r"Only a file URL can be converted to a path"),
+        ("${hya.path:file:///a%ff}", r"UnicodeDecodeError"),
+    ],
+)
+def test_path_resolver_invalid_path_is_an_error(expression: str, message: str) -> None:
+    conf = OmegaConf.create({"empty": "", "key": expression})
+    with pytest.raises(InterpolationResolutionError, match=message):
+        _ = conf.key

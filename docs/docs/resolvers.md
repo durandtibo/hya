@@ -222,30 +222,44 @@ url_decoded: ${hya.path:file:///data/my%20file.txt} # /data/my file.txt
 
 ```python
 import os
+import re
 from pathlib import Path
 from urllib.parse import unquote, urlparse
 
 path = os.fspath(path)
+if not path:
+    raise ValueError("The path is empty")
 url = urlparse(path)
 if url.scheme == "file":
-    if url.netloc not in ("", "localhost") or "?" in path or "#" in path:
+    if url.netloc.lower() not in ("", "localhost") or "?" in path or "#" in path:
         raise ValueError(
             f"A file URL with a host, a query or a fragment is not supported: '{path}'"
         )
-    path = unquote(url.path)
+    if not url.path:
+        raise ValueError(f"The file URL has no path: '{path}'")
+    path = unquote(url.path, errors="strict")
+elif re.match(r"\s*[A-Za-z][A-Za-z0-9+.-]+://", path):
+    raise ValueError(f"Only a file URL can be converted to a path, but received '{path}'")
 value = Path(path).expanduser().resolve()
 ```
 
 **Notes:**
 
 - Returns a `pathlib.Path` object, which is useful for path operations in Python.
+- An empty path raises a `ValueError`, so an empty value does not point at the working directory:
+  write `.` for it.
 - Only a string that starts with `file:` (the scheme is case-insensitive) is read as a URL (its
-  percent-encoding is decoded). A host other than `localhost` (`file://host/a`), a query or a
-  fragment (`file:///data/run#1`) raises a `ValueError`: no part of a URL is dropped silently.
+  percent-encoding is decoded). A host other than `localhost` (`file://host/a`, the host name is
+  case-insensitive), a query or a fragment (`file:///data/run#1`), a URL without a path (`file:`)
+  and a percent-encoding that is not valid UTF-8 (`file:///a%ff`) raise a `ValueError`: no part of a
+  URL is dropped silently.
+- Any other URL, such as `s3://bucket/key` or `http://host/path`, raises a `ValueError`: it is not a
+  local path. For a local directory of that name, write `./s3:/bucket/key`.
 - In a `file:` URL, write a `?` of a file name as `%3F` and a `#` as `%23`, or give the path
   without `file:`.
 - Any other string is a plain path, written as is: `/data/a?b`, `/data/run#1` and `/data/a%20b`
-  keep the `?`, the `#` and the `%20`.
+  keep the `?`, the `#` and the `%20`. A colon is allowed (`a:b`), and so is a Windows drive
+  (`C://x`), because a scheme has two characters or more here.
 - A `pathlib.Path` is accepted, so the output of `hya.path` can be passed to `hya.path` again.
 - A path with a tilde must be quoted in an interpolation: `${hya.path:"~/data"}`. Unquoted, it is a
   grammar error.
@@ -291,6 +305,9 @@ value = separator.join(map(str, iterable))
   error.
 - Each element is converted with `str`: with `x: [["${a}"], 2]` and `a: 1`,
   `${hya.iter_join:${x},-}` is `[1]-2`.
+- The resolver is `separator.join` over the iterable: a string is joined character by character
+  (`${hya.iter_join:abc,-}` is `a-b-c`) and a mapping gives its keys joined (use
+  `${oc.dict.values:x}` for its values).
 
 **Use Case:** Dynamically constructing file paths, experiment names, or configuration strings.
 

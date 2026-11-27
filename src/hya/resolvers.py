@@ -18,6 +18,7 @@ import logging
 import math
 import operator
 import os
+import re
 from enum import Enum
 from functools import reduce
 from pathlib import Path, PurePath
@@ -31,6 +32,10 @@ if TYPE_CHECKING:
 
 
 logger: logging.Logger = logging.getLogger(__name__)
+
+# A URL with an authority, such as "s3://bucket": it is never a local path. A scheme of one
+# character is not matched, so a Windows drive ("C://x") is not read as a URL.
+_URL: re.Pattern[str] = re.compile(r"\s*[A-Za-z][A-Za-z0-9+.-]+://")
 
 
 def add_resolver(first: Any, *others: Any) -> Any:
@@ -205,6 +210,8 @@ def path_resolver(path: str | os.PathLike[str]) -> Path:
     is used, with its percent-encoding (for example ``%20`` for a space)
     decoded. In a URL, ``?`` and ``#`` start a query and a fragment, so a
     file name that contains them is written ``%3F`` and ``%23``. Any
+    other URL with ``://`` after a scheme of two characters or more (for
+    example ``s3://bucket``) is rejected: it is not a local path. Any
     other string is a plain path, written as is: ``?``, ``#`` and ``%``
     are not interpreted.
 
@@ -217,10 +224,14 @@ def path_resolver(path: str | os.PathLike[str]) -> Path:
         directory and converted to absolute path.
 
     Raises:
-        ValueError: If a ``file:`` URL has a host other than ``localhost``
-            (for example ``file://host/a``), a query or a fragment (any
-            ``?`` or ``#``, for example ``file:///data/run#1``): they
-            would be dropped silently.
+        ValueError: If the path is empty (write ``.`` for the working
+            directory); if a ``file:`` URL has no path, a host other than
+            ``localhost`` (for example ``file://host/a``), a query or a
+            fragment (any ``?`` or ``#``, for example
+            ``file:///data/run#1``); or if the string is a URL with
+            another scheme (``scheme://...``). A ``UnicodeDecodeError``,
+            a subclass of ``ValueError``, is raised if the
+            percent-encoding of a ``file:`` URL is not valid UTF-8.
 
     Note:
         Within an OmegaConf interpolation, a path with a tilde (~)
@@ -248,14 +259,23 @@ def path_resolver(path: str | os.PathLike[str]) -> Path:
         ```
     """
     path = os.fspath(path)
+    if not path:
+        msg = "The path is empty"
+        raise ValueError(msg)
     url = urlparse(path)
     if url.scheme == "file":
         # The characters are checked: ``url.query`` and ``url.fragment`` are empty for a
         # trailing "?" or "#", which would be dropped too
-        if url.netloc not in ("", "localhost") or "?" in path or "#" in path:
+        if url.netloc.lower() not in ("", "localhost") or "?" in path or "#" in path:
             msg = f"A file URL with a host, a query or a fragment is not supported: '{path}'"
             raise ValueError(msg)
-        path = unquote(url.path)
+        if not url.path:
+            msg = f"The file URL has no path: '{path}'"
+            raise ValueError(msg)
+        path = unquote(url.path, errors="strict")
+    elif _URL.match(path):
+        msg = f"Only a file URL can be converted to a path, but received '{path}'"
+        raise ValueError(msg)
     return Path(path).expanduser().resolve()
 
 

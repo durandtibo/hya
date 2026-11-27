@@ -54,8 +54,9 @@ def braceexpand_resolver(pattern: str) -> list[str]:
     Note:
         When using brace expansion patterns in OmegaConf, you need
         to quote the pattern string (``${hya.braceexpand:"a{1,2}"}``)
-        or to escape the braces to avoid conflicts with OmegaConf's
-        own syntax for curly braces.
+        to avoid conflicts with OmegaConf's own syntax for curly
+        braces and commas. Without quotes, the braces and the commas
+        must all be escaped.
 
     Example:
         ```pycon

@@ -13,11 +13,11 @@
 - Run all the pre-commit hooks (ruff, docformatter, codespell, ty, import-linter, ...) with
   `PATH=$PWD/.venv/bin:$PATH .venv/bin/pre-commit run --all-files`. The import contracts are
   defined in `pyproject.toml` (`[tool.importlinter]`): keep the layering, do not relax a contract.
-- Type check with `.venv/bin/inv types.check --complete` (ty, then pyright) and
-  `VIRTUAL_ENV=$PWD/.venv PATH=$PWD/.venv/bin:$PATH .venv/bin/pyright --verifytypes hya --ignoreexternal`.
-  The environment must be activated (set `VIRTUAL_ENV` and `PATH` as above): without it pyright does
-  not find the package and reports a false result (`No py.typed file found`, 0 %). The score must
-  be 100 %. Fix the issues raised by the checkers.
+- Type check with `.venv/bin/inv types.check --complete` (ty, then pyright) and verify the public
+  types with `.venv/bin/inv types.verify` (defined in `tasks.py`). Do not call
+  `pyright --verifytypes` directly: without an activated environment it does not find the package
+  and reports a false result (`No py.typed file found`, 0 %). The score must be 100 %. Fix the
+  issues raised by the checkers.
   Ignoring an issue (`type: ignore`, `pyright: ignore`, a cast that hides the problem) is not
   fixing it.
 - Run the unit tests of the modules you changed (for example

@@ -52,10 +52,13 @@ jobs:
           dist-type: ${{ matrix.dist-type }}
       - name: Run package checks
         shell: bash
-        run: |
+        env:
+          PACKAGE_EXTRA: ${{ matrix.package-extra }}
+        run: |2
+
           set -euo pipefail
           echo "🔍 Running package checks..."
-          python tests/package_checks.py
+          python tests/package/checks.py --extra "$PACKAGE_EXTRA"
 
           echo "✅ Package checks passed"
 
@@ -76,7 +79,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # ratchet:actions/checkout@v7
       - name: Install uv and set the python version
-        uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # ratchet:astral-sh/setup-uv@v10.3.3
+        uses: astral-sh/setup-uv@1db35dd8eee11c5894872e0b383ae6c406cf738d # ratchet:astral-sh/setup-uv@v10.4.0
         with:
           python-version: ${{ matrix.python-version }}
           activate-environment: true
@@ -89,9 +92,13 @@ jobs:
           dist-type: ${{ matrix.dist-type }}
           verify-sdist-extra: false
       - name: Run package checks
-        run: |
+        env:
+          # The extras are not installed for the sdist (verify-sdist-extra: false)
+          PACKAGE_EXTRA: ${{ matrix.dist-type == 'wheel' && 'all' || '' }}
+        run: |2
+
           set -euo pipefail
           echo "🔍 Running package checks..."
-          python tests/package_checks.py
+          python tests/package/checks.py --extra "$PACKAGE_EXTRA"
 
           echo "✅ Package checks passed"

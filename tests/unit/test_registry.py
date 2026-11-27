@@ -9,7 +9,7 @@ import pytest
 from hya.registry import _KEY, ResolverRegistry, _publish
 
 if TYPE_CHECKING:
-    from collections.abc import Callable, Generator
+    from collections.abc import Callable, Generator, Mapping
 
 
 def add_two(value: int) -> int:
@@ -45,6 +45,33 @@ def test_resolver_registry_init_with_state() -> None:
 
 def test_resolver_registry_init_with_mapping() -> None:
     assert ResolverRegistry(MappingProxyType({"add2": add_two})).state == {"add2": add_two}
+
+
+def test_resolver_registry_init_with_none() -> None:
+    assert ResolverRegistry(None).state == {}
+
+
+@pytest.mark.parametrize("state", [{}, MappingProxyType({})])
+def test_resolver_registry_init_with_an_empty_mapping(state: Mapping[str, Any]) -> None:
+    assert ResolverRegistry(state).state == {}
+
+
+@pytest.mark.parametrize(
+    ("state", "name"),
+    [
+        ([], "list"),
+        ((), "tuple"),
+        (0, "int"),
+        (False, "bool"),
+        ("", "str"),
+        ("key", "str"),
+        (set(), "set"),
+        ([("key", add_two)], "list"),
+    ],
+)
+def test_resolver_registry_init_with_a_state_that_is_not_a_mapping(state: Any, name: str) -> None:
+    with pytest.raises(TypeError, match=rf"The state must be a mapping, but received {name}$"):
+        ResolverRegistry(state)
 
 
 def test_resolver_registry_state_is_read_only() -> None:
@@ -335,6 +362,19 @@ def test_resolver_registry_register_lazy_function_not_found() -> None:
         "module:1f",
         "module:f g",
         "module:function ",
+        ".module:function",
+        ".:function",
+        "..a.module:function",
+        "module.:function",
+        "a..b:function",
+        "a b:function",
+        " module:function",
+        "module :function",
+        "a-b:function",
+        "a/b:function",
+        "1a:function",
+        "\u00e9:function",
+        "module\n:function",
     ],
 )
 def test_resolver_registry_register_lazy_invalid_target(target: str) -> None:
@@ -348,6 +388,39 @@ def test_resolver_registry_register_lazy_invalid_target_does_not_register() -> N
     with pytest.raises(ValueError, match=r"must be formatted as"):
         registry.register_lazy("key", "module")
     assert registry.state == {}
+
+
+@pytest.mark.parametrize(
+    "target", ["module:function", "a.b_2._c:_f2", "_:_", "hya.numpy:to_array_resolver"]
+)
+def test_resolver_registry_register_lazy_valid_target(target: str) -> None:
+    registry = ResolverRegistry()
+    registry.register_lazy("key", target)
+    assert registry.has_resolver("key")
+
+
+@pytest.mark.parametrize(
+    ("target", "name"),
+    [
+        (None, "NoneType"),
+        (1, "int"),
+        (b"module:function", "bytes"),
+        (["module", "function"], "list"),
+        (add_two, "function"),
+    ],
+)
+def test_resolver_registry_register_lazy_target_not_a_string(target: Any, name: str) -> None:
+    registry = ResolverRegistry()
+    with pytest.raises(TypeError, match=rf"The target must be a string, but received {name}$"):
+        registry.register_lazy("key", target)
+    assert registry.state == {}
+
+
+def test_resolver_registry_register_lazy_invalid_target_keeps_the_resolver() -> None:
+    registry = ResolverRegistry({"key": add_two})
+    with pytest.raises(ValueError, match=r"must be formatted as"):
+        registry.register_lazy("key", "a b:function", exist_ok=True)
+    assert registry.state == {"key": add_two}
 
 
 def test_resolver_registry_register_lazy_invalid_key() -> None:

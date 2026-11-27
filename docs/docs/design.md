@@ -81,6 +81,8 @@ Hydra has a plugin mechanism that could remove the import. `hya` does not use it
 Every entry of a `ResolverRegistry` is added by `register`, including the ones of the constructor
 and of `register_lazy`. It raises at once for a value that is not callable, a key that is not a
 string (`@registry.register` used without a key) and a key that is not made of names joined by dots.
+The constructor raises for anything else than a mapping or `None`, and `register_lazy` for a target
+that is not a string formatted as `module:function`, made of names.
 
 - **Benefit:** the error points at the line that registers, not at a configuration that fails to
   parse later, and `register_resolvers()` cannot stop half way because of an entry.

@@ -21,7 +21,8 @@ F = TypeVar("F", bound=Callable[..., Any])
 _HAS_ANNOTATION_VALIDATION: bool = tuple(map(int, omegaconf.__version__.split(".")[:2])) >= (2, 4)
 
 # A key that every supported OmegaConf can interpolate: ASCII identifiers joined by dots.
-# OmegaConf 2.3 and later also interpolate "-", which OmegaConf 2.2 does not.
+# OmegaConf 2.3 and later also interpolate "-", which OmegaConf 2.2 does not. The module of a
+# lazy target is written in the same way.
 _KEY: re.Pattern[str] = re.compile(r"[A-Za-z_]\w*(\.[A-Za-z_]\w*)*", re.ASCII)
 
 
@@ -58,13 +59,14 @@ class ResolverRegistry:
 
 
     Args:
-        state: Optional initial state mapping containing key-resolver pairs.
-            If provided, a copy is made to prevent external modifications.
-            Each pair is added with ``register``, so it is validated.
+        state: Optional initial state mapping containing key-resolver pairs,
+            or ``None`` for an empty registry. A copy is made to prevent
+            external modifications. Each pair is added with ``register``,
+            so it is validated.
 
     Raises:
-        TypeError: If a key of ``state`` is not a string, or a value is
-            not callable.
+        TypeError: If ``state`` is not a mapping or ``None``, if a key of
+            ``state`` is not a string, or if a value is not callable.
         ValueError: If a key of ``state`` is not made of names joined
             by dots (see ``register``).
 
@@ -84,8 +86,12 @@ class ResolverRegistry:
         self._state: dict[str, Callable[..., Any]] = {}
         # The resolvers published to OmegaConf by this registry
         self._published: dict[str, Callable[..., Any]] = {}
-        for key, resolver in (state or {}).items():
-            self.register(key)(resolver)
+        if state is not None:
+            if not isinstance(state, Mapping):
+                msg = f"The state must be a mapping, but received {type(state).__name__}"
+                raise TypeError(msg)
+            for key, resolver in state.items():
+                self.register(key)(resolver)
 
     @property
     def state(self) -> Mapping[str, Callable[..., Any]]:
@@ -219,14 +225,17 @@ class ResolverRegistry:
             key: The key used to register the resolver, as for ``register``.
                 Must be unique unless ``exist_ok`` is ``True``.
             target: The resolver to import, as ``"module:function"``, for
-                example ``"hya.numpy:to_array_resolver"``. The function
-                is the name of an attribute of the module.
+                example ``"hya.numpy:to_array_resolver"``. The module is
+                an absolute module name: ASCII names joined by dots, as a
+                key. The function is the name of an attribute of the
+                module (a Python identifier). That they exist is checked
+                on the first call.
             exist_ok: If ``False``, a ``RuntimeError`` is raised if you try to
                 register a new resolver with an existing key. If ``True``,
                 the existing resolver will be overridden.
 
         Raises:
-            TypeError: If the key is not a string.
+            TypeError: If the key or ``target`` is not a string.
             ValueError: If ``target`` is not formatted as
                 ``"module:function"``, or if the key is not made of names
                 joined by dots.
@@ -249,8 +258,11 @@ class ResolverRegistry:
 
             ```
         """
+        if not isinstance(target, str):
+            msg = f"The target must be a string, but received {type(target).__name__}"
+            raise TypeError(msg)
         module_name, _, function_name = target.partition(":")
-        if not module_name or not function_name.isidentifier():
+        if not _KEY.fullmatch(module_name) or not function_name.isidentifier():
             msg = f"The target must be formatted as 'module:function', but received '{target}'"
             raise ValueError(msg)
 

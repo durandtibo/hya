@@ -251,8 +251,10 @@ registry.register_lazy("my.array", "hya.numpy:to_array_resolver")
 registry.register_resolvers()
 ```
 
-A target that is not formatted as `"module:function"` raises a `ValueError` when it is registered.
-An unknown module or function raises an error on the first call of the resolver. A lazy resolver
+A target that is not formatted as `"module:function"`, with an absolute module name made of names
+joined by dots and a function name that is a Python identifier, raises a `ValueError` when it is
+registered, and a target that is not a string raises a `TypeError`. An unknown module or function
+raises an error on the first call of the resolver. A lazy resolver
 cannot receive the special parameters of OmegaConf (`_root_`, `_parent_`, `_node_`): register such
 a resolver with `register`.
 
@@ -277,6 +279,8 @@ custom_registry.register_resolvers()
 ```
 
 `ResolverRegistry` is also available from the top-level package: `from hya import ResolverRegistry`.
+Its constructor takes an optional mapping of keys to resolvers, validated as by `register`; anything
+else than a mapping or `None` raises a `TypeError`.
 
 ## Common Use Cases
 

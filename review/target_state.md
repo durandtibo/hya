@@ -386,7 +386,7 @@ adds its tests, and states its behaviour changes. They are listed by value.
 | 5 (#808) | `bugfix/reject-invalid-path`         | F4: section 3.5; P4.                                                                                                                      | P4         | yes      |
 | 6 (#809) | `bugfix/validate-registry-arguments` | F9, F10: constructor and `register_lazy`; P7.                                                                                             | P7         | yes      |
 | 7 (#810) | `docs/fix-resolver-examples`         | F13 to F15: rename or replace the shape examples, quote `'hya[all]'`, split the YAML blocks.                                              | P12        | no       |
-| 8        | `test/check-resolver-catalogue`      | F16: every default key is in `resolvers.md`; the reference lists every module found with `pkgutil`, except `hya.utils` and its fallbacks. | P12        | no       |
+| 8 (#811) | `test/check-resolver-catalogue`      | F16: every default key is in `resolvers.md`; the reference lists every module found with `pkgutil`, except `hya.utils` and its fallbacks. | P12        | no       |
 | 9        | `chore/remove-unused-logger`         | F17.                                                                                                                                      | n/a        | no       |
 
 After they are merged and CI is green, the maintainer sets the version `0.5.0` and creates the exact

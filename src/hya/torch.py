@@ -17,6 +17,7 @@ from typing import TYPE_CHECKING, Any
 from omegaconf.errors import InterpolationResolutionError
 
 from hya.imports import is_torch_available, validate_torch
+from hya.utils.config import to_plain
 
 if TYPE_CHECKING or is_torch_available():
     import torch
@@ -29,14 +30,23 @@ def to_tensor_resolver(data: Any, dtype: torch.dtype | None = None) -> torch.Ten
     ``torch.Tensor``.
 
     Args:
-        data: Specifies the data to transform in ``torch.Tensor``.
-            This value should be compatible with ``torch.tensor``
+        data: Specifies the data to transform in ``torch.Tensor``: a
+            tensor, or a value compatible with ``torch.tensor``. The
+            configuration nodes of a value are resolved first, at any
+            depth.
         dtype: The data type of the tensor, for example the output of
-            the ``hya.torch.dtype`` resolver. ``None`` lets PyTorch
-            infer the data type from the data.
+            the ``hya.torch.dtype`` resolver. ``None`` keeps the data
+            type of a tensor, and lets PyTorch infer the data type of
+            any other value.
 
     Returns:
-        The input in a ``torch.Tensor`` object.
+        The input in a ``torch.Tensor`` object. It is a copy: it does
+        not share memory with a tensor given as input, and it does not
+        require a gradient.
+
+    Raises:
+        omegaconf.errors.MissingMandatoryValue: If a node contains a
+            missing value (``???``).
 
     Example:
         ```pycon
@@ -48,11 +58,17 @@ def to_tensor_resolver(data: Any, dtype: torch.dtype | None = None) -> torch.Ten
         >>> conf = OmegaConf.create({"key": "${hya.torch.tensor:[1,2,3],${hya.torch.dtype:float32}}"})
         >>> conf.key
         tensor([1., 2., 3.])
+        >>> # A tensor is copied
+        >>> conf = OmegaConf.create({"key": "${hya.torch.tensor:${hya.torch.tensor:[1,2]}}"})
+        >>> conf.key
+        tensor([1, 2])
 
         ```
     """
     validate_torch()
-    return torch.tensor(data, dtype=dtype)
+    if isinstance(data, torch.Tensor):
+        return data.detach().to(dtype=data.dtype if dtype is None else dtype, copy=True)
+    return torch.tensor(to_plain(data), dtype=dtype)
 
 
 def torch_dtype_resolver(target: str) -> torch.dtype:

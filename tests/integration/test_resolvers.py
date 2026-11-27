@@ -265,6 +265,7 @@ WHOLE_VALUE_RESOLVERS = [
     pytest.param("${hya.sha256:${x}}", id="sha256"),
     pytest.param("${hya.iter_join:${x},-}", id="iter_join"),
     pytest.param("${hya.np.array:${x}}", id="np.array", marks=numpy_available),
+    pytest.param("${hya.torch.tensor:${x}}", id="torch.tensor", marks=torch_available),
 ]
 
 

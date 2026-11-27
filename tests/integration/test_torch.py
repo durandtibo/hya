@@ -7,7 +7,7 @@ from omegaconf import OmegaConf
 from omegaconf.errors import InterpolationResolutionError
 
 from hya.imports import is_torch_available
-from hya.testing import torch_available
+from hya.testing import numpy_available, torch_available
 
 if is_torch_available():
     import torch
@@ -60,3 +60,48 @@ def test_tensor_resolver_dtype_does_not_modify_the_config() -> None:
     )
     assert conf.key.dtype == torch.float64
     assert conf.x == [1, 2]
+
+
+@torch_available
+@pytest.mark.filterwarnings("error")
+def test_tensor_resolver_of_a_tensor() -> None:
+    conf = OmegaConf.create({"key": "${hya.torch.tensor:${hya.torch.tensor:[1,2]}}"})
+    assert conf.key.equal(torch.tensor([1, 2]))
+
+
+@torch_available
+def test_tensor_resolver_of_a_tensor_with_a_dtype() -> None:
+    conf = OmegaConf.create(
+        {"key": "${hya.torch.tensor:${hya.torch.tensor:[1,2]},${hya.torch.dtype:float64}}"}
+    )
+    assert conf.key.dtype == torch.float64
+
+
+@torch_available
+def test_tensor_resolver_of_a_tensor_of_the_configuration_does_not_share_memory() -> None:
+    data = torch.tensor([1, 2])
+    conf = OmegaConf.create(
+        {"x": data, "key": "${hya.torch.tensor:${x}}"}, flags={"allow_objects": True}
+    )
+    conf.key[0] = 10
+    assert data.tolist() == [1, 2]
+
+
+@numpy_available
+@torch_available
+def test_tensor_resolver_of_an_array() -> None:
+    conf = OmegaConf.create({"key": "${hya.torch.tensor:${hya.np.array:[1,2]}}"})
+    assert conf.key.equal(torch.tensor([1, 2]))
+
+
+@torch_available
+def test_tensor_resolver_of_a_literal_list_of_a_node() -> None:
+    conf = OmegaConf.create({"a": 1, "x": ["${a}"], "key": "${hya.torch.tensor:[${x},[2]]}"})
+    assert conf.key.equal(torch.tensor([[1], [2]]))
+
+
+@torch_available
+def test_tensor_resolver_missing_value_in_a_list() -> None:
+    conf = OmegaConf.create({"x": ["???"], "key": "${hya.torch.tensor:${x}}"})
+    with pytest.raises(InterpolationResolutionError, match=r"MissingMandatoryValue"):
+        _ = conf.key

@@ -1,1 +1,3 @@
 ::: hya.registry
+
+::: hya.default

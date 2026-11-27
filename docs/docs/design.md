@@ -95,14 +95,16 @@ callable to the registry, and `register_resolvers` publishes the registry to Ome
 to replace silently:
 
 - `register(key)` raises a `RuntimeError` if the key exists, unless `exist_ok=True`.
-- `register_resolvers()` skips, with a warning, a key that OmegaConf already has, unless
-  `replace=True`.
+- `register_resolvers()` skips a key that OmegaConf already has and that the registry did not
+  publish, unless `replace=True`. One warning lists the skipped keys, after the other keys are
+  published. With `replace=True`, every key is published, whatever OmegaConf holds.
 
 - **Benefit:** a typo or an import-order accident cannot swap a resolver without a trace, and
   `register_resolvers()` can be called as often as you like (it is idempotent).
 - **Cost:** overriding a built-in takes two opt-ins (`exist_ok=True`, then `replace=True`).
 - **Limit:** `hya` cannot detect that another source registered a key in OmegaConf _after_ `hya`
-  published it. Doing so needs private OmegaConf attributes that change between releases.
+  published it: `register_resolvers()` keeps it silently. Doing so needs private OmegaConf
+  attributes that change between releases. Use `replace=True` to publish the key again.
 
 ## Errors are the ones of OmegaConf
 

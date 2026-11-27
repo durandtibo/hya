@@ -223,10 +223,12 @@ def custom_add(first, *others):
 registry.register_resolvers(replace=True)
 ```
 
-`register_resolvers` is idempotent: calling it twice changes nothing, and a resolver that is already
-published is not registered again. A resolver removed from OmegaConf (for example by
-`OmegaConf.clear_resolvers()`) is published again. A key that another source registered in OmegaConf
-is not overwritten unless `replace=True`.
+`register_resolvers` is idempotent: calling it twice changes nothing. A resolver removed from
+OmegaConf (for example by `OmegaConf.clear_resolvers()`) is published again. A key that another
+source registered in OmegaConf is not overwritten unless `replace=True`: one warning lists the
+skipped keys, after the other keys are published. With `replace=True`, every key of the registry is
+published, whatever OmegaConf holds. A resolver that another source registers over a key that the
+registry already published is kept without a warning: use `replace=True` to publish yours again.
 
 OmegaConf caches the value of the nodes it has already resolved. Replacing a resolver does not clear
 this cache for existing configurations: call `OmegaConf.clear_cache(cfg)` to clear it.
@@ -561,9 +563,10 @@ def my_resolver(x):
 
 **Warning:** `A resolver is already registered in OmegaConf for 'my_key': not replaced.`
 
-OmegaConf already has a resolver for this key and `register_resolvers()` did not replace it.
+OmegaConf already has a resolver for each key that the warning lists, and `register_resolvers()` did
+not replace them.
 
-**Solution:** Use `registry.register_resolvers(replace=True)` to replace it.
+**Solution:** Use `registry.register_resolvers(replace=True)` to replace them.
 
 ### Invalid Resolver Key
 

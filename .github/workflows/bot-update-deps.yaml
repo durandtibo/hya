@@ -20,7 +20,7 @@ jobs:
     steps:
       - name: Generate GitHub App token
         id: app-token
-        uses: actions/create-github-app-token@64ab729a6294000f5aa4a4bc0b73d1f32bc45510 # ratchet:actions/create-github-app-token@v3.3.0
+        uses: actions/create-github-app-token@f418cff399f7aef4c2f0ad47e25ca7a6abbdd6fc # ratchet:actions/create-github-app-token@v3.4.0
         with:
           client-id: ${{ secrets.TIBOT_CLIENT_ID }}
           private-key: ${{ secrets.TIBOT_APP_PRIVATE_KEY }}
@@ -32,7 +32,7 @@ jobs:
           persist-credentials: false
 
       - name: Setup python environment
-        uses: durandtibo/setup-venv-uv-action@4445098aa662d3d72aa0455918bc46a091b2a7f8 # ratchet:durandtibo/setup-venv-uv-action@v0.3.1
+        uses: durandtibo/setup-venv-uv-action@6142e28631bebf642f8ff7087c8c8702f5d99c63 # ratchet:durandtibo/setup-venv-uv-action@v0.3.2
 
       # Update all dependencies to their latest compatible versions
       - name: Update dependencies

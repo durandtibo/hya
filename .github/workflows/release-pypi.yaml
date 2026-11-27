@@ -57,7 +57,7 @@ jobs:
       contents: write
     steps:
       - name: Sign and release package
-        uses: durandtibo/sign-pypi-package-action@27337599193dc08605604ca7dd844528833f78b0 # ratchet:durandtibo/sign-pypi-package-action@v0.1.0
+        uses: durandtibo/sign-pypi-package-action@0add3d41c042f2c855d4ac39bfd51e57987ca8fe # ratchet:durandtibo/sign-pypi-package-action@v0.1.1
 
   # SLSA provenance (*.intoto.jsonl) attached to the GitHub release.
   # The reusable workflow must be referenced by a tag, not by a commit SHA:

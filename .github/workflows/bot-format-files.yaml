@@ -23,7 +23,7 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # ratchet:actions/checkout@v7
 
       - name: Format files
-        uses: durandtibo/format-files-action@1c50829b34a99c23bb309a56546722f594c2996b # ratchet:durandtibo/format-files-action@v0.0.2
+        uses: durandtibo/format-files-action@d616f6af5d74f644f80dbcb47932d3ee73d611ba # ratchet:durandtibo/format-files-action@v0.1.0
         with:
           github-app-client-id: ${{ secrets.TIBOT_CLIENT_ID }}
           github-app-private-key: ${{ secrets.TIBOT_APP_PRIVATE_KEY }}

@@ -21,7 +21,7 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # ratchet:actions/checkout@v7
 
       - name: Setup python environment
-        uses: durandtibo/setup-venv-uv-action@4445098aa662d3d72aa0455918bc46a091b2a7f8 # ratchet:durandtibo/setup-venv-uv-action@v0.3.1
+        uses: durandtibo/setup-venv-uv-action@6142e28631bebf642f8ff7087c8c8702f5d99c63 # ratchet:durandtibo/setup-venv-uv-action@v0.3.2
 
       - name: check modules
         run: |

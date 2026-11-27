@@ -54,31 +54,37 @@ torch = [
   "torch>=2.0,<2.3; sys_platform == 'darwin' and platform_machine != 'arm64' and python_version < '3.13'",
 ]
 
+# Testing: ``hya.testing`` (the pytest marks) imports pytest
+testing = ["pytest>=9.0,<10.0"]
+
 [dependency-groups]
+
 dev = [
   "codespell>=2.4,<3.0",
-  "coverage[toml]>=7.17.2,<8.0",
+  "coverage[toml]>=7.17.4,<8.0",
   "docformatter>=1.7.8,<2.0",
-  "feu[all]>=0.8.4,<1.0",
-  "invoke-tasklib>=0.1.0a0,<1.0",
+  "feu[all]>=0.9.0,<1.0",
+  # grimp (import-linter) does not build on free-threaded Python 3.13.
+  "import-linter>=2.0,<3.0; python_version >= '3.14'",
+  "invoke-tasklib>=0.1.0,<1.0",
   "invoke>=3.0,<4.0",
-  "pre-commit>=4.6,<5.0",
-  "pygments>=2.20,<3.0",
+  "pre-commit>=4.7,<5.0",
+  "pygments>=2.21,<3.0",
   "pyright>=1.1.414,<2.0",
   "pytest-cov>=7.1,<8.0",
   "pytest-timeout>=2.4,<3.0",
-  "pytest>=9.1,<10.0",
-  "ruff>=0.16,<1.0",
-  "ty>=0.0.100,<1.0",
+  "pytest>=9.2,<10.0",
+  "ruff>=0.17,<1.0",
+  "ty>=0.0.112,<1.0",
   "xdoctest>=1.3,<2.0",
 ]
 
 docs = [
-  "griffe-inherited-docstrings>=1.1,<2.0",
-  "mike>=2.2,<3.0",
-  "mkdocs-material>=9.7,<10.0",
+  "griffe-inherited-docstrings >=1.1,<2.0",
+  "mike >=2.2,<3.0",
+  "mkdocs-material >=9.7,<10.0",
   "mkdocstrings[python]>=1.0.8,<2.0",
-  "mkdocs-include-markdown-plugin>=7.3,<8.0",
+  "mkdocs-include-markdown-plugin >=7.3,<8.0",
 ]
 
 [project.urls]
@@ -246,3 +252,73 @@ include = ["src", "tests", "dev"]
 
 [tool.ty.environment]
 python-version = "3.11"
+
+[tool.importlinter]
+root_package = "hya"
+include_external_packages = false
+
+[[tool.importlinter.contracts]]
+name = "Core modules must not import feature modules"
+type = "forbidden"
+source_modules = [
+  "hya.imports",
+  "hya.registry",
+  "hya.utils",
+]
+forbidden_modules = [
+  "hya.braceexpand",
+  "hya.default",
+  "hya.numpy",
+  "hya.resolvers",
+  "hya.testing",
+  "hya.torch",
+]
+
+[[tool.importlinter.contracts]]
+name = "Utils must not import other modules"
+type = "forbidden"
+source_modules = ["hya.utils"]
+forbidden_modules = [
+  "hya.braceexpand",
+  "hya.default",
+  "hya.imports",
+  "hya.numpy",
+  "hya.registry",
+  "hya.resolvers",
+  "hya.testing",
+  "hya.torch",
+]
+
+[[tool.importlinter.contracts]]
+name = "Library code must not import the testing helpers"
+type = "forbidden"
+source_modules = [
+  "hya.braceexpand",
+  "hya.default",
+  "hya.imports",
+  "hya.numpy",
+  "hya.registry",
+  "hya.resolvers",
+  "hya.torch",
+  "hya.utils",
+]
+forbidden_modules = ["hya.testing"]
+
+[[tool.importlinter.contracts]]
+name = "The default registry must import the optional modules lazily"
+type = "forbidden"
+source_modules = ["hya.default"]
+forbidden_modules = [
+  "hya.braceexpand",
+  "hya.numpy",
+  "hya.torch",
+]
+
+[[tool.importlinter.contracts]]
+name = "Optional modules must be independent"
+type = "independence"
+modules = [
+  "hya.braceexpand",
+  "hya.numpy",
+  "hya.torch",
+]

@@ -327,11 +327,12 @@ model:
 data:
   input_shape: [3, 224, 224]
   dummy_input: ${hya.torch.tensor:${data.input_shape}}
-  # The data type is the second argument of the tensor resolver
-  float_input: ${hya.torch.tensor:${data.input_shape},${hya.torch.dtype:float32}}
+  # The data type is the second argument of the tensor resolver: its name or a torch.dtype
+  float_input: ${hya.torch.tensor:${data.input_shape},float32}
+  same_dtype_input: ${hya.torch.tensor:${data.input_shape},${model.dtype}}
 ```
 
-The NumPy resolver takes the data type as a string: `${hya.np.array:[1,2,3],float32}`.
+The NumPy resolver takes the data type as a string too: `${hya.np.array:[1,2,3],float32}`.
 
 ### Versioning and Hashing
 

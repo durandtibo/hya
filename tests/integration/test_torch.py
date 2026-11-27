@@ -105,3 +105,25 @@ def test_tensor_resolver_missing_value_in_a_list() -> None:
     conf = OmegaConf.create({"x": ["???"], "key": "${hya.torch.tensor:${x}}"})
     with pytest.raises(InterpolationResolutionError, match=r"MissingMandatoryValue"):
         _ = conf.key
+
+
+@torch_available
+@pytest.mark.parametrize(
+    ("expression", "dtype"),
+    [
+        ("${hya.torch.tensor:[1,2],float32}", "float32"),
+        ("${hya.torch.tensor:[1,2],${name}}", "float32"),
+        ("${hya.torch.tensor:[1,2],null}", "int64"),
+        ("${hya.torch.tensor:${hya.torch.tensor:[1,2]},float32}", "float32"),
+    ],
+)
+def test_tensor_resolver_dtype_name(expression: str, dtype: str) -> None:
+    conf = OmegaConf.create({"name": "float32", "key": expression})
+    assert conf.key.dtype == getattr(torch, dtype)
+
+
+@torch_available
+def test_tensor_resolver_unknown_dtype_name() -> None:
+    conf = OmegaConf.create({"key": "${hya.torch.tensor:[1,2],bool32}"})
+    with pytest.raises(InterpolationResolutionError, match=r"Incorrect dtype bool32\."):
+        _ = conf.key

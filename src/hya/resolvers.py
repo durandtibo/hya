@@ -109,7 +109,9 @@ def iter_join_resolver(iterable: Iterable[Any], separator: str) -> str:
 
     This resolver takes an iterable (e.g., list, tuple) and concatenates
     all elements into a single string, separated by the specified separator.
-    Each element is converted to a string using str().
+    The configuration nodes of the iterable are resolved first, at any
+    depth. Each element is then converted to a string using str(), so a
+    nested list is written as a Python list.
 
     Args:
         iterable: Any iterable object where all the returned values
@@ -121,6 +123,10 @@ def iter_join_resolver(iterable: Iterable[Any], separator: str) -> str:
     Returns:
         A single string with all iterable elements joined by the separator.
 
+    Raises:
+        omegaconf.errors.MissingMandatoryValue: If a node contains a
+            missing value (``???``).
+
     Example:
         ```pycon
         >>> import hya
@@ -131,10 +137,16 @@ def iter_join_resolver(iterable: Iterable[Any], separator: str) -> str:
         >>> conf = OmegaConf.create({"path": "${hya.iter_join:[data,models,v1],/}"})
         >>> conf.path
         data/models/v1
+        >>> # The interpolations of nested values are resolved
+        >>> conf = OmegaConf.create(
+        ...     {"a": 1, "x": [["${a}"], 2], "key": "${hya.iter_join:${x},-}"}
+        ... )
+        >>> conf.key
+        [1]-2
 
         ```
     """
-    return separator.join(map(str, iterable))
+    return separator.join(map(str, to_plain(iterable)))
 
 
 def mul_resolver(first: Any, *others: Any) -> Any:

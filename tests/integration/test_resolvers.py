@@ -263,6 +263,7 @@ def test_iter_join_resolver_of_the_output_of_another_resolver() -> None:
 # The resolvers that read a whole value, applied to the node ``x``
 WHOLE_VALUE_RESOLVERS = [
     pytest.param("${hya.sha256:${x}}", id="sha256"),
+    pytest.param("${hya.iter_join:${x},-}", id="iter_join"),
     pytest.param("${hya.np.array:${x}}", id="np.array", marks=numpy_available),
 ]
 
@@ -334,4 +335,23 @@ def test_sha256_resolver_of_an_object_without_json_form(expression: str) -> None
 def test_sha256_resolver_of_a_mapping_with_mixed_key_types() -> None:
     conf = OmegaConf.create({"x": {1: 2, "a": 3}, "key": "${hya.sha256:${x}}"})
     with pytest.raises(InterpolationResolutionError, match=r"TypeError"):
+        _ = conf.key
+
+
+@pytest.mark.parametrize(
+    ("expression", "expected"),
+    [
+        ("${hya.iter_join:${x},-}", "[1]-2"),
+        ("${hya.iter_join:[${x},3],-}", "[[1], 2]-3"),
+        ("${hya.iter_join:[[${a}],2],-}", "[1]-2"),
+    ],
+)
+def test_iter_join_resolver_nested_interpolation(expression: str, expected: str) -> None:
+    conf = OmegaConf.create({"a": 1, "x": [["${a}"], 2], "key": expression})
+    assert conf.key == expected
+
+
+def test_iter_join_resolver_nested_missing_value_in_a_literal_list() -> None:
+    conf = OmegaConf.create({"x": [["???"]], "key": "${hya.iter_join:[${x}],-}"})
+    with pytest.raises(InterpolationResolutionError, match=r"MissingMandatoryValue"):
         _ = conf.key

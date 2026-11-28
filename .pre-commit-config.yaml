@@ -40,7 +40,7 @@ repos:
       # Flags old-style type comments in favor of real annotations.
       - id: python-use-type-annotations
   - repo: https://github.com/astral-sh/uv-pre-commit
-    rev: 0.13.9
+    rev: 0.13.10
     hooks:
       # Fails if uv.lock is out of sync with pyproject.toml.
       - id: uv-lock
